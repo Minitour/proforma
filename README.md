@@ -156,7 +156,8 @@ binaries and publishes `proforma-mcp` (command: `proforma`) plus the platform pa
 `proforma-<os>-<cpu>` to npm with **trusted publishing (GitHub OIDC)** — no npm token is stored
 anywhere. The very first version has to be published once from a maintainer's `npm login`
 session, because npm can only attach a trusted publisher to an existing package; see
-[`scripts/npm-bootstrap.sh`](scripts/npm-bootstrap.sh).
+[`scripts/npm-bootstrap.ps1`](scripts/npm-bootstrap.ps1) (Windows PowerShell) or
+[`scripts/npm-bootstrap.sh`](scripts/npm-bootstrap.sh) (bash).
 
 ## License
 
