@@ -1,0 +1,5 @@
+# Normalise text to LF in the repository
+* text=auto eol=lf
+# .pf files are stored byte-for-byte (Composer writes CRLF; fixtures keep their exact bytes)
+*.pf -text
+*.sh text eol=lf

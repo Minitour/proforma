@@ -1,0 +1,88 @@
+/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'sore_throat' ;
+     title :: 'Sore throat assessment' ;
+     version :: '1.0' ;
+     author :: 'proforma example' ;
+end metadata.
+
+metaprops :: '' ;
+
+plan  :: 'sore_throat' ;
+     caption :: 'Sore throat assessment' ;
+     component :: 'assess' ;
+          task_definition :: 'assess' ;
+          ltwh :: 40,40,0,0;
+     component :: 'manage' ;
+          task_definition :: 'manage' ;
+          schedule_constraint :: completed('assess') ;
+          ltwh :: 40,140,0,0;
+     component :: 'prescribe' ;
+          task_definition :: 'prescribe' ;
+          schedule_constraint :: completed('manage') ;
+          ltwh :: 40,240,0,0;
+     component :: 'advise' ;
+          task_definition :: 'advise' ;
+          schedule_constraint :: completed('manage') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+enquiry  :: 'assess' ;
+     caption :: 'Assess patient' ;
+     source :: 'centor_score' ;
+          data_definition :: 'centor_score' ;
+     source :: 'penicillin_allergy' ;
+          data_definition :: 'penicillin_allergy' ;
+     source :: 'temperature' ;
+          data_definition :: 'temperature' ;
+end enquiry.
+
+decision  :: 'manage' ;
+     caption :: 'Choose management' ;
+     candidate :: 'antibiotics' ;
+          caption :: 'Prescribe antibiotics' ;
+          argument :: for,centor_score >= 3 attributes
+               argument_name :: 'high_centor' ;
+               caption :: 'Centor score of 3 or more' ;
+          end attributes
+          ;
+          argument :: for,temperature > 38.5;
+          recommendation ::netsupport() > 0;
+     candidate :: 'self_care' ;
+          caption :: 'Self-care advice' ;
+          argument :: for,centor_score <= 1;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'prescribe' ;
+     caption :: 'Prescribe phenoxymethylpenicillin' ;
+     precondition ::result_of(manage) = antibiotics and penicillin_allergy = "no";
+     procedure :: 'Phenoxymethylpenicillin 500 mg four times daily for 5 days' ;
+end action.
+
+action  :: 'advise' ;
+     caption :: 'Give self-care advice' ;
+     precondition ::result_of(manage) = self_care;
+end action.
+
+
+data  :: 'temperature' ;
+     type :: real ;
+     caption :: 'Body temperature' ;
+     unit :: 'C' ;
+end data.
+
+data  :: 'centor_score' ;
+     type :: integer ;
+     caption :: 'Centor score (0-4)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'penicillin_allergy' ;
+     type :: text ;
+     caption :: 'Penicillin allergy?' ;
+     range ::"yes","no";
+end data.

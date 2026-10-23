@@ -1,0 +1,42 @@
+{
+  "name": "proforma",
+  "version": "0.1.0",
+  "description": "MCP server and CLI for PROforma (.pf) clinical guideline files: read, edit, lint and diagram (Mermaid)",
+  "homepage": "https://github.com/Minitour/proforma",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Minitour/proforma.git"
+  },
+  "author": "Antonio Zaitoun <antonio@zaitoun.dev>",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "proforma",
+    "clinical-guidelines",
+    "computer-interpretable-guidelines",
+    "deontics",
+    "mermaid",
+    "model-context-protocol"
+  ],
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "bin": {
+    "proforma": "./bin/proforma.js"
+  },
+  "scripts": {
+    "postinstall": "node ./bin/install.js"
+  },
+  "optionalDependencies": {
+    "proforma-linux-x64": "0.1.0",
+    "proforma-linux-arm64": "0.1.0",
+    "proforma-darwin-x64": "0.1.0",
+    "proforma-darwin-arm64": "0.1.0",
+    "proforma-win32-x64": "0.1.0",
+    "proforma-win32-arm64": "0.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
