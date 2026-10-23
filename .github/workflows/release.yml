@@ -164,9 +164,9 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      # trusted publishing needs npm >= 11.5.1
+      # trusted publishing needs npm >= 11.5.1 (pinned to 11: npm 12 needs a newer Node)
       - name: Update npm
-        run: npm install -g npm@latest
+        run: npm install -g npm@11
 
       - name: Download npm packages
         uses: actions/download-artifact@v4
