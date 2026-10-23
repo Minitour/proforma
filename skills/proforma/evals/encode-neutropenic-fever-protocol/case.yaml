@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: encode-neutropenic-fever-protocol
+expected_outcome: |
+  A lint-clean .pf modelling triage, confirmation of neutropenia, empirical antibiotics with allergy alternatives, MASCC risk stratification (>= 21 low risk with discharge criteria, < 21 admit, ICU review for hypotension or lactate), supportive measures and 24-hourly reassessment, plus an HTML report with the flow diagram.
+context:
+  scaffold_script: place-files.sh

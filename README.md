@@ -98,6 +98,21 @@ proforma mermaid  --file triage.pf --output triage.md
 proforma check-expression --file triage.pf --expression "result_of(refer) = urgent"
 ```
 
+## Agent skill and examples
+
+* [`skills/proforma`](skills/proforma) is an agent skill (for Claude Code / Claude) that teaches the
+  guideline-to-PROforma workflow: extract the logic from a guideline, build the `.pf` with the CLI,
+  lint until clean, and produce a shareable HTML report with
+  [`scripts/build_report.mjs`](skills/proforma/scripts/build_report.mjs). The report has per-plan Mermaid
+  diagrams, decision tables with evidence grades, the data model and the source. The skill ships its
+  test cases under `evals/`.
+* [`examples/esmo_crf.pf`](examples/esmo_crf.pf) encodes the ESMO 2020 cancer-related fatigue guideline
+  (Fabi et al., Ann Oncol 2020): screening, diagnostic assessment and management, with graded
+  recommendations as decision arguments. Composer's engine loads it with no verifier issues. The
+  report is [`examples/esmo_crf.html`](examples/esmo_crf.html) and the diagram is
+  [`examples/esmo_crf.mmd`](examples/esmo_crf.mmd).
+* [`examples/sore_throat.pf`](examples/sore_throat.pf) is a small guideline built step by step with the CLI.
+
 ## Lint codes
 
 | Prefix | Meaning |

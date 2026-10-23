@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: encode-ckd-anaemia-guideline
+expected_outcome: |
+  A lint-clean PROforma 1.9 file encoding the screening -> work-up -> iron -> ESA -> re-check pathway, with decisions whose arguments carry the [level, grade] evidence, the ESA exclusions and the no-consensus elderly option, plus a self-contained HTML report with Mermaid diagrams and decision tables.
+context:
+  scaffold_script: place-files.sh

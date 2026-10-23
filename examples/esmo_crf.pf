@@ -1,0 +1,514 @@
+/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'esmo_crf' ;
+     title :: 'Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)' ;
+     desc :: 'Screening, diagnostic assessment and management of cancer-related fatigue (CRF) following Figure 1 and the recommendations of the ESMO guideline. Evidence levels/grades of recommendation are given in brackets.' ;
+     version :: '1.0' ;
+     author :: 'Derived from Fabi et al., Ann Oncol 2020;31:713-723' ;
+end metadata.
+
+metaprops :: '' ;
+
+plan  :: 'esmo_crf' ;
+     caption :: 'Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)' ;
+     component :: 'crf_care_cycle' ;
+          task_definition :: 'crf_care_cycle' ;
+          cycle_until ::care_ended = "yes";
+          ltwh :: 40,40,0,0;
+end plan.
+
+enquiry  :: 'screening' ;
+     caption :: 'Step I - Screening (NRS 0-10)' ;
+     description :: 'Screen with a brief validated tool with established cut-offs, e.g. a 0-10 NRS: mild 1-3, moderate 4-6, severe 7-10 [II, B].' ;
+     source :: 'age' ;
+          data_definition :: 'age' ;
+     source :: 'fatigue_nrs' ;
+          data_definition :: 'fatigue_nrs' ;
+     source :: 'metastatic_disease' ;
+          data_definition :: 'metastatic_disease' ;
+     source :: 'treatment_phase' ;
+          data_definition :: 'treatment_phase' ;
+end enquiry.
+
+decision  :: 'screening_result' ;
+     caption :: 'Moderate or severe fatigue?' ;
+     candidate :: 'assess' ;
+          caption :: 'Comprehensive diagnostic assessment (Step II)' ;
+          argument :: for,fatigue_nrs >= 4 attributes
+               argument_name :: 'nrs_4_or_more' ;
+               caption :: 'NRS >= 4: moderate to severe fatigue requires a comprehensive, focused diagnostic assessment [II, B]' ;
+          end attributes
+          ;
+          argument :: against,fatigue_nrs < 4;
+          recommendation ::netsupport() > 0;
+     candidate :: 'rescreen_later' ;
+          caption :: 'No further assessment now; rescreen at regular intervals' ;
+          argument :: for,fatigue_nrs < 4 attributes
+               argument_name :: 'nrs_below_4' ;
+               caption :: 'NRS 0-3: none or mild fatigue' ;
+          end attributes
+          ;
+          argument :: against,fatigue_nrs >= 4;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'routine_rescreening' ;
+     caption :: 'Continue routine fatigue screening' ;
+     precondition ::result_of(screening_result) = rescreen_later;
+     procedure :: 'Repeat fatigue screening at regular intervals during therapy and aftercare, and whenever clinically indicated [II, B].' ;
+end action.
+
+enquiry  :: 'clinical_history' ;
+     caption :: 'Clinical history' ;
+     description :: 'Type and stage of disease, recurrence or progression, metastasis, time from diagnosis, length and type of treatment (surgery, chemotherapy, radiotherapy).' ;
+     source :: 'advanced_pancreatic_cancer' ;
+          data_definition :: 'advanced_pancreatic_cancer' ;
+     source :: 'cachexia' ;
+          data_definition :: 'cachexia' ;
+     source :: 'metastatic_disease' ;
+          data_definition :: 'metastatic_disease' ;
+     source :: 'treatment_phase' ;
+          data_definition :: 'treatment_phase' ;
+end enquiry.
+
+enquiry  :: 'fatigue_assessment' ;
+     caption :: 'Fatigue assessment' ;
+     description :: 'Onset and duration, alleviating and worsening elements, degree of interference with daily life and recreational activities (e.g. Brief Fatigue Inventory).' ;
+     source :: 'bfi_score' ;
+          data_definition :: 'bfi_score' ;
+     source :: 'fatigue_duration_weeks' ;
+          data_definition :: 'fatigue_duration_weeks' ;
+     source :: 'fatigue_interference' ;
+          data_definition :: 'fatigue_interference' ;
+end enquiry.
+
+enquiry  :: 'associated_elements' ;
+     caption :: 'Associated elements' ;
+     description :: 'Other physical symptoms (e.g. pain, nausea), emotional distress (two-question test for depression), cognitive symptoms, sleep disturbances, nutritional imbalance, laboratory tests (urinalysis, full blood count, urea and electrolytes, liver and thyroid function, ESR, CRP, glucose, creatinine).' ;
+     source :: 'anaemia' ;
+          data_definition :: 'anaemia' ;
+     source :: 'depression_screen_positive' ;
+          data_definition :: 'depression_screen_positive' ;
+     source :: 'electrolyte_disturbance' ;
+          data_definition :: 'electrolyte_disturbance' ;
+     source :: 'nutritional_imbalance' ;
+          data_definition :: 'nutritional_imbalance' ;
+     source :: 'pain_score' ;
+          data_definition :: 'pain_score' ;
+     source :: 'sleep_disturbance' ;
+          data_definition :: 'sleep_disturbance' ;
+end enquiry.
+
+enquiry  :: 'comorbidities' ;
+     caption :: 'Comorbidities' ;
+     description :: 'Heart failure, pulmonary disease, endocrine dysfunction, hepatic/kidney/neurologic dysfunction, multiorgan failure, infection, alcohol/substance abuse, presence of caregiver/social support.' ;
+     source :: 'caregiver_support' ;
+          data_definition :: 'caregiver_support' ;
+     source :: 'endocrine_dysfunction' ;
+          data_definition :: 'endocrine_dysfunction' ;
+     source :: 'infection' ;
+          data_definition :: 'infection' ;
+     source :: 'organ_dysfunction' ;
+          data_definition :: 'organ_dysfunction' ;
+     source :: 'substance_abuse' ;
+          data_definition :: 'substance_abuse' ;
+end enquiry.
+
+action  :: 'medication_review' ;
+     caption :: 'Review all medication (elderly patients)' ;
+     precondition ::age >= 65;
+     procedure :: 'In patients aged 65 or older, take an inventory of all drugs: polypharmacy increases the risk of interactions and potentially inappropriate medication.' ;
+end action.
+
+plan  :: 'diagnostic_assessment' ;
+     caption :: 'Step II - Diagnostic assessment' ;
+     description :: 'Focused fatigue history, thorough medical examination, status of the underlying malignancy, review of body systems, mental status examination and a minimum battery of laboratory tests [II, B].' ;
+     component :: 'clinical_history' ;
+          task_definition :: 'clinical_history' ;
+          ltwh :: 40,40,0,0;
+     component :: 'fatigue_assessment' ;
+          task_definition :: 'fatigue_assessment' ;
+          ltwh :: 40,140,0,0;
+     component :: 'associated_elements' ;
+          task_definition :: 'associated_elements' ;
+          ltwh :: 40,240,0,0;
+     component :: 'comorbidities' ;
+          task_definition :: 'comorbidities' ;
+          ltwh :: 40,340,0,0;
+     component :: 'medication_review' ;
+          task_definition :: 'medication_review' ;
+          ltwh :: 40,440,0,0;
+end plan.
+
+action  :: 'manage_contributing_factors' ;
+     caption :: 'Manage treatable contributing factors' ;
+     precondition ::anaemia = "yes" or pain_score >= 4 or depression_screen_positive = "yes" or electrolyte_disturbance = "yes" or endocrine_dysfunction = "yes" or infection = "yes" or sleep_disturbance = "yes" or nutritional_imbalance = "yes";
+     procedure :: 'Manage all associated elements and treatable contributing factors found during the diagnostic assessment (e.g. anaemia, pain, electrolyte disturbance, depression, endocrine dysfunction, infection), followed by a fatigue re-screening.' ;
+end action.
+
+action  :: 'education' ;
+     caption :: 'Patient and family education, information and counselling' ;
+     description :: 'Information and counselling for patients and caregivers on CRF and how to prevent, avoid chronicity or manage it [II, B]; energy preservation, task prioritisation, activity pacing, delegation. In elderly patients: education to reduce fatigue and emotional distress [II, C].' ;
+     procedure :: 'Explain the multifactorial nature of CRF, its causes and course; offer support groups; devise a personalised activity plan with energy conservation, prioritisation and pacing.' ;
+end action.
+
+decision  :: 'physical_activity' ;
+     caption :: 'Physical activity' ;
+     candidate :: 'exercise_programme' ;
+          caption :: 'Moderate-intensity aerobic and resistance exercise' ;
+          argument :: for,cachexia = "no" attributes
+               argument_name :: 'non_cachectic' ;
+               caption :: 'Physical exercise can be recommended in non-cachectic patients with cancer [I, B]' ;
+          end attributes
+          ;
+          argument :: against,cachexia = "yes" attributes
+               argument_name :: 'cachectic' ;
+               caption :: 'Evidence of benefit is for non-cachectic patients' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'no_structured_exercise' ;
+          caption :: 'No structured exercise programme; reassess' ;
+          argument :: for,cachexia = "yes";
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'exercise' ;
+     caption :: 'Prescribe exercise programme' ;
+     precondition ::result_of(physical_activity) = exercise_programme;
+     procedure :: 'Moderate-intensity aerobic and functional resistance exercise [I, B]; walking and home-based aerobic and resistance exercise [II, B]: e.g. 150 min/week aerobic, 2 days/week strength training, walking 2-3 times/week for 30-60 min at moderate effort.' ;
+end action.
+
+decision  :: 'psychosocial' ;
+     caption :: 'Psychosocial and mind-body interventions' ;
+     choice_mode :: multiple ;
+     candidate :: 'psychoeducation' ;
+          caption :: 'Psychoeducation' ;
+          argument :: for,fatigue_nrs >= 4 attributes
+               caption :: 'Psychoeducation is recommended to manage CRF [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'cbt' ;
+          caption :: 'Cognitive behavioural therapy' ;
+          argument :: for,fatigue_nrs >= 4 attributes
+               caption :: 'CBT is recommended to manage CRF [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'mbsr' ;
+          caption :: 'Mindfulness-based stress reduction' ;
+          argument :: for,depression_screen_positive = "yes" attributes
+               caption :: 'MBSR could be an option to improve CRF [II, C]; benefits on mood, anxiety and stress' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'yoga' ;
+          caption :: 'Yoga' ;
+          argument :: for,treatment_phase = "post_treatment" attributes
+               caption :: 'Yoga could be an option to improve CRF in cancer survivors and QoL [II, C]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'acupuncture' ;
+          caption :: 'Acupuncture (no panel consensus [II, C] vs [II, D])' ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'psychosocial_interventions' ;
+     caption :: 'Deliver psychosocial interventions' ;
+     precondition ::count(result_set(psychosocial)) > 0;
+     procedure :: 'Deliver the selected interventions individually or in groups; in elderly patients during oncological treatment psychosocial interventions are recommended [II, C].' ;
+end action.
+
+decision  :: 'pharmacological' ;
+     caption :: 'Pharmacological intervention' ;
+     description :: 'Not recommended for CRF [II, D]: modafinil, armodafinil, paroxetine and other antidepressants, donepezil, eszopiclone, megestrol acetate, melatonin, L-carnitine, coenzyme Q10, astragalus, guarana. In elderly patients pharmacological interventions are not recommended [II, D].' ;
+     candidate :: 'corticosteroids' ;
+          caption :: 'Short-term corticosteroids' ;
+          argument :: for,metastatic_disease = "yes" attributes
+               argument_name :: 'metastatic' ;
+               caption :: 'Short-term dexamethasone or methylprednisolone is recommended in metastatic cancer patients [II, B]' ;
+          end attributes
+          ;
+          argument :: excluding,metastatic_disease = "no" attributes
+               caption :: 'Only for short-term use in metastatic cancer patients' ;
+          end attributes
+          ;
+          argument :: excluding,age >= 65 attributes
+               argument_name :: 'elderly' ;
+               caption :: 'Pharmacological interventions are not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'psychostimulant' ;
+          caption :: 'Psychostimulant trial (methylphenidate; no panel consensus)' ;
+          argument :: for,fatigue_nrs >= 7 attributes
+               caption :: 'Could be considered in thoroughly selected patients, evaluating usefulness and safety after a very short period [II, C]; 6 of 9 panel members: not recommended [II, D]' ;
+          end attributes
+          ;
+          argument :: for,metastatic_disease = "no";
+          argument :: excluding,age >= 65 attributes
+               caption :: 'Not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() >= 2;
+     candidate :: 'wisconsin_ginseng' ;
+          caption :: 'Wisconsin ginseng (no panel consensus)' ;
+          argument :: for,treatment_phase = "active_treatment" attributes
+               caption :: 'Could be considered during active cancer treatment [II, C]' ;
+          end attributes
+          ;
+          argument :: for,fatigue_duration_weeks > 4 attributes
+               caption :: 'Fatigue lasting more than 4 weeks with no other treatable reasons [II, C]' ;
+          end attributes
+          ;
+          argument :: against,anaemia = "yes" or depression_screen_positive = "yes" or endocrine_dysfunction = "yes" or infection = "yes" attributes
+               caption :: 'Other treatable reasons for fatigue present' ;
+          end attributes
+          ;
+          argument :: excluding,age >= 65;
+          recommendation ::netsupport() >= 2;
+     candidate :: 'mistletoe' ;
+          caption :: 'Mistletoe extract (no panel consensus)' ;
+          argument :: for,advanced_pancreatic_cancer = "yes" attributes
+               caption :: 'Could be considered for fatigue in advanced pancreatic cancer [II, C]; 6 of 9 panel members: not recommended [II, D]' ;
+          end attributes
+          ;
+          argument :: excluding,age >= 65;
+          recommendation ::netsupport() > 0;
+     candidate :: 'no_drug_treatment' ;
+          caption :: 'No pharmacological treatment' ;
+          argument :: for,age >= 65 attributes
+               caption :: 'Pharmacological interventions are not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          argument :: for,metastatic_disease = "no" and fatigue_nrs < 7;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'corticosteroid_course' ;
+     caption :: 'Short corticosteroid course' ;
+     precondition ::result_of(pharmacological) = corticosteroids;
+     procedure :: 'Dexamethasone 4 mg b.i.d. for 14 days or methylprednisolone 16 mg b.i.d. for 7 days [II, B]; avoid long-term steroid use.' ;
+end action.
+
+action  :: 'discuss_non_consensus_options' ;
+     caption :: 'Discuss options without panel consensus' ;
+     precondition ::result_of(pharmacological) oneof ["psychostimulant", "wisconsin_ginseng", "mistletoe"];
+     procedure :: 'Shared decision on psychostimulants, Wisconsin ginseng or mistletoe extract (ESMO panel split 3:6); if started, evaluate benefit and safety after a very short period.' ;
+end action.
+
+plan  :: 'management' ;
+     caption :: 'Step III - Management' ;
+     description :: 'Patient and family education, physical activity, psychosocial interventions and (selected) pharmacological interventions.' ;
+     component :: 'education' ;
+          task_definition :: 'education' ;
+          ltwh :: 40,40,0,0;
+     component :: 'physical_activity' ;
+          task_definition :: 'physical_activity' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,140,0,0;
+     component :: 'exercise' ;
+          task_definition :: 'exercise' ;
+          schedule_constraint :: completed('physical_activity') ;
+          ltwh :: 40,240,0,0;
+     component :: 'psychosocial' ;
+          task_definition :: 'psychosocial' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,340,0,0;
+     component :: 'psychosocial_interventions' ;
+          task_definition :: 'psychosocial_interventions' ;
+          schedule_constraint :: completed('psychosocial') ;
+          ltwh :: 40,440,0,0;
+     component :: 'pharmacological' ;
+          task_definition :: 'pharmacological' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,540,0,0;
+     component :: 'corticosteroid_course' ;
+          task_definition :: 'corticosteroid_course' ;
+          schedule_constraint :: completed('pharmacological') ;
+          ltwh :: 40,640,0,0;
+     component :: 'discuss_non_consensus_options' ;
+          task_definition :: 'discuss_non_consensus_options' ;
+          schedule_constraint :: completed('pharmacological') ;
+          ltwh :: 40,740,0,0;
+end plan.
+
+enquiry  :: 're_evaluation' ;
+     caption :: 'Re-evaluate fatigue after intervention' ;
+     description :: 'After a specific intervention on fatigue, patients must be re-evaluated (back to Step I).' ;
+     source :: 'care_ended' ;
+          data_definition :: 'care_ended' ;
+     source :: 'fatigue_nrs' ;
+          data_definition :: 'fatigue_nrs' ;
+end enquiry.
+
+plan  :: 'assess_and_manage' ;
+     caption :: 'Assess and manage fatigue' ;
+     precondition ::result_of(screening_result) = assess;
+     component :: 'diagnostic_assessment' ;
+          task_definition :: 'diagnostic_assessment' ;
+          ltwh :: 40,40,0,0;
+     component :: 'manage_contributing_factors' ;
+          task_definition :: 'manage_contributing_factors' ;
+          schedule_constraint :: completed('diagnostic_assessment') ;
+          ltwh :: 40,140,0,0;
+     component :: 'management' ;
+          task_definition :: 'management' ;
+          schedule_constraint :: completed('manage_contributing_factors') ;
+          ltwh :: 40,240,0,0;
+     component :: 're_evaluation' ;
+          task_definition :: 're_evaluation' ;
+          schedule_constraint :: completed('management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+plan  :: 'crf_care_cycle' ;
+     caption :: 'Fatigue screening and care cycle' ;
+     description :: 'All cancer patients should be routinely screened for the presence and severity of fatigue from diagnosis onward, at regular intervals during therapy and aftercare and if clinically indicated [II, B]. Shared decision-making throughout.' ;
+     component :: 'screening' ;
+          task_definition :: 'screening' ;
+          ltwh :: 40,40,0,0;
+     component :: 'screening_result' ;
+          task_definition :: 'screening_result' ;
+          schedule_constraint :: completed('screening') ;
+          ltwh :: 40,140,0,0;
+     component :: 'routine_rescreening' ;
+          task_definition :: 'routine_rescreening' ;
+          schedule_constraint :: completed('screening_result') ;
+          ltwh :: 40,240,0,0;
+     component :: 'assess_and_manage' ;
+          task_definition :: 'assess_and_manage' ;
+          schedule_constraint :: completed('screening_result') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+
+data  :: 'fatigue_nrs' ;
+     type :: integer ;
+     caption :: 'Fatigue severity on a 0-10 numerical rating scale (NRS)' ;
+     range ::0,1,2,3,4,5,6,7,8,9,10;
+end data.
+
+data  :: 'age' ;
+     type :: integer ;
+     caption :: 'Age (years)' ;
+     unit :: 'years' ;
+end data.
+
+data  :: 'treatment_phase' ;
+     type :: text ;
+     caption :: 'Phase of cancer care' ;
+     range ::"active_treatment","post_treatment","palliative";
+end data.
+
+data  :: 'metastatic_disease' ;
+     type :: text ;
+     caption :: 'Metastatic cancer?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'advanced_pancreatic_cancer' ;
+     type :: text ;
+     caption :: 'Advanced pancreatic cancer?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'cachexia' ;
+     type :: text ;
+     caption :: 'Cachexia present?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'fatigue_duration_weeks' ;
+     type :: integer ;
+     caption :: 'Duration of fatigue (weeks)' ;
+     unit :: 'weeks' ;
+end data.
+
+data  :: 'fatigue_interference' ;
+     type :: text ;
+     caption :: 'Interference with daily life and recreational activities' ;
+     range ::"none","mild","moderate","severe";
+end data.
+
+data  :: 'bfi_score' ;
+     type :: real ;
+     caption :: 'Brief Fatigue Inventory (BFI) global score' ;
+end data.
+
+data  :: 'pain_score' ;
+     type :: integer ;
+     caption :: 'Pain (NRS 0-10)' ;
+     range ::0,1,2,3,4,5,6,7,8,9,10;
+end data.
+
+data  :: 'depression_screen_positive' ;
+     type :: text ;
+     caption :: 'Two-question depression screen positive (low mood or loss of interest in the last month)?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'sleep_disturbance' ;
+     type :: text ;
+     caption :: 'Sleep disturbance?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'nutritional_imbalance' ;
+     type :: text ;
+     caption :: 'Nutritional imbalance?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'anaemia' ;
+     type :: text ;
+     caption :: 'Anaemia (full blood count)?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'electrolyte_disturbance' ;
+     type :: text ;
+     caption :: 'Electrolyte disturbance?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'endocrine_dysfunction' ;
+     type :: text ;
+     caption :: 'Endocrine dysfunction (e.g. hypothyroidism, hypogonadism, adrenal insufficiency, hypopituitarism, especially with immunotherapy)?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'infection' ;
+     type :: text ;
+     caption :: 'Active infection?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'organ_dysfunction' ;
+     type :: text ;
+     caption :: 'Cardiac, pulmonary, hepatic, renal or neurological dysfunction?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'substance_abuse' ;
+     type :: text ;
+     caption :: 'Alcohol / substance abuse?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'caregiver_support' ;
+     type :: text ;
+     caption :: 'Caregiver / social support available?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'care_ended' ;
+     type :: text ;
+     caption :: 'Fatigue follow-up can end (therapy and aftercare completed)?' ;
+     range ::"yes","no";
+end data.

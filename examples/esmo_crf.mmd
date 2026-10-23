@@ -1,0 +1,75 @@
+---
+title: Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)
+---
+flowchart TD
+    subgraph esmo_crf__crf_care_cycle["Fatigue screening and care cycle<br/>[cycle: until care_ended = #quot;yes#quot;]"]
+        esmo_crf__crf_care_cycle__screening{"Step I - Screening (NRS 0-10)"}
+        class esmo_crf__crf_care_cycle__screening enquiry
+        esmo_crf__crf_care_cycle__screening_result(("Moderate or severe fatigue?"))
+        class esmo_crf__crf_care_cycle__screening_result decision
+        esmo_crf__crf_care_cycle__routine_rescreening("Continue routine fatigue screening")
+        class esmo_crf__crf_care_cycle__routine_rescreening action
+        subgraph esmo_crf__crf_care_cycle__assess_and_manage["Assess and manage fatigue"]
+            subgraph esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment["Step II - Diagnostic assessment"]
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__clinical_history{"Clinical history"}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__clinical_history enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__fatigue_assessment{"Fatigue assessment"}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__fatigue_assessment enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__associated_elements{"Associated elements"}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__associated_elements enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__comorbidities{"Comorbidities"}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__comorbidities enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__medication_review("Review all medication (elderly patients)")
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__medication_review action
+            end
+            style esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+            esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors("Manage treatable contributing factors")
+            class esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors action
+            subgraph esmo_crf__crf_care_cycle__assess_and_manage__management["Step III - Management"]
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education("Patient and family education, information and counselling")
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__education action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity(("Physical activity"))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__exercise("Prescribe exercise programme")
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__exercise action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial(("Psychosocial and mind-body interventions"))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions("Deliver psychosocial interventions")
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological(("Pharmacological intervention"))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course("Short corticosteroid course")
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options("Discuss options without panel consensus")
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --> esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity
+                esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity -->|"exercise_programme"| esmo_crf__crf_care_cycle__assess_and_manage__management__exercise
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --> esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial --> esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --> esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological -->|"corticosteroids"| esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological -->|"psychostimulant/wisconsin_ginseng/mistletoe"| esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options
+            end
+            style esmo_crf__crf_care_cycle__assess_and_manage__management fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+            esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation{"Re-evaluate fatigue after intervention"}
+            class esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation enquiry
+            esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment --> esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors
+            esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors --> esmo_crf__crf_care_cycle__assess_and_manage__management
+            esmo_crf__crf_care_cycle__assess_and_manage__management --> esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation
+        end
+        style esmo_crf__crf_care_cycle__assess_and_manage fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        esmo_crf__crf_care_cycle__screening --> esmo_crf__crf_care_cycle__screening_result
+        esmo_crf__crf_care_cycle__screening_result -->|"rescreen_later"| esmo_crf__crf_care_cycle__routine_rescreening
+        esmo_crf__crf_care_cycle__screening_result -->|"assess"| esmo_crf__crf_care_cycle__assess_and_manage
+    end
+    style esmo_crf__crf_care_cycle fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px

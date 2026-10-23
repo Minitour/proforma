@@ -187,9 +187,10 @@ lists `[a, b]`, function calls `f(x, y)`, `result_of(decision)`, complex atoms `
 An unknown bare atom is treated as a text literal (e.g. `result_of(triage) = urgent`).
 Negation is the function `not(x)`. Truth values: `true()`/`false()`.
 
-Common built-ins (see lint for unknown-function checks): `is_known(d)`, `is_completed(T)`,
-`is_in_progress(T)`, `is_discarded(T)`, `is_dormant(T)`, `netsupport(D, C)`, `result_set(D)`,
-`now()`, `today()`, `count(s)`, `max(...)`, `min(...)`, `abs(x)`, `round(x)`.
+Common built-ins (full table below; lint flags unknown functions): `isknown(d)`, `isunknown(d)`,
+`is_completed(T)`, `is_in_progress(T)`, `is_discarded(T)`, `is_dormant(T)`, `netsupport(D, C)`,
+`result_set(D)`, `now()`, `count(set)`, `max(set)`, `min(set)`, `sum(set)`, `abs(x)`,
+`date_diff_days(from, to)` (= to - from), `date_part_year(d)`, `completed_time(T)`, `if(cond, a, b)`, `not(x)`.
 "#;
 
 const FUNCTIONS: &str = r#"# User functions
@@ -224,6 +225,8 @@ const EDITING: &str = r#"# Editing with proforma
 * `rename` updates task_definition references, scheduling constraints, sources and
   expression references; `remove_component` cascades to plan components and sources.
 * Names: identifiers only (letters, digits, `_`). Human-readable text goes in `caption`.
+* Comments (`/** ... **/`) are not preserved: every edit rewrites the file in Composer's layout (Composer
+  drops comments on save as well). Keep explanations in captions, descriptions and metadata `desc`.
 "#;
 
 pub fn get(section: Option<&str>) -> String {

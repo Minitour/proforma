@@ -1,0 +1,15 @@
+FEBRILE NEUTROPENIA — ED TRIAGE PROTOCOL (fictional hospital protocol, for testing only)
+
+Who: any patient on chemotherapy presenting with temp >= 38.3C once, or >= 38.0C sustained for 1 hour.
+
+1) Triage within 15 minutes: vitals, neutrophil count (ANC), start sepsis screen.
+2) If ANC < 0.5 x10^9/L (or expected to fall below 0.5 within 48h) -> febrile neutropenia confirmed. Otherwise manage as fever without neutropenia (not covered here).
+3) Give empirical IV antibiotics within 60 minutes of arrival -- always, do not wait for results.
+   - Penicillin allergy (non-severe): use the alternative regimen.
+   - Severe penicillin allergy (anaphylaxis): use the non-beta-lactam regimen.
+4) Risk stratification with the MASCC score (0-26):
+   - MASCC >= 21 = low risk -> consider early discharge with oral antibiotics IF: lives within 1 hour of hospital, has a carer at home, can take oral medication, and no other reason for admission.
+   - MASCC < 21 = high risk -> admit to oncology ward.
+   - Hypotension (systolic < 90) or lactate > 2 -> ICU review regardless of score.
+5) Supportive measures (any that apply): G-CSF only if high risk AND expected prolonged neutropenia; antifungal cover if fever persists > 4 days on antibiotics; remove/replace central line if line infection suspected.
+6) Reassess every 24 hours until afebrile for 48 hours and ANC > 0.5.

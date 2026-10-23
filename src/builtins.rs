@@ -405,7 +405,7 @@ pub fn reference_table() -> String {
     s.push_str(
         "| `calculate<Int|Real|Text|Boolean>[s](\"java.Class\", ...)` | Java user functions |\n",
     );
-    s.push_str("\nNotes: `boolean` data items are typed as text (compare with `= \"true\"`/atoms, not `true()`); there is no date arithmetic (use date_diff_*/date_part_*); integers promote to reals but not vice versa; user `function`s are referenced as bare names (no parentheses).\n");
+    s.push_str("\nNotes: `boolean` data items are typed as text (compare with `= \"true\"`/atoms, not `true()`); there is no date arithmetic (use date_diff_*/date_part_*; `date_diff_<unit>(from, to)` returns to - from, e.g. `date_diff_hours(completed_time(T), now()) >= 48`); integers promote to reals but not vice versa; user `function`s are referenced as bare names (no parentheses).\n");
     s.push_str("Not supported by the verifier although documented: ");
     s.push_str(
         &DOCUMENTED_BUT_UNKNOWN

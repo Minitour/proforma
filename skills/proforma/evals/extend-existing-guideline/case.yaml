@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: extend-existing-guideline
+expected_outcome: |
+  sore_throat.pf still lints clean and keeps its existing content, now has a clarithromycin action for allergic patients (precondition combining the antibiotics decision result with penicillin_allergy = "yes"), the penicillin action excludes allergic patients, a follow-up enquiry scheduled after treatment, and an HTML report of the updated model.
+context:
+  scaffold_script: place-files.sh

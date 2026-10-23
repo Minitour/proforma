@@ -6,3 +6,5 @@
 /research/oracle/classpath.txt
 *.class
 .*.tmp
+# skill-creator test runs
+/skills/proforma-workspace/

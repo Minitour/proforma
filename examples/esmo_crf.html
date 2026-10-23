@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020) — PROforma model</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d2329;--muted:#66707a;--line:#e3e5e8;--accent:#8a1538}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+header{background:linear-gradient(120deg,#5b0e2d,#8a1538);color:#fff;padding:36px 24px 28px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}header p{margin:4px 0;opacity:.9}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px 12px;font-size:13px}
+.badge.ok{background:#e6f6ea;color:#11602a;border-color:#bfe3c9}.badge.bad{background:#fdecea;color:#9b1c1c;border-color:#f3b3ad}
+main{padding:26px 0 60px}h2{font-size:21px;margin:34px 0 12px;color:var(--accent)}h3{margin:0 0 8px;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.note{border-left:4px solid #e3a008;background:#fffbea}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:13px}
+.diagram.stage{max-height:none;text-align:center}.diagram{overflow:auto;max-height:80vh;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.diagram.fit svg{max-width:100%!important;height:auto}
+.toolbar{display:flex;gap:12px;align-items:center;margin:0 0 8px}.toolbar button{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin:10px 2px}.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:2px solid}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-top:0}
+code{font:12.5px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:#f1f2f4;border-radius:5px;padding:1px 5px;word-break:break-word}
+.tag{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}.cap{color:var(--muted);font-size:13px}.desc{color:#3d4650}.proc{margin-top:4px}
+.why{font-size:13px;color:#3d4650;margin:3px 0 0}.muted{color:var(--muted)}ul.args{margin:0;padding-left:16px}ul.args li{margin:2px 0 6px}
+.sup{display:inline-block;font-size:11.5px;font-weight:600;border-radius:5px;padding:1px 6px;text-transform:uppercase;letter-spacing:.03em}
+.sup.for{background:#e6f6ea;color:#11602a}.sup.against{background:#fdecea;color:#9b1c1c}.sup.excluding{background:#2b2f36;color:#fff}.sup.confirming{background:#d9f0ff;color:#0b4f84}.sup.weight{background:#eef0ff;color:#2d3a8c}
+.grade{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 7px;margin:0 1px;border:1px solid}
+.gA,.gB{color:#11602a;border-color:#9fd6ad;background:#effaf2}.gC{color:#8a5a00;border-color:#f0cf84;background:#fff8e6}.gD,.gE{color:#9b1c1c;border-color:#f3b3ad;background:#fdf1f0}
+.kind{font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;text-transform:uppercase}.kind.plan{background:#FFDCD9;color:#a12a1e}.kind.action{background:#E4FAFA;color:#006262}.kind.enquiry{background:#E6FFE6;color:#006d00}.kind.task{background:#FEFBED;color:#8a6d00}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:14px 0}summary{cursor:pointer;padding:14px 18px;font-weight:600}
+pre.src{margin:0;max-height:620px;overflow:auto;background:#0f1720;color:#dbe4ee;padding:16px 18px;border-radius:0 0 12px 12px;font:12.5px/1.5 ui-monospace,Consolas,monospace}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:18px;margin-top:40px}
+@media print{header{background:#5b0e2d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.toolbar{display:none}.diagram svg{max-width:100%!important;height:auto}.diagram,pre.src{max-height:none;overflow:visible}details{display:block}details>summary{display:none}.card,tr{break-inside:avoid}}
+</style></head>
+<body>
+<header><div class="wrap">
+<h1>Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)</h1>
+<p>Derived from Fabi A. et al., Cancer-related fatigue: ESMO Clinical Practice Guidelines for diagnosis and treatment. Ann Oncol 2020;31(6):713-723</p>
+<div class="badges"><span class="badge ok">proforma lint: 0 errors · 0 warnings</span><span class="badge ok">Deontics engine: parses OK, verifier 0 issues</span><span class="badge">PROforma engine_version 1.9</span></div></div></header>
+<main class="wrap">
+
+<section class="card note"><b>Research model.</b> An executable PROforma representation of the source guideline for research and tooling. It is not a clinical decision support system and does not replace the published guideline.</section>
+
+
+<div class="grid">
+<div class="stat"><b>5</b><span>plans (incl. root)</span></div>
+<div class="stat"><b>4</b><span>decisions</span></div>
+<div class="stat"><b>6</b><span>enquiries</span></div>
+<div class="stat"><b>8</b><span>actions</span></div>
+<div class="stat"><b>21</b><span>data items</span></div>
+</div>
+
+<h2>Care pathway</h2>
+<div class="legend">
+<span><i style="background:#FFDCD9;border-color:#E55344"></i>plan</span>
+<span><i style="background:#fff;border-color:#B40F78;border-radius:50%"></i>decision</span>
+<span><i style="background:#E6FFE6;border-color:#009700;transform:rotate(45deg)"></i>enquiry (data collection)</span>
+<span><i style="background:#E4FAFA;border-color:#008585"></i>action</span>
+<span><i style="background:#F8A2D3;border-color:#B40F78"></i>decision option</span>
+<span>arrows = scheduling (B starts after A); arrow labels = decision result tested by the next task's precondition</span>
+</div>
+<section class="card"><h3>Step II - Diagnostic assessment</h3><p class="desc">Focused fatigue history, thorough medical examination, status of the underlying malignancy, review of body systems, mental status examination and a minimum battery of laboratory tests <span class="grade gB">II, B</span>.</p><div class="diagram stage"><pre class="mermaid">flowchart LR
+    diagnostic_assessment__clinical_history{&quot;Clinical history&quot;}
+    class diagnostic_assessment__clinical_history enquiry
+    diagnostic_assessment__fatigue_assessment{&quot;Fatigue assessment&quot;}
+    class diagnostic_assessment__fatigue_assessment enquiry
+    diagnostic_assessment__associated_elements{&quot;Associated elements&quot;}
+    class diagnostic_assessment__associated_elements enquiry
+    diagnostic_assessment__comorbidities{&quot;Comorbidities&quot;}
+    class diagnostic_assessment__comorbidities enquiry
+    diagnostic_assessment__medication_review(&quot;Review all medication (elderly patients)&quot;)
+    class diagnostic_assessment__medication_review action
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
+</pre></div></section><section class="card"><h3>Step III - Management</h3><p class="desc">Patient and family education, physical activity, psychosocial interventions and (selected) pharmacological interventions.</p><div class="diagram stage"><pre class="mermaid">flowchart LR
+    management__education(&quot;Patient and family education, information and counselling&quot;)
+    class management__education action
+    management__physical_activity((&quot;Physical activity&quot;))
+    management__physical_activity__c_exercise_programme&gt;&quot;exercise_programme&lt;br/&gt;&lt;i&gt;Moderate-intensity aerobic and resistance exercise&lt;/i&gt;&lt;br/&gt;(2 args)&quot;]:::candidate
+    management__physical_activity -.-&gt; management__physical_activity__c_exercise_programme
+    management__physical_activity__c_no_structured_exercise&gt;&quot;no_structured_exercise&lt;br/&gt;&lt;i&gt;No structured exercise programme; reassess&lt;/i&gt;&lt;br/&gt;(1 arg)&quot;]:::candidate
+    management__physical_activity -.-&gt; management__physical_activity__c_no_structured_exercise
+    class management__physical_activity decision
+    management__exercise(&quot;Prescribe exercise programme&quot;)
+    class management__exercise action
+    management__psychosocial((&quot;Psychosocial and mind-body interventions&quot;))
+    management__psychosocial__c_psychoeducation&gt;&quot;psychoeducation&lt;br/&gt;&lt;i&gt;Psychoeducation&lt;/i&gt;&lt;br/&gt;(1 arg)&quot;]:::candidate
+    management__psychosocial -.-&gt; management__psychosocial__c_psychoeducation
+    management__psychosocial__c_cbt&gt;&quot;cbt&lt;br/&gt;&lt;i&gt;Cognitive behavioural therapy&lt;/i&gt;&lt;br/&gt;(1 arg)&quot;]:::candidate
+    management__psychosocial -.-&gt; management__psychosocial__c_cbt
+    management__psychosocial__c_mbsr&gt;&quot;mbsr&lt;br/&gt;&lt;i&gt;Mindfulness-based stress reduction&lt;/i&gt;&lt;br/&gt;(1 arg)&quot;]:::candidate
+    management__psychosocial -.-&gt; management__psychosocial__c_mbsr
+    management__psychosocial__c_yoga&gt;&quot;yoga&lt;br/&gt;&lt;i&gt;Yoga&lt;/i&gt;&lt;br/&gt;(1 arg)&quot;]:::candidate
+    management__psychosocial -.-&gt; management__psychosocial__c_yoga
+    management__psychosocial__c_acupuncture&gt;&quot;acupuncture&lt;br/&gt;&lt;i&gt;Acupuncture (no panel consensus [II, C] vs [II, D])&lt;/i&gt;&lt;br/&gt;(0 args)&quot;]:::candidate
+    management__psychosocial -.-&gt; management__psychosocial__c_acupuncture
+    class management__psychosocial decision
+    management__psychosocial_interventions(&quot;Deliver psychosocial interventions&quot;)
+    class management__psychosocial_interventions action
+    management__pharmacological((&quot;Pharmacological intervention&quot;))
+    management__pharmacological__c_corticosteroids&gt;&quot;corticosteroids&lt;br/&gt;&lt;i&gt;Short-term corticosteroids&lt;/i&gt;&lt;br/&gt;(3 args)&quot;]:::candidate
+    management__pharmacological -.-&gt; management__pharmacological__c_corticosteroids
+    management__pharmacological__c_psychostimulant&gt;&quot;psychostimulant&lt;br/&gt;&lt;i&gt;Psychostimulant trial (methylphenidate; no panel consensus)&lt;/i&gt;&lt;br/&gt;(3 args)&quot;]:::candidate
+    management__pharmacological -.-&gt; management__pharmacological__c_psychostimulant
+    management__pharmacological__c_wisconsin_ginseng&gt;&quot;wisconsin_ginseng&lt;br/&gt;&lt;i&gt;Wisconsin ginseng (no panel consensus)&lt;/i&gt;&lt;br/&gt;(4 args)&quot;]:::candidate
+    management__pharmacological -.-&gt; management__pharmacological__c_wisconsin_ginseng
+    management__pharmacological__c_mistletoe&gt;&quot;mistletoe&lt;br/&gt;&lt;i&gt;Mistletoe extract (no panel consensus)&lt;/i&gt;&lt;br/&gt;(2 args)&quot;]:::candidate
+    management__pharmacological -.-&gt; management__pharmacological__c_mistletoe
+    management__pharmacological__c_no_drug_treatment&gt;&quot;no_drug_treatment&lt;br/&gt;&lt;i&gt;No pharmacological treatment&lt;/i&gt;&lt;br/&gt;(2 args)&quot;]:::candidate
+    management__pharmacological -.-&gt; management__pharmacological__c_no_drug_treatment
+    class management__pharmacological decision
+    management__corticosteroid_course(&quot;Short corticosteroid course&quot;)
+    class management__corticosteroid_course action
+    management__discuss_non_consensus_options(&quot;Discuss options without panel consensus&quot;)
+    class management__discuss_non_consensus_options action
+    management__education --&gt; management__physical_activity
+    %% schedule_constraint: completed(physical_activity)
+    management__physical_activity__c_exercise_programme --&gt; management__exercise
+    management__education --&gt; management__psychosocial
+    management__psychosocial --&gt; management__psychosocial_interventions
+    management__education --&gt; management__pharmacological
+    %% schedule_constraint: completed(pharmacological)
+    management__pharmacological__c_corticosteroids --&gt; management__corticosteroid_course
+    management__pharmacological --&gt;|&quot;psychostimulant/wisconsin_ginseng/mistletoe&quot;| management__discuss_non_consensus_options
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
+</pre></div></section><section class="card"><h3>Assess and manage fatigue</h3><div class="diagram stage"><pre class="mermaid">flowchart TD
+    assess_and_manage__diagnostic_assessment([&quot;Step II - Diagnostic assessment&quot;])
+    class assess_and_manage__diagnostic_assessment plan
+    assess_and_manage__manage_contributing_factors(&quot;Manage treatable contributing factors&quot;)
+    class assess_and_manage__manage_contributing_factors action
+    assess_and_manage__management([&quot;Step III - Management&quot;])
+    class assess_and_manage__management plan
+    assess_and_manage__re_evaluation{&quot;Re-evaluate fatigue after intervention&quot;}
+    class assess_and_manage__re_evaluation enquiry
+    assess_and_manage__diagnostic_assessment --&gt; assess_and_manage__manage_contributing_factors
+    assess_and_manage__manage_contributing_factors --&gt; assess_and_manage__management
+    assess_and_manage__management --&gt; assess_and_manage__re_evaluation
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
+</pre></div></section><section class="card"><h3>Fatigue screening and care cycle</h3><p class="desc">All cancer patients should be routinely screened for the presence and severity of fatigue from diagnosis onward, at regular intervals during therapy and aftercare and if clinically indicated <span class="grade gB">II, B</span>. Shared decision-making throughout.</p><div class="diagram stage"><pre class="mermaid">flowchart LR
+    crf_care_cycle__screening{&quot;Step I - Screening (NRS 0-10)&quot;}
+    class crf_care_cycle__screening enquiry
+    crf_care_cycle__screening_result((&quot;Moderate or severe fatigue?&quot;))
+    crf_care_cycle__screening_result__c_assess&gt;&quot;assess&lt;br/&gt;&lt;i&gt;Comprehensive diagnostic assessment (Step II)&lt;/i&gt;&lt;br/&gt;(2 args)&quot;]:::candidate
+    crf_care_cycle__screening_result -.-&gt; crf_care_cycle__screening_result__c_assess
+    crf_care_cycle__screening_result__c_rescreen_later&gt;&quot;rescreen_later&lt;br/&gt;&lt;i&gt;No further assessment now; rescreen at regular intervals&lt;/i&gt;&lt;br/&gt;(2 args)&quot;]:::candidate
+    crf_care_cycle__screening_result -.-&gt; crf_care_cycle__screening_result__c_rescreen_later
+    class crf_care_cycle__screening_result decision
+    crf_care_cycle__routine_rescreening(&quot;Continue routine fatigue screening&quot;)
+    class crf_care_cycle__routine_rescreening action
+    crf_care_cycle__assess_and_manage([&quot;Assess and manage fatigue&quot;])
+    class crf_care_cycle__assess_and_manage plan
+    crf_care_cycle__screening --&gt; crf_care_cycle__screening_result
+    %% schedule_constraint: completed(screening_result)
+    crf_care_cycle__screening_result__c_rescreen_later --&gt; crf_care_cycle__routine_rescreening
+    %% schedule_constraint: completed(screening_result)
+    crf_care_cycle__screening_result__c_assess --&gt; crf_care_cycle__assess_and_manage
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
+</pre></div></section>
+<details><summary>Complete pathway in one diagram (all plans nested)</summary><div class="toolbar" style="padding:0 18px"><button id="fit" type="button">Fit to width</button><span class="muted">scroll to pan</span></div><div class="diagram" id="diagram" style="margin:0 18px 18px"><pre class="mermaid">flowchart TD
+    subgraph esmo_crf__crf_care_cycle[&quot;Fatigue screening and care cycle&lt;br/&gt;[cycle: until care_ended = #quot;yes#quot;]&quot;]
+        esmo_crf__crf_care_cycle__screening{&quot;Step I - Screening (NRS 0-10)&quot;}
+        class esmo_crf__crf_care_cycle__screening enquiry
+        esmo_crf__crf_care_cycle__screening_result((&quot;Moderate or severe fatigue?&quot;))
+        class esmo_crf__crf_care_cycle__screening_result decision
+        esmo_crf__crf_care_cycle__routine_rescreening(&quot;Continue routine fatigue screening&quot;)
+        class esmo_crf__crf_care_cycle__routine_rescreening action
+        subgraph esmo_crf__crf_care_cycle__assess_and_manage[&quot;Assess and manage fatigue&quot;]
+            subgraph esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment[&quot;Step II - Diagnostic assessment&quot;]
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__clinical_history{&quot;Clinical history&quot;}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__clinical_history enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__fatigue_assessment{&quot;Fatigue assessment&quot;}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__fatigue_assessment enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__associated_elements{&quot;Associated elements&quot;}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__associated_elements enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__comorbidities{&quot;Comorbidities&quot;}
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__comorbidities enquiry
+                esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__medication_review(&quot;Review all medication (elderly patients)&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment__medication_review action
+            end
+            style esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+            esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors(&quot;Manage treatable contributing factors&quot;)
+            class esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors action
+            subgraph esmo_crf__crf_care_cycle__assess_and_manage__management[&quot;Step III - Management&quot;]
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education(&quot;Patient and family education, information and counselling&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__education action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity((&quot;Physical activity&quot;))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__exercise(&quot;Prescribe exercise programme&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__exercise action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial((&quot;Psychosocial and mind-body interventions&quot;))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions(&quot;Deliver psychosocial interventions&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological((&quot;Pharmacological intervention&quot;))
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological decision
+                esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course(&quot;Short corticosteroid course&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options(&quot;Discuss options without panel consensus&quot;)
+                class esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options action
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --&gt; esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity
+                esmo_crf__crf_care_cycle__assess_and_manage__management__physical_activity --&gt;|&quot;exercise_programme&quot;| esmo_crf__crf_care_cycle__assess_and_manage__management__exercise
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --&gt; esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial
+                esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial --&gt; esmo_crf__crf_care_cycle__assess_and_manage__management__psychosocial_interventions
+                esmo_crf__crf_care_cycle__assess_and_manage__management__education --&gt; esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological --&gt;|&quot;corticosteroids&quot;| esmo_crf__crf_care_cycle__assess_and_manage__management__corticosteroid_course
+                esmo_crf__crf_care_cycle__assess_and_manage__management__pharmacological --&gt;|&quot;psychostimulant/wisconsin_ginseng/mistletoe&quot;| esmo_crf__crf_care_cycle__assess_and_manage__management__discuss_non_consensus_options
+            end
+            style esmo_crf__crf_care_cycle__assess_and_manage__management fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+            esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation{&quot;Re-evaluate fatigue after intervention&quot;}
+            class esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation enquiry
+            esmo_crf__crf_care_cycle__assess_and_manage__diagnostic_assessment --&gt; esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors
+            esmo_crf__crf_care_cycle__assess_and_manage__manage_contributing_factors --&gt; esmo_crf__crf_care_cycle__assess_and_manage__management
+            esmo_crf__crf_care_cycle__assess_and_manage__management --&gt; esmo_crf__crf_care_cycle__assess_and_manage__re_evaluation
+        end
+        style esmo_crf__crf_care_cycle__assess_and_manage fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        esmo_crf__crf_care_cycle__screening --&gt; esmo_crf__crf_care_cycle__screening_result
+        esmo_crf__crf_care_cycle__screening_result --&gt;|&quot;rescreen_later&quot;| esmo_crf__crf_care_cycle__routine_rescreening
+        esmo_crf__crf_care_cycle__screening_result --&gt;|&quot;assess&quot;| esmo_crf__crf_care_cycle__assess_and_manage
+    end
+    style esmo_crf__crf_care_cycle fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
+</pre></div></details>
+
+<h2>Decisions</h2><p class="muted">Symbolic argumentation: <b>for</b> +1, <b>against</b> −1, <b>confirming</b> +1000, <b>excluding</b> rules a candidate out; <code>netsupport()</code> is the candidate's net support.</p><section class="card"><h3>Moderate or severe fatigue? <span class="tag">screening_result · single choice</span></h3><table><thead><tr><th>Candidate</th><th>Arguments (support · condition · rationale)</th><th>Recommended when</th></tr></thead><tbody><tr><td><b>assess</b><div class="cap">Comprehensive diagnostic assessment (Step II)</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>fatigue_nrs &gt;= 4</code><div class="why">NRS &gt;= 4: moderate to severe fatigue requires a comprehensive, focused diagnostic assessment <span class="grade gB">II, B</span></div></li><li><span class="sup against">against</span> <code>fatigue_nrs &lt; 4</code></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>rescreen_later</b><div class="cap">No further assessment now; rescreen at regular intervals</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>fatigue_nrs &lt; 4</code><div class="why">NRS 0-3: none or mild fatigue</div></li><li><span class="sup against">against</span> <code>fatigue_nrs &gt;= 4</code></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr></tbody></table></section><section class="card"><h3>Physical activity <span class="tag">physical_activity · single choice</span></h3><table><thead><tr><th>Candidate</th><th>Arguments (support · condition · rationale)</th><th>Recommended when</th></tr></thead><tbody><tr><td><b>exercise_programme</b><div class="cap">Moderate-intensity aerobic and resistance exercise</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>cachexia = &quot;no&quot;</code><div class="why">Physical exercise can be recommended in non-cachectic patients with cancer <span class="grade gB">I, B</span></div></li><li><span class="sup against">against</span> <code>cachexia = &quot;yes&quot;</code><div class="why">Evidence of benefit is for non-cachectic patients</div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>no_structured_exercise</b><div class="cap">No structured exercise programme; reassess</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>cachexia = &quot;yes&quot;</code></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr></tbody></table></section><section class="card"><h3>Psychosocial and mind-body interventions <span class="tag">psychosocial · multiple choice</span></h3><table><thead><tr><th>Candidate</th><th>Arguments (support · condition · rationale)</th><th>Recommended when</th></tr></thead><tbody><tr><td><b>psychoeducation</b><div class="cap">Psychoeducation</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>fatigue_nrs &gt;= 4</code><div class="why">Psychoeducation is recommended to manage CRF <span class="grade gB">II, B</span></div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>cbt</b><div class="cap">Cognitive behavioural therapy</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>fatigue_nrs &gt;= 4</code><div class="why">CBT is recommended to manage CRF <span class="grade gB">II, B</span></div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>mbsr</b><div class="cap">Mindfulness-based stress reduction</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>depression_screen_positive = &quot;yes&quot;</code><div class="why">MBSR could be an option to improve CRF <span class="grade gC">II, C</span>; benefits on mood, anxiety and stress</div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>yoga</b><div class="cap">Yoga</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>treatment_phase = &quot;post_treatment&quot;</code><div class="why">Yoga could be an option to improve CRF in cancer survivors and QoL <span class="grade gC">II, C</span></div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>acupuncture</b><div class="cap">Acupuncture (no panel consensus <span class="grade gC">II, C</span> vs <span class="grade gD">II, D</span>)</div></td><td><ul class="args"><li class="muted">no arguments</li></ul></td><td><code>netsupport() &gt; 0</code></td></tr></tbody></table></section><section class="card"><h3>Pharmacological intervention <span class="tag">pharmacological · single choice</span></h3><p class="desc">Not recommended for CRF <span class="grade gD">II, D</span>: modafinil, armodafinil, paroxetine and other antidepressants, donepezil, eszopiclone, megestrol acetate, melatonin, L-carnitine, coenzyme Q10, astragalus, guarana. In elderly patients pharmacological interventions are not recommended <span class="grade gD">II, D</span>.</p><table><thead><tr><th>Candidate</th><th>Arguments (support · condition · rationale)</th><th>Recommended when</th></tr></thead><tbody><tr><td><b>corticosteroids</b><div class="cap">Short-term corticosteroids</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>metastatic_disease = &quot;yes&quot;</code><div class="why">Short-term dexamethasone or methylprednisolone is recommended in metastatic cancer patients <span class="grade gB">II, B</span></div></li><li><span class="sup excluding">excluding</span> <code>metastatic_disease = &quot;no&quot;</code><div class="why">Only for short-term use in metastatic cancer patients</div></li><li><span class="sup excluding">excluding</span> <code>age &gt;= 65</code><div class="why">Pharmacological interventions are not recommended in elderly patients <span class="grade gD">II, D</span></div></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>psychostimulant</b><div class="cap">Psychostimulant trial (methylphenidate; no panel consensus)</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>fatigue_nrs &gt;= 7</code><div class="why">Could be considered in thoroughly selected patients, evaluating usefulness and safety after a very short period <span class="grade gC">II, C</span>; 6 of 9 panel members: not recommended <span class="grade gD">II, D</span></div></li><li><span class="sup for">for</span> <code>metastatic_disease = &quot;no&quot;</code></li><li><span class="sup excluding">excluding</span> <code>age &gt;= 65</code><div class="why">Not recommended in elderly patients <span class="grade gD">II, D</span></div></li></ul></td><td><code>netsupport() &gt;= 2</code></td></tr><tr><td><b>wisconsin_ginseng</b><div class="cap">Wisconsin ginseng (no panel consensus)</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>treatment_phase = &quot;active_treatment&quot;</code><div class="why">Could be considered during active cancer treatment <span class="grade gC">II, C</span></div></li><li><span class="sup for">for</span> <code>fatigue_duration_weeks &gt; 4</code><div class="why">Fatigue lasting more than 4 weeks with no other treatable reasons <span class="grade gC">II, C</span></div></li><li><span class="sup against">against</span> <code>anaemia = &quot;yes&quot; or depression_screen_positive = &quot;yes&quot; or endocrine_dysfunction = &quot;yes&quot; or infection = &quot;yes&quot;</code><div class="why">Other treatable reasons for fatigue present</div></li><li><span class="sup excluding">excluding</span> <code>age &gt;= 65</code></li></ul></td><td><code>netsupport() &gt;= 2</code></td></tr><tr><td><b>mistletoe</b><div class="cap">Mistletoe extract (no panel consensus)</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>advanced_pancreatic_cancer = &quot;yes&quot;</code><div class="why">Could be considered for fatigue in advanced pancreatic cancer <span class="grade gC">II, C</span>; 6 of 9 panel members: not recommended <span class="grade gD">II, D</span></div></li><li><span class="sup excluding">excluding</span> <code>age &gt;= 65</code></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr><tr><td><b>no_drug_treatment</b><div class="cap">No pharmacological treatment</div></td><td><ul class="args"><li><span class="sup for">for</span> <code>age &gt;= 65</code><div class="why">Pharmacological interventions are not recommended in elderly patients <span class="grade gD">II, D</span></div></li><li><span class="sup for">for</span> <code>metastatic_disease = &quot;no&quot; and fatigue_nrs &lt; 7</code></li></ul></td><td><code>netsupport() &gt; 0</code></td></tr></tbody></table></section>
+
+<h2>Tasks</h2>
+<section class="card"><table><thead><tr><th>Kind</th><th>Task</th><th>What it does</th><th>Precondition</th></tr></thead><tbody><tr><td><span class="kind plan">plan</span></td><td><b>Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)</b><div class="tag">esmo_crf</div></td><td></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Step I - Screening (NRS 0-10)</b><div class="tag">screening</div></td><td><div>Screen with a brief validated tool with established cut-offs, e.g. a 0-10 NRS: mild 1-3, moderate 4-6, severe 7-10 <span class="grade gB">II, B</span>.</div><div class="muted">asks for: age, fatigue_nrs, metastatic_disease, treatment_phase</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind action">action</span></td><td><b>Continue routine fatigue screening</b><div class="tag">routine_rescreening</div></td><td><div class="proc">Repeat fatigue screening at regular intervals during therapy and aftercare, and whenever clinically indicated <span class="grade gB">II, B</span>.</div></td><td><code>result_of(screening_result) = rescreen_later</code></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Clinical history</b><div class="tag">clinical_history</div></td><td><div>Type and stage of disease, recurrence or progression, metastasis, time from diagnosis, length and type of treatment (surgery, chemotherapy, radiotherapy).</div><div class="muted">asks for: advanced_pancreatic_cancer, cachexia, metastatic_disease, treatment_phase</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Fatigue assessment</b><div class="tag">fatigue_assessment</div></td><td><div>Onset and duration, alleviating and worsening elements, degree of interference with daily life and recreational activities (e.g. Brief Fatigue Inventory).</div><div class="muted">asks for: bfi_score, fatigue_duration_weeks, fatigue_interference</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Associated elements</b><div class="tag">associated_elements</div></td><td><div>Other physical symptoms (e.g. pain, nausea), emotional distress (two-question test for depression), cognitive symptoms, sleep disturbances, nutritional imbalance, laboratory tests (urinalysis, full blood count, urea and electrolytes, liver and thyroid function, ESR, CRP, glucose, creatinine).</div><div class="muted">asks for: anaemia, depression_screen_positive, electrolyte_disturbance, nutritional_imbalance, pain_score, sleep_disturbance</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Comorbidities</b><div class="tag">comorbidities</div></td><td><div>Heart failure, pulmonary disease, endocrine dysfunction, hepatic/kidney/neurologic dysfunction, multiorgan failure, infection, alcohol/substance abuse, presence of caregiver/social support.</div><div class="muted">asks for: caregiver_support, endocrine_dysfunction, infection, organ_dysfunction, substance_abuse</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind action">action</span></td><td><b>Review all medication (elderly patients)</b><div class="tag">medication_review</div></td><td><div class="proc">In patients aged 65 or older, take an inventory of all drugs: polypharmacy increases the risk of interactions and potentially inappropriate medication.</div></td><td><code>age &gt;= 65</code></td></tr><tr><td><span class="kind plan">plan</span></td><td><b>Step II - Diagnostic assessment</b><div class="tag">diagnostic_assessment</div></td><td><div>Focused fatigue history, thorough medical examination, status of the underlying malignancy, review of body systems, mental status examination and a minimum battery of laboratory tests <span class="grade gB">II, B</span>.</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind action">action</span></td><td><b>Manage treatable contributing factors</b><div class="tag">manage_contributing_factors</div></td><td><div class="proc">Manage all associated elements and treatable contributing factors found during the diagnostic assessment (e.g. anaemia, pain, electrolyte disturbance, depression, endocrine dysfunction, infection), followed by a fatigue re-screening.</div></td><td><code>anaemia = &quot;yes&quot; or pain_score &gt;= 4 or depression_screen_positive = &quot;yes&quot; or electrolyte_disturbance = &quot;yes&quot; or endocrine_dysfunction = &quot;yes&quot; or infection = &quot;yes&quot; or sleep_disturbance = &quot;yes&quot; or nutritional_imbalance = &quot;yes&quot;</code></td></tr><tr><td><span class="kind action">action</span></td><td><b>Patient and family education, information and counselling</b><div class="tag">education</div></td><td><div>Information and counselling for patients and caregivers on CRF and how to prevent, avoid chronicity or manage it <span class="grade gB">II, B</span>; energy preservation, task prioritisation, activity pacing, delegation. In elderly patients: education to reduce fatigue and emotional distress <span class="grade gC">II, C</span>.</div><div class="proc">Explain the multifactorial nature of CRF, its causes and course; offer support groups; devise a personalised activity plan with energy conservation, prioritisation and pacing.</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind action">action</span></td><td><b>Prescribe exercise programme</b><div class="tag">exercise</div></td><td><div class="proc">Moderate-intensity aerobic and functional resistance exercise <span class="grade gB">I, B</span>; walking and home-based aerobic and resistance exercise <span class="grade gB">II, B</span>: e.g. 150 min/week aerobic, 2 days/week strength training, walking 2-3 times/week for 30-60 min at moderate effort.</div></td><td><code>result_of(physical_activity) = exercise_programme</code></td></tr><tr><td><span class="kind action">action</span></td><td><b>Deliver psychosocial interventions</b><div class="tag">psychosocial_interventions</div></td><td><div class="proc">Deliver the selected interventions individually or in groups; in elderly patients during oncological treatment psychosocial interventions are recommended <span class="grade gC">II, C</span>.</div></td><td><code>count(result_set(psychosocial)) &gt; 0</code></td></tr><tr><td><span class="kind action">action</span></td><td><b>Short corticosteroid course</b><div class="tag">corticosteroid_course</div></td><td><div class="proc">Dexamethasone 4 mg b.i.d. for 14 days or methylprednisolone 16 mg b.i.d. for 7 days <span class="grade gB">II, B</span>; avoid long-term steroid use.</div></td><td><code>result_of(pharmacological) = corticosteroids</code></td></tr><tr><td><span class="kind action">action</span></td><td><b>Discuss options without panel consensus</b><div class="tag">discuss_non_consensus_options</div></td><td><div class="proc">Shared decision on psychostimulants, Wisconsin ginseng or mistletoe extract (ESMO panel split 3:6); if started, evaluate benefit and safety after a very short period.</div></td><td><code>result_of(pharmacological) oneof [&quot;psychostimulant&quot;, &quot;wisconsin_ginseng&quot;, &quot;mistletoe&quot;]</code></td></tr><tr><td><span class="kind plan">plan</span></td><td><b>Step III - Management</b><div class="tag">management</div></td><td><div>Patient and family education, physical activity, psychosocial interventions and (selected) pharmacological interventions.</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind enquiry">enquiry</span></td><td><b>Re-evaluate fatigue after intervention</b><div class="tag">re_evaluation</div></td><td><div>After a specific intervention on fatigue, patients must be re-evaluated (back to Step I).</div><div class="muted">asks for: care_ended, fatigue_nrs</div></td><td><span class="muted">—</span></td></tr><tr><td><span class="kind plan">plan</span></td><td><b>Assess and manage fatigue</b><div class="tag">assess_and_manage</div></td><td></td><td><code>result_of(screening_result) = assess</code></td></tr><tr><td><span class="kind plan">plan</span></td><td><b>Fatigue screening and care cycle</b><div class="tag">crf_care_cycle</div></td><td><div>All cancer patients should be routinely screened for the presence and severity of fatigue from diagnosis onward, at regular intervals during therapy and aftercare and if clinically indicated <span class="grade gB">II, B</span>. Shared decision-making throughout.</div></td><td><span class="muted">—</span></td></tr></tbody></table></section>
+
+<h2>Data model</h2><section class="card"><table><thead><tr><th>Name</th><th>Question / label</th><th>Type</th><th>Allowed values</th></tr></thead><tbody><tr><td><code>fatigue_nrs</code></td><td>Fatigue severity on a 0-10 numerical rating scale (NRS)</td><td>integer</td><td><code>0</code> <code>1</code> <code>2</code> <code>3</code> <code>4</code> <code>5</code> <code>6</code> <code>7</code> <code>8</code> <code>9</code> <code>10</code></td></tr><tr><td><code>age</code></td><td>Age (years)</td><td>integer (years)</td><td><span class="muted">—</span></td></tr><tr><td><code>treatment_phase</code></td><td>Phase of cancer care</td><td>text</td><td><code>&quot;active_treatment&quot;</code> <code>&quot;post_treatment&quot;</code> <code>&quot;palliative&quot;</code></td></tr><tr><td><code>metastatic_disease</code></td><td>Metastatic cancer?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>advanced_pancreatic_cancer</code></td><td>Advanced pancreatic cancer?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>cachexia</code></td><td>Cachexia present?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>fatigue_duration_weeks</code></td><td>Duration of fatigue (weeks)</td><td>integer (weeks)</td><td><span class="muted">—</span></td></tr><tr><td><code>fatigue_interference</code></td><td>Interference with daily life and recreational activities</td><td>text</td><td><code>&quot;none&quot;</code> <code>&quot;mild&quot;</code> <code>&quot;moderate&quot;</code> <code>&quot;severe&quot;</code></td></tr><tr><td><code>bfi_score</code></td><td>Brief Fatigue Inventory (BFI) global score</td><td>real</td><td><span class="muted">—</span></td></tr><tr><td><code>pain_score</code></td><td>Pain (NRS 0-10)</td><td>integer</td><td><code>0</code> <code>1</code> <code>2</code> <code>3</code> <code>4</code> <code>5</code> <code>6</code> <code>7</code> <code>8</code> <code>9</code> <code>10</code></td></tr><tr><td><code>depression_screen_positive</code></td><td>Two-question depression screen positive (low mood or loss of interest in the last month)?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>sleep_disturbance</code></td><td>Sleep disturbance?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>nutritional_imbalance</code></td><td>Nutritional imbalance?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>anaemia</code></td><td>Anaemia (full blood count)?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>electrolyte_disturbance</code></td><td>Electrolyte disturbance?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>endocrine_dysfunction</code></td><td>Endocrine dysfunction (e.g. hypothyroidism, hypogonadism, adrenal insufficiency, hypopituitarism, especially with immunotherapy)?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>infection</code></td><td>Active infection?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>organ_dysfunction</code></td><td>Cardiac, pulmonary, hepatic, renal or neurological dysfunction?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>substance_abuse</code></td><td>Alcohol / substance abuse?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>caregiver_support</code></td><td>Caregiver / social support available?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr><tr><td><code>care_ended</code></td><td>Fatigue follow-up can end (therapy and aftercare completed)?</td><td>text</td><td><code>&quot;yes&quot;</code> <code>&quot;no&quot;</code></td></tr></tbody></table></section>
+
+<h2>Source</h2>
+<details><summary>Task tree</summary><pre class="src">title: Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)
+version: 1.0
+author: Derived from Fabi et al., Ann Oncol 2020;31:713-723
+engine_version: 1.9
+
+Task tree:
+  - plan esmo_crf &quot;Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)&quot;
+    - plan crf_care_cycle &quot;Fatigue screening and care cycle&quot;
+      - enquiry screening &quot;Step I - Screening (NRS 0-10)&quot; sources: [age, fatigue_nrs, metastatic_disease, treatment_phase]
+      - decision screening_result &quot;Moderate or severe fatigue?&quot; candidates: [assess, rescreen_later]  [after screening]
+      - action routine_rescreening &quot;Continue routine fatigue screening&quot;  [after screening_result]
+      - plan assess_and_manage &quot;Assess and manage fatigue&quot;  [after screening_result]
+        - plan diagnostic_assessment &quot;Step II - Diagnostic assessment&quot;
+          - enquiry clinical_history &quot;Clinical history&quot; sources: [advanced_pancreatic_cancer, cachexia, metastatic_disease, treatment_phase]
+          - enquiry fatigue_assessment &quot;Fatigue assessment&quot; sources: [bfi_score, fatigue_duration_weeks, fatigue_interference]
+          - enquiry associated_elements &quot;Associated elements&quot; sources: [anaemia, depression_screen_positive, electrolyte_disturbance, nutritional_imbalance, pain_score, sleep_disturbance]
+          - enquiry comorbidities &quot;Comorbidities&quot; sources: [caregiver_support, endocrine_dysfunction, infection, organ_dysfunction, substance_abuse]
+          - action medication_review &quot;Review all medication (elderly patients)&quot;
+        - action manage_contributing_factors &quot;Manage treatable contributing factors&quot;  [after diagnostic_assessment]
+        - plan management &quot;Step III - Management&quot;  [after manage_contributing_factors]
+          - action education &quot;Patient and family education, information and counselling&quot;
+          - decision physical_activity &quot;Physical activity&quot; candidates: [exercise_programme, no_structured_exercise]  [after education]
+          - action exercise &quot;Prescribe exercise programme&quot;  [after physical_activity]
+          - decision psychosocial &quot;Psychosocial and mind-body interventions&quot; candidates: [psychoeducation, cbt, mbsr, yoga, acupuncture]  [after education]
+          - action psychosocial_interventions &quot;Deliver psychosocial interventions&quot;  [after psychosocial]
+          - decision pharmacological &quot;Pharmacological intervention&quot; candidates: [corticosteroids, psychostimulant, wisconsin_ginseng, mistletoe, no_drug_treatment]  [after education]
+          - action corticosteroid_course &quot;Short corticosteroid course&quot;  [after pharmacological]
+          - action discuss_non_consensus_options &quot;Discuss options without panel consensus&quot;  [after pharmacological]
+        - enquiry re_evaluation &quot;Re-evaluate fatigue after intervention&quot; sources: [care_ended, fatigue_nrs]  [after management]
+
+Data items:
+  - fatigue_nrs &quot;Fatigue severity on a 0-10 numerical rating scale (NRS)&quot; : integer in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  - age &quot;Age (years)&quot; : integer
+  - treatment_phase &quot;Phase of cancer care&quot; : text in [&quot;active_treatment&quot;, &quot;post_treatment&quot;, &quot;palliative&quot;]
+  - metastatic_disease &quot;Metastatic cancer?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - advanced_pancreatic_cancer &quot;Advanced pancreatic cancer?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - cachexia &quot;Cachexia present?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - fatigue_duration_weeks &quot;Duration of fatigue (weeks)&quot; : integer
+  - fatigue_interference &quot;Interference with daily life and recreational activities&quot; : text in [&quot;none&quot;, &quot;mild&quot;, &quot;moderate&quot;, &quot;severe&quot;]
+  - bfi_score &quot;Brief Fatigue Inventory (BFI) global score&quot; : real
+  - pain_score &quot;Pain (NRS 0-10)&quot; : integer in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  - depression_screen_positive &quot;Two-question depression screen positive (low mood or loss of interest in the last month)?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - sleep_disturbance &quot;Sleep disturbance?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - nutritional_imbalance &quot;Nutritional imbalance?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - anaemia &quot;Anaemia (full blood count)?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - electrolyte_disturbance &quot;Electrolyte disturbance?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - endocrine_dysfunction &quot;Endocrine dysfunction (e.g. hypothyroidism, hypogonadism, adrenal insufficiency, hypopituitarism, especially with immunotherapy)?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - infection &quot;Active infection?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - organ_dysfunction &quot;Cardiac, pulmonary, hepatic, renal or neurological dysfunction?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - substance_abuse &quot;Alcohol / substance abuse?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - caregiver_support &quot;Caregiver / social support available?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+  - care_ended &quot;Fatigue follow-up can end (therapy and aftercare completed)?&quot; : text in [&quot;yes&quot;, &quot;no&quot;]
+</pre></details>
+<details><summary>esmo_crf.pf — 515 lines</summary><pre class="src">/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'esmo_crf' ;
+     title :: 'Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)' ;
+     desc :: 'Screening, diagnostic assessment and management of cancer-related fatigue (CRF) following Figure 1 and the recommendations of the ESMO guideline. Evidence levels/grades of recommendation are given in brackets.' ;
+     version :: '1.0' ;
+     author :: 'Derived from Fabi et al., Ann Oncol 2020;31:713-723' ;
+end metadata.
+
+metaprops :: '' ;
+
+plan  :: 'esmo_crf' ;
+     caption :: 'Cancer-related fatigue: ESMO Clinical Practice Guidelines (2020)' ;
+     component :: 'crf_care_cycle' ;
+          task_definition :: 'crf_care_cycle' ;
+          cycle_until ::care_ended = &quot;yes&quot;;
+          ltwh :: 40,40,0,0;
+end plan.
+
+enquiry  :: 'screening' ;
+     caption :: 'Step I - Screening (NRS 0-10)' ;
+     description :: 'Screen with a brief validated tool with established cut-offs, e.g. a 0-10 NRS: mild 1-3, moderate 4-6, severe 7-10 [II, B].' ;
+     source :: 'age' ;
+          data_definition :: 'age' ;
+     source :: 'fatigue_nrs' ;
+          data_definition :: 'fatigue_nrs' ;
+     source :: 'metastatic_disease' ;
+          data_definition :: 'metastatic_disease' ;
+     source :: 'treatment_phase' ;
+          data_definition :: 'treatment_phase' ;
+end enquiry.
+
+decision  :: 'screening_result' ;
+     caption :: 'Moderate or severe fatigue?' ;
+     candidate :: 'assess' ;
+          caption :: 'Comprehensive diagnostic assessment (Step II)' ;
+          argument :: for,fatigue_nrs &gt;= 4 attributes
+               argument_name :: 'nrs_4_or_more' ;
+               caption :: 'NRS &gt;= 4: moderate to severe fatigue requires a comprehensive, focused diagnostic assessment [II, B]' ;
+          end attributes
+          ;
+          argument :: against,fatigue_nrs &lt; 4;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'rescreen_later' ;
+          caption :: 'No further assessment now; rescreen at regular intervals' ;
+          argument :: for,fatigue_nrs &lt; 4 attributes
+               argument_name :: 'nrs_below_4' ;
+               caption :: 'NRS 0-3: none or mild fatigue' ;
+          end attributes
+          ;
+          argument :: against,fatigue_nrs &gt;= 4;
+          recommendation ::netsupport() &gt; 0;
+end decision.
+
+action  :: 'routine_rescreening' ;
+     caption :: 'Continue routine fatigue screening' ;
+     precondition ::result_of(screening_result) = rescreen_later;
+     procedure :: 'Repeat fatigue screening at regular intervals during therapy and aftercare, and whenever clinically indicated [II, B].' ;
+end action.
+
+enquiry  :: 'clinical_history' ;
+     caption :: 'Clinical history' ;
+     description :: 'Type and stage of disease, recurrence or progression, metastasis, time from diagnosis, length and type of treatment (surgery, chemotherapy, radiotherapy).' ;
+     source :: 'advanced_pancreatic_cancer' ;
+          data_definition :: 'advanced_pancreatic_cancer' ;
+     source :: 'cachexia' ;
+          data_definition :: 'cachexia' ;
+     source :: 'metastatic_disease' ;
+          data_definition :: 'metastatic_disease' ;
+     source :: 'treatment_phase' ;
+          data_definition :: 'treatment_phase' ;
+end enquiry.
+
+enquiry  :: 'fatigue_assessment' ;
+     caption :: 'Fatigue assessment' ;
+     description :: 'Onset and duration, alleviating and worsening elements, degree of interference with daily life and recreational activities (e.g. Brief Fatigue Inventory).' ;
+     source :: 'bfi_score' ;
+          data_definition :: 'bfi_score' ;
+     source :: 'fatigue_duration_weeks' ;
+          data_definition :: 'fatigue_duration_weeks' ;
+     source :: 'fatigue_interference' ;
+          data_definition :: 'fatigue_interference' ;
+end enquiry.
+
+enquiry  :: 'associated_elements' ;
+     caption :: 'Associated elements' ;
+     description :: 'Other physical symptoms (e.g. pain, nausea), emotional distress (two-question test for depression), cognitive symptoms, sleep disturbances, nutritional imbalance, laboratory tests (urinalysis, full blood count, urea and electrolytes, liver and thyroid function, ESR, CRP, glucose, creatinine).' ;
+     source :: 'anaemia' ;
+          data_definition :: 'anaemia' ;
+     source :: 'depression_screen_positive' ;
+          data_definition :: 'depression_screen_positive' ;
+     source :: 'electrolyte_disturbance' ;
+          data_definition :: 'electrolyte_disturbance' ;
+     source :: 'nutritional_imbalance' ;
+          data_definition :: 'nutritional_imbalance' ;
+     source :: 'pain_score' ;
+          data_definition :: 'pain_score' ;
+     source :: 'sleep_disturbance' ;
+          data_definition :: 'sleep_disturbance' ;
+end enquiry.
+
+enquiry  :: 'comorbidities' ;
+     caption :: 'Comorbidities' ;
+     description :: 'Heart failure, pulmonary disease, endocrine dysfunction, hepatic/kidney/neurologic dysfunction, multiorgan failure, infection, alcohol/substance abuse, presence of caregiver/social support.' ;
+     source :: 'caregiver_support' ;
+          data_definition :: 'caregiver_support' ;
+     source :: 'endocrine_dysfunction' ;
+          data_definition :: 'endocrine_dysfunction' ;
+     source :: 'infection' ;
+          data_definition :: 'infection' ;
+     source :: 'organ_dysfunction' ;
+          data_definition :: 'organ_dysfunction' ;
+     source :: 'substance_abuse' ;
+          data_definition :: 'substance_abuse' ;
+end enquiry.
+
+action  :: 'medication_review' ;
+     caption :: 'Review all medication (elderly patients)' ;
+     precondition ::age &gt;= 65;
+     procedure :: 'In patients aged 65 or older, take an inventory of all drugs: polypharmacy increases the risk of interactions and potentially inappropriate medication.' ;
+end action.
+
+plan  :: 'diagnostic_assessment' ;
+     caption :: 'Step II - Diagnostic assessment' ;
+     description :: 'Focused fatigue history, thorough medical examination, status of the underlying malignancy, review of body systems, mental status examination and a minimum battery of laboratory tests [II, B].' ;
+     component :: 'clinical_history' ;
+          task_definition :: 'clinical_history' ;
+          ltwh :: 40,40,0,0;
+     component :: 'fatigue_assessment' ;
+          task_definition :: 'fatigue_assessment' ;
+          ltwh :: 40,140,0,0;
+     component :: 'associated_elements' ;
+          task_definition :: 'associated_elements' ;
+          ltwh :: 40,240,0,0;
+     component :: 'comorbidities' ;
+          task_definition :: 'comorbidities' ;
+          ltwh :: 40,340,0,0;
+     component :: 'medication_review' ;
+          task_definition :: 'medication_review' ;
+          ltwh :: 40,440,0,0;
+end plan.
+
+action  :: 'manage_contributing_factors' ;
+     caption :: 'Manage treatable contributing factors' ;
+     precondition ::anaemia = &quot;yes&quot; or pain_score &gt;= 4 or depression_screen_positive = &quot;yes&quot; or electrolyte_disturbance = &quot;yes&quot; or endocrine_dysfunction = &quot;yes&quot; or infection = &quot;yes&quot; or sleep_disturbance = &quot;yes&quot; or nutritional_imbalance = &quot;yes&quot;;
+     procedure :: 'Manage all associated elements and treatable contributing factors found during the diagnostic assessment (e.g. anaemia, pain, electrolyte disturbance, depression, endocrine dysfunction, infection), followed by a fatigue re-screening.' ;
+end action.
+
+action  :: 'education' ;
+     caption :: 'Patient and family education, information and counselling' ;
+     description :: 'Information and counselling for patients and caregivers on CRF and how to prevent, avoid chronicity or manage it [II, B]; energy preservation, task prioritisation, activity pacing, delegation. In elderly patients: education to reduce fatigue and emotional distress [II, C].' ;
+     procedure :: 'Explain the multifactorial nature of CRF, its causes and course; offer support groups; devise a personalised activity plan with energy conservation, prioritisation and pacing.' ;
+end action.
+
+decision  :: 'physical_activity' ;
+     caption :: 'Physical activity' ;
+     candidate :: 'exercise_programme' ;
+          caption :: 'Moderate-intensity aerobic and resistance exercise' ;
+          argument :: for,cachexia = &quot;no&quot; attributes
+               argument_name :: 'non_cachectic' ;
+               caption :: 'Physical exercise can be recommended in non-cachectic patients with cancer [I, B]' ;
+          end attributes
+          ;
+          argument :: against,cachexia = &quot;yes&quot; attributes
+               argument_name :: 'cachectic' ;
+               caption :: 'Evidence of benefit is for non-cachectic patients' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'no_structured_exercise' ;
+          caption :: 'No structured exercise programme; reassess' ;
+          argument :: for,cachexia = &quot;yes&quot;;
+          recommendation ::netsupport() &gt; 0;
+end decision.
+
+action  :: 'exercise' ;
+     caption :: 'Prescribe exercise programme' ;
+     precondition ::result_of(physical_activity) = exercise_programme;
+     procedure :: 'Moderate-intensity aerobic and functional resistance exercise [I, B]; walking and home-based aerobic and resistance exercise [II, B]: e.g. 150 min/week aerobic, 2 days/week strength training, walking 2-3 times/week for 30-60 min at moderate effort.' ;
+end action.
+
+decision  :: 'psychosocial' ;
+     caption :: 'Psychosocial and mind-body interventions' ;
+     choice_mode :: multiple ;
+     candidate :: 'psychoeducation' ;
+          caption :: 'Psychoeducation' ;
+          argument :: for,fatigue_nrs &gt;= 4 attributes
+               caption :: 'Psychoeducation is recommended to manage CRF [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'cbt' ;
+          caption :: 'Cognitive behavioural therapy' ;
+          argument :: for,fatigue_nrs &gt;= 4 attributes
+               caption :: 'CBT is recommended to manage CRF [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'mbsr' ;
+          caption :: 'Mindfulness-based stress reduction' ;
+          argument :: for,depression_screen_positive = &quot;yes&quot; attributes
+               caption :: 'MBSR could be an option to improve CRF [II, C]; benefits on mood, anxiety and stress' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'yoga' ;
+          caption :: 'Yoga' ;
+          argument :: for,treatment_phase = &quot;post_treatment&quot; attributes
+               caption :: 'Yoga could be an option to improve CRF in cancer survivors and QoL [II, C]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'acupuncture' ;
+          caption :: 'Acupuncture (no panel consensus [II, C] vs [II, D])' ;
+          recommendation ::netsupport() &gt; 0;
+end decision.
+
+action  :: 'psychosocial_interventions' ;
+     caption :: 'Deliver psychosocial interventions' ;
+     precondition ::count(result_set(psychosocial)) &gt; 0;
+     procedure :: 'Deliver the selected interventions individually or in groups; in elderly patients during oncological treatment psychosocial interventions are recommended [II, C].' ;
+end action.
+
+decision  :: 'pharmacological' ;
+     caption :: 'Pharmacological intervention' ;
+     description :: 'Not recommended for CRF [II, D]: modafinil, armodafinil, paroxetine and other antidepressants, donepezil, eszopiclone, megestrol acetate, melatonin, L-carnitine, coenzyme Q10, astragalus, guarana. In elderly patients pharmacological interventions are not recommended [II, D].' ;
+     candidate :: 'corticosteroids' ;
+          caption :: 'Short-term corticosteroids' ;
+          argument :: for,metastatic_disease = &quot;yes&quot; attributes
+               argument_name :: 'metastatic' ;
+               caption :: 'Short-term dexamethasone or methylprednisolone is recommended in metastatic cancer patients [II, B]' ;
+          end attributes
+          ;
+          argument :: excluding,metastatic_disease = &quot;no&quot; attributes
+               caption :: 'Only for short-term use in metastatic cancer patients' ;
+          end attributes
+          ;
+          argument :: excluding,age &gt;= 65 attributes
+               argument_name :: 'elderly' ;
+               caption :: 'Pharmacological interventions are not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'psychostimulant' ;
+          caption :: 'Psychostimulant trial (methylphenidate; no panel consensus)' ;
+          argument :: for,fatigue_nrs &gt;= 7 attributes
+               caption :: 'Could be considered in thoroughly selected patients, evaluating usefulness and safety after a very short period [II, C]; 6 of 9 panel members: not recommended [II, D]' ;
+          end attributes
+          ;
+          argument :: for,metastatic_disease = &quot;no&quot;;
+          argument :: excluding,age &gt;= 65 attributes
+               caption :: 'Not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() &gt;= 2;
+     candidate :: 'wisconsin_ginseng' ;
+          caption :: 'Wisconsin ginseng (no panel consensus)' ;
+          argument :: for,treatment_phase = &quot;active_treatment&quot; attributes
+               caption :: 'Could be considered during active cancer treatment [II, C]' ;
+          end attributes
+          ;
+          argument :: for,fatigue_duration_weeks &gt; 4 attributes
+               caption :: 'Fatigue lasting more than 4 weeks with no other treatable reasons [II, C]' ;
+          end attributes
+          ;
+          argument :: against,anaemia = &quot;yes&quot; or depression_screen_positive = &quot;yes&quot; or endocrine_dysfunction = &quot;yes&quot; or infection = &quot;yes&quot; attributes
+               caption :: 'Other treatable reasons for fatigue present' ;
+          end attributes
+          ;
+          argument :: excluding,age &gt;= 65;
+          recommendation ::netsupport() &gt;= 2;
+     candidate :: 'mistletoe' ;
+          caption :: 'Mistletoe extract (no panel consensus)' ;
+          argument :: for,advanced_pancreatic_cancer = &quot;yes&quot; attributes
+               caption :: 'Could be considered for fatigue in advanced pancreatic cancer [II, C]; 6 of 9 panel members: not recommended [II, D]' ;
+          end attributes
+          ;
+          argument :: excluding,age &gt;= 65;
+          recommendation ::netsupport() &gt; 0;
+     candidate :: 'no_drug_treatment' ;
+          caption :: 'No pharmacological treatment' ;
+          argument :: for,age &gt;= 65 attributes
+               caption :: 'Pharmacological interventions are not recommended in elderly patients [II, D]' ;
+          end attributes
+          ;
+          argument :: for,metastatic_disease = &quot;no&quot; and fatigue_nrs &lt; 7;
+          recommendation ::netsupport() &gt; 0;
+end decision.
+
+action  :: 'corticosteroid_course' ;
+     caption :: 'Short corticosteroid course' ;
+     precondition ::result_of(pharmacological) = corticosteroids;
+     procedure :: 'Dexamethasone 4 mg b.i.d. for 14 days or methylprednisolone 16 mg b.i.d. for 7 days [II, B]; avoid long-term steroid use.' ;
+end action.
+
+action  :: 'discuss_non_consensus_options' ;
+     caption :: 'Discuss options without panel consensus' ;
+     precondition ::result_of(pharmacological) oneof [&quot;psychostimulant&quot;, &quot;wisconsin_ginseng&quot;, &quot;mistletoe&quot;];
+     procedure :: 'Shared decision on psychostimulants, Wisconsin ginseng or mistletoe extract (ESMO panel split 3:6); if started, evaluate benefit and safety after a very short period.' ;
+end action.
+
+plan  :: 'management' ;
+     caption :: 'Step III - Management' ;
+     description :: 'Patient and family education, physical activity, psychosocial interventions and (selected) pharmacological interventions.' ;
+     component :: 'education' ;
+          task_definition :: 'education' ;
+          ltwh :: 40,40,0,0;
+     component :: 'physical_activity' ;
+          task_definition :: 'physical_activity' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,140,0,0;
+     component :: 'exercise' ;
+          task_definition :: 'exercise' ;
+          schedule_constraint :: completed('physical_activity') ;
+          ltwh :: 40,240,0,0;
+     component :: 'psychosocial' ;
+          task_definition :: 'psychosocial' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,340,0,0;
+     component :: 'psychosocial_interventions' ;
+          task_definition :: 'psychosocial_interventions' ;
+          schedule_constraint :: completed('psychosocial') ;
+          ltwh :: 40,440,0,0;
+     component :: 'pharmacological' ;
+          task_definition :: 'pharmacological' ;
+          schedule_constraint :: completed('education') ;
+          ltwh :: 40,540,0,0;
+     component :: 'corticosteroid_course' ;
+          task_definition :: 'corticosteroid_course' ;
+          schedule_constraint :: completed('pharmacological') ;
+          ltwh :: 40,640,0,0;
+     component :: 'discuss_non_consensus_options' ;
+          task_definition :: 'discuss_non_consensus_options' ;
+          schedule_constraint :: completed('pharmacological') ;
+          ltwh :: 40,740,0,0;
+end plan.
+
+enquiry  :: 're_evaluation' ;
+     caption :: 'Re-evaluate fatigue after intervention' ;
+     description :: 'After a specific intervention on fatigue, patients must be re-evaluated (back to Step I).' ;
+     source :: 'care_ended' ;
+          data_definition :: 'care_ended' ;
+     source :: 'fatigue_nrs' ;
+          data_definition :: 'fatigue_nrs' ;
+end enquiry.
+
+plan  :: 'assess_and_manage' ;
+     caption :: 'Assess and manage fatigue' ;
+     precondition ::result_of(screening_result) = assess;
+     component :: 'diagnostic_assessment' ;
+          task_definition :: 'diagnostic_assessment' ;
+          ltwh :: 40,40,0,0;
+     component :: 'manage_contributing_factors' ;
+          task_definition :: 'manage_contributing_factors' ;
+          schedule_constraint :: completed('diagnostic_assessment') ;
+          ltwh :: 40,140,0,0;
+     component :: 'management' ;
+          task_definition :: 'management' ;
+          schedule_constraint :: completed('manage_contributing_factors') ;
+          ltwh :: 40,240,0,0;
+     component :: 're_evaluation' ;
+          task_definition :: 're_evaluation' ;
+          schedule_constraint :: completed('management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+plan  :: 'crf_care_cycle' ;
+     caption :: 'Fatigue screening and care cycle' ;
+     description :: 'All cancer patients should be routinely screened for the presence and severity of fatigue from diagnosis onward, at regular intervals during therapy and aftercare and if clinically indicated [II, B]. Shared decision-making throughout.' ;
+     component :: 'screening' ;
+          task_definition :: 'screening' ;
+          ltwh :: 40,40,0,0;
+     component :: 'screening_result' ;
+          task_definition :: 'screening_result' ;
+          schedule_constraint :: completed('screening') ;
+          ltwh :: 40,140,0,0;
+     component :: 'routine_rescreening' ;
+          task_definition :: 'routine_rescreening' ;
+          schedule_constraint :: completed('screening_result') ;
+          ltwh :: 40,240,0,0;
+     component :: 'assess_and_manage' ;
+          task_definition :: 'assess_and_manage' ;
+          schedule_constraint :: completed('screening_result') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+
+data  :: 'fatigue_nrs' ;
+     type :: integer ;
+     caption :: 'Fatigue severity on a 0-10 numerical rating scale (NRS)' ;
+     range ::0,1,2,3,4,5,6,7,8,9,10;
+end data.
+
+data  :: 'age' ;
+     type :: integer ;
+     caption :: 'Age (years)' ;
+     unit :: 'years' ;
+end data.
+
+data  :: 'treatment_phase' ;
+     type :: text ;
+     caption :: 'Phase of cancer care' ;
+     range ::&quot;active_treatment&quot;,&quot;post_treatment&quot;,&quot;palliative&quot;;
+end data.
+
+data  :: 'metastatic_disease' ;
+     type :: text ;
+     caption :: 'Metastatic cancer?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'advanced_pancreatic_cancer' ;
+     type :: text ;
+     caption :: 'Advanced pancreatic cancer?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'cachexia' ;
+     type :: text ;
+     caption :: 'Cachexia present?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'fatigue_duration_weeks' ;
+     type :: integer ;
+     caption :: 'Duration of fatigue (weeks)' ;
+     unit :: 'weeks' ;
+end data.
+
+data  :: 'fatigue_interference' ;
+     type :: text ;
+     caption :: 'Interference with daily life and recreational activities' ;
+     range ::&quot;none&quot;,&quot;mild&quot;,&quot;moderate&quot;,&quot;severe&quot;;
+end data.
+
+data  :: 'bfi_score' ;
+     type :: real ;
+     caption :: 'Brief Fatigue Inventory (BFI) global score' ;
+end data.
+
+data  :: 'pain_score' ;
+     type :: integer ;
+     caption :: 'Pain (NRS 0-10)' ;
+     range ::0,1,2,3,4,5,6,7,8,9,10;
+end data.
+
+data  :: 'depression_screen_positive' ;
+     type :: text ;
+     caption :: 'Two-question depression screen positive (low mood or loss of interest in the last month)?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'sleep_disturbance' ;
+     type :: text ;
+     caption :: 'Sleep disturbance?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'nutritional_imbalance' ;
+     type :: text ;
+     caption :: 'Nutritional imbalance?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'anaemia' ;
+     type :: text ;
+     caption :: 'Anaemia (full blood count)?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'electrolyte_disturbance' ;
+     type :: text ;
+     caption :: 'Electrolyte disturbance?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'endocrine_dysfunction' ;
+     type :: text ;
+     caption :: 'Endocrine dysfunction (e.g. hypothyroidism, hypogonadism, adrenal insufficiency, hypopituitarism, especially with immunotherapy)?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'infection' ;
+     type :: text ;
+     caption :: 'Active infection?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'organ_dysfunction' ;
+     type :: text ;
+     caption :: 'Cardiac, pulmonary, hepatic, renal or neurological dysfunction?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'substance_abuse' ;
+     type :: text ;
+     caption :: 'Alcohol / substance abuse?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'caregiver_support' ;
+     type :: text ;
+     caption :: 'Caregiver / social support available?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+
+data  :: 'care_ended' ;
+     type :: text ;
+     caption :: 'Fatigue follow-up can end (therapy and aftercare completed)?' ;
+     range ::&quot;yes&quot;,&quot;no&quot;;
+end data.
+</pre></details>
+<details><summary>Validation output</summary><pre class="src">$ proforma lint --file esmo_crf.pf --include-info
+0 error(s), 0 warning(s)</pre></details>
+
+<footer>Generated with the <code>proforma</code> CLI (npm: proforma-mcp) · research use only.</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,securityLevel:"loose",flowchart:{htmlLabels:true,curve:"basis",useMaxWidth:false,nodeSpacing:40,rankSpacing:55},themeVariables:{fontSize:"15px"},theme:"default"});
+const fitBtn=document.getElementById("fit"),dg=document.getElementById("diagram");fitBtn.onclick=()=>{dg.classList.toggle("fit");fitBtn.textContent=dg.classList.contains("fit")?"Actual size":"Fit to width";};</script>
+</body></html>
