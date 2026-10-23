@@ -10,7 +10,10 @@
 param(
     [Parameter(Mandatory = $true)][string]$RunId
 )
-$ErrorActionPreference = 'Stop'
+# 'Continue': in Windows PowerShell 5.1 'Stop' turns any stderr output of native
+# commands (npm prints notices there) into a terminating error. Failures are
+# detected through $LASTEXITCODE instead (Invoke-Checked).
+$ErrorActionPreference = 'Continue'
 
 $Repo = 'Minitour/proforma'
 $Workflow = 'release.yml'
@@ -28,7 +31,7 @@ Write-Host "Downloading npm packages from run $RunId ..."
 Invoke-Checked 'gh run download' { gh run download $RunId -R $Repo -n npm-packages -D $dir }
 Get-ChildItem $dir | ForEach-Object { Write-Host "  $($_.Name)" }
 
-npm whoami 2>$null | Out-Null
+$null = npm whoami 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Log in to npm (interactive; uses your 2FA):'
     Invoke-Checked 'npm login' { npm login }
