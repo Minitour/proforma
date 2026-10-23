@@ -58,10 +58,10 @@ foreach ($p in $Packages) {
 # `npm trust` needs npm >= 11.15; run it through npx (npm 11; npm 12 needs a newer Node) so the global npm is untouched.
 foreach ($p in $Packages) {
     Write-Host "== trusted publisher for $p -> $Repo / $Workflow"
-    Invoke-Checked "npm trust $p" { npx -y npm@11 trust github $p --repo $Repo --file $Workflow --allow-publish --yes }
+    Invoke-Checked "npm trust $p" { npx -y npm@^11.15.0 trust github $p --repo $Repo --file $Workflow --allow-publish --yes }
 }
 
 Write-Host ''
-Write-Host 'Done. Verify with: npx -y npm@11 trust list proforma-mcp'
+Write-Host 'Done. Verify with: npx -y npm@^11.15.0 trust list proforma-mcp'
 Write-Host "Optional: on npmjs.com set each package's publishing access to"
 Write-Host "'require 2FA and disallow tokens' so only the GitHub workflow can publish."

@@ -47,10 +47,10 @@ done
 # `npm trust` needs npm >= 11.15; run it through npx (npm 11; npm 12 needs a newer Node) so the global npm is untouched.
 for p in $PACKAGES; do
   echo "== trusted publisher for $p -> $REPO / $WORKFLOW"
-  npx -y npm@11 trust github "$p" --repo "$REPO" --file "$WORKFLOW" --allow-publish --yes
+  npx -y "npm@^11.15.0" trust github "$p" --repo "$REPO" --file "$WORKFLOW" --allow-publish --yes
 done
 
 echo
-echo "Done. Verify with: npx -y npm@11 trust list proforma-mcp"
+echo "Done. Verify with: npx -y "npm@^11.15.0" trust list proforma-mcp"
 echo "Optional: on npmjs.com set each package's publishing access to"
 echo "'require 2FA and disallow tokens' so only the GitHub workflow can publish."

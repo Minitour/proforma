@@ -166,7 +166,7 @@ jobs:
 
       # trusted publishing needs npm >= 11.5.1 (pinned to 11: npm 12 needs a newer Node)
       - name: Update npm
-        run: npm install -g npm@11
+        run: npm install -g "npm@^11.15.0"
 
       - name: Download npm packages
         uses: actions/download-artifact@v4
