@@ -1,5 +1,5 @@
 {
-  "name": "proforma",
+  "name": "proforma-mcp",
   "version": "0.1.0",
   "description": "MCP server and CLI for PROforma (.pf) clinical guideline files: read, edit, lint and diagram (Mermaid)",
   "homepage": "https://github.com/Minitour/proforma",

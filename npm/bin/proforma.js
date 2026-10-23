@@ -38,6 +38,19 @@ if (!binary) {
   process.exit(1);
 }
 
+// Ensure the native binary is executable (some unpackers drop the mode bits).
+if (process.platform !== "win32") {
+  try {
+    fs.accessSync(binary, fs.constants.X_OK);
+  } catch {
+    try {
+      fs.chmodSync(binary, 0o755);
+    } catch {
+      // fall through; spawn will report the error
+    }
+  }
+}
+
 const result = spawnSync(binary, process.argv.slice(2), { stdio: "inherit", env: process.env });
 if (result.error) {
   console.error("proforma: failed to start:", result.error.message);

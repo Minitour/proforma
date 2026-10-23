@@ -4,14 +4,21 @@ on:
   push:
     tags:
       - "v[0-9]*.[0-9]*.[0-9]*"
+  # Build the npm packages without publishing (used once to bootstrap the
+  # packages before trusted publishing can be attached; see scripts/npm-bootstrap.sh).
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, e.g. 0.1.0"
+        required: true
 
 env:
   CARGO_TERM_COLOR: always
-  BINARY_NAME: proforma
+  PLATFORMS: linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64
 
 permissions:
   contents: write   # create GitHub Releases
-  id-token: write   # npm Trusted Publisher (OIDC) + provenance
+  id-token: write   # npm trusted publishing (OIDC); no npm token is used anywhere
 
 jobs:
   # ── 1. Build native binaries ────────────────────────────────────────────────
@@ -22,12 +29,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { target: x86_64-unknown-linux-gnu,  runner: ubuntu-latest,        npm_platform: linux-x64,    binary: proforma }
-          - { target: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm,     npm_platform: linux-arm64,  binary: proforma }
-          - { target: x86_64-apple-darwin,       runner: macos-latest,         npm_platform: darwin-x64,   binary: proforma }
-          - { target: aarch64-apple-darwin,      runner: macos-latest,         npm_platform: darwin-arm64, binary: proforma }
-          - { target: x86_64-pc-windows-msvc,    runner: windows-latest,       npm_platform: win32-x64,    binary: proforma.exe }
-          - { target: aarch64-pc-windows-msvc,   runner: windows-11-arm,       npm_platform: win32-arm64,  binary: proforma.exe }
+          - { target: x86_64-unknown-linux-gnu,  runner: ubuntu-latest,    npm_platform: linux-x64,    binary: proforma }
+          - { target: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm, npm_platform: linux-arm64,  binary: proforma }
+          - { target: x86_64-apple-darwin,       runner: macos-latest,     npm_platform: darwin-x64,   binary: proforma }
+          - { target: aarch64-apple-darwin,      runner: macos-latest,     npm_platform: darwin-arm64, binary: proforma }
+          - { target: x86_64-pc-windows-msvc,    runner: windows-latest,   npm_platform: win32-x64,    binary: proforma.exe }
+          - { target: aarch64-pc-windows-msvc,   runner: windows-11-arm,   npm_platform: win32-arm64,  binary: proforma.exe }
     steps:
       - uses: actions/checkout@v4
 
@@ -46,10 +53,12 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-${{ matrix.target }}-cargo-
 
-      - name: Set Cargo.toml version from tag
+      - name: Set Cargo.toml version
         shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${INPUT_VERSION:-${GITHUB_REF_NAME#v}}"
           sed -i.bak "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
           rm -f Cargo.toml.bak
 
@@ -69,44 +78,48 @@ jobs:
           path: staging/${{ matrix.binary }}
           if-no-files-found: error
 
-  # ── 2. Publish to npm and GitHub Releases ───────────────────────────────────
-  publish:
-    name: Publish
+  # ── 2. Assemble npm packages (tarballs keep the executable bit) ─────────────
+  package:
+    name: Package
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Derive version
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: echo "VERSION=${INPUT_VERSION:-${GITHUB_REF_NAME#v}}" >> "$GITHUB_OUTPUT"
 
       - name: Download all binary artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Publish platform packages
+      - name: Build platform and main packages
         shell: bash
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
           set -euo pipefail
-          for PLATFORM in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64; do
+          mkdir -p dist
+          for PLATFORM in $PLATFORMS; do
             OS="${PLATFORM%-*}"; CPU="${PLATFORM#*-}"
             BINARY="proforma"; [ "$OS" = "win32" ] && BINARY="proforma.exe"
-            PKG="proforma-${PLATFORM}"
-            mkdir -p "pkg-${PLATFORM}/bin"
-            cp "artifacts/binary-${PLATFORM}/${BINARY}" "pkg-${PLATFORM}/bin/${BINARY}"
-            chmod +x "pkg-${PLATFORM}/bin/${BINARY}"
-            cat > "pkg-${PLATFORM}/package.json" <<PKGJSON
+            DIR="pkg/proforma-${PLATFORM}"
+            mkdir -p "$DIR/bin"
+            cp "artifacts/binary-${PLATFORM}/${BINARY}" "$DIR/bin/${BINARY}"
+            chmod 755 "$DIR/bin/${BINARY}"
+            cat > "$DIR/package.json" <<PKGJSON
           {
-            "name": "${PKG}",
+            "name": "proforma-${PLATFORM}",
             "version": "${VERSION}",
             "description": "proforma native binary for ${OS}/${CPU}",
             "os": ["${OS}"],
@@ -116,40 +129,78 @@ jobs:
             "repository": { "type": "git", "url": "https://github.com/Minitour/proforma.git" }
           }
           PKGJSON
-            set +e
-            OUTPUT=$(npm publish "./pkg-${PLATFORM}" --access public --provenance 2>&1); CODE=$?
-            set -e
-            if [ $CODE -ne 0 ] && ! echo "$OUTPUT" | grep -qi "previously published"; then
-              echo "$OUTPUT" >&2; exit $CODE
-            fi
-            echo "$OUTPUT"
+            (cd dist && npm pack "../$DIR")
           done
 
-      - name: Publish main package
-        shell: bash
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-        run: |
-          set -euo pipefail
-          cd npm
-          cp ../README.md README.md
+          cp README.md npm/README.md
           node -e "
             const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const pkg = JSON.parse(fs.readFileSync('npm/package.json', 'utf8'));
             pkg.version = process.env.VERSION;
             for (const k of Object.keys(pkg.optionalDependencies || {})) pkg.optionalDependencies[k] = process.env.VERSION;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            fs.writeFileSync('npm/package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
-          set +e
-          OUTPUT=$(npm publish --access public --provenance 2>&1); CODE=$?
-          set -e
-          if [ $CODE -ne 0 ] && ! echo "$OUTPUT" | grep -qi "previously published"; then
-            echo "$OUTPUT" >&2; exit $CODE
-          fi
-          echo "$OUTPUT"
+          (cd dist && npm pack ../npm)
+          ls -la dist
+
+      - name: Upload npm packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: dist/*.tgz
+          if-no-files-found: error
+
+  # ── 3. Publish to npm via trusted publishing, then create the GitHub release ─
+  publish:
+    name: Publish
+    needs: package
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      # trusted publishing needs npm >= 11.5.1
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Download npm packages
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: dist
+
+      - name: Publish (platform packages first, then proforma-mcp)
+        shell: bash
+        env:
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          set -euo pipefail
+          # no token: npm authenticates with the GitHub OIDC identity
+          unset NODE_AUTH_TOKEN || true
+          publish() {
+            set +e
+            OUTPUT=$(npm publish "$1" --access public 2>&1); CODE=$?
+            set -e
+            if [ $CODE -ne 0 ]; then
+              if echo "$OUTPUT" | grep -qi "previously published"; then
+                echo "skip $1 (already published)"
+              else
+                echo "$OUTPUT" >&2; exit $CODE
+              fi
+            else
+              echo "$OUTPUT"
+            fi
+          }
+          for PLATFORM in $PLATFORMS; do
+            publish "dist/proforma-${PLATFORM}-${VERSION}.tgz"
+          done
+          publish "dist/proforma-mcp-${VERSION}.tgz"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "v${{ steps.version.outputs.VERSION }}"
+          name: "v${{ needs.package.outputs.version }}"
           generate_release_notes: true

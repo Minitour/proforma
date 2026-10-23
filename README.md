@@ -29,8 +29,8 @@ Deontics Composer. Written in Rust, a single native binary per platform, distrib
 ## Install
 
 ```bash
-npx proforma --help            # run without installing
-npm install -g proforma        # or install globally
+npx proforma-mcp --help        # run without installing
+npm install -g proforma-mcp    # or install globally -> `proforma` command
 cargo install --git https://github.com/Minitour/proforma   # or build from source (Rust 1.88+)
 ```
 
@@ -39,12 +39,12 @@ cargo install --git https://github.com/Minitour/proforma   # or build from sourc
 ```json
 {
   "mcpServers": {
-    "proforma": { "command": "npx", "args": ["-y", "proforma", "serve"] }
+    "proforma": { "command": "npx", "args": ["-y", "proforma-mcp", "serve"] }
   }
 }
 ```
 
-Claude Code: `claude mcp add proforma -- npx -y proforma serve`
+Claude Code: `claude mcp add proforma -- npx -y proforma-mcp serve`
 
 `proforma serve --transport http --port 8080` serves Streamable HTTP at `http://127.0.0.1:8080/mcp`.
 
@@ -152,8 +152,11 @@ cargo run -- lint --file examples/sore_throat.pf
 ```
 
 Releases: push a `vX.Y.Z` tag. The release workflow builds Linux/macOS/Windows (x64 + arm64)
-binaries and publishes `proforma` plus the platform packages `proforma-<os>-<cpu>` to npm via
-trusted publishing.
+binaries and publishes `proforma-mcp` (command: `proforma`) plus the platform packages
+`proforma-<os>-<cpu>` to npm with **trusted publishing (GitHub OIDC)** — no npm token is stored
+anywhere. The very first version has to be published once from a maintainer's `npm login`
+session, because npm can only attach a trusted publisher to an existing package; see
+[`scripts/npm-bootstrap.sh`](scripts/npm-bootstrap.sh).
 
 ## License
 
