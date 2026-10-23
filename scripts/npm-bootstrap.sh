@@ -17,7 +17,7 @@ REPO="Minitour/proforma"
 WORKFLOW="release.yml"
 RUN="${1:?usage: scripts/npm-bootstrap.sh <release workflow run id>}"
 PLATFORMS="linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64 win32-arm64"
-PACKAGES="$(for p in $PLATFORMS; do printf 'proforma-%s ' "$p"; done)proforma-mcp"
+PACKAGES="$(for p in $PLATFORMS; do printf '@proforma-mcp/proforma-%s ' "$p"; done)proforma-mcp"
 
 dir="$(mktemp -d)"
 echo "Downloading npm packages from run $RUN ..."
@@ -31,8 +31,10 @@ fi
 echo "Publishing as $(npm whoami)"
 
 for p in $PACKAGES; do
-  tgz="$(ls "$dir"/"$p"-[0-9]*.tgz)"
-  version="$(basename "$tgz" .tgz)"; version="${version#"$p"-}"
+  # npm pack file name: '@scope/name' -> 'scope-name-<version>.tgz'
+  file="${p#@}"; file="${file/\//-}"
+  tgz="$(ls "$dir"/"$file"-[0-9]*.tgz)"
+  version="$(basename "$tgz" .tgz)"; version="${version#"$file"-}"
   # resumable: skip versions that are already on the registry
   if [ "$(npm view "$p@$version" version 2>/dev/null)" = "$version" ]; then
     echo "== skip $p@$version (already published)"

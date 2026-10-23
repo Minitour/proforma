@@ -18,7 +18,7 @@ $ErrorActionPreference = 'Continue'
 $Repo = 'Minitour/proforma'
 $Workflow = 'release.yml'
 $Platforms = 'linux-x64', 'linux-arm64', 'darwin-x64', 'darwin-arm64', 'win32-x64', 'win32-arm64'
-$Packages = @($Platforms | ForEach-Object { "proforma-$_" }) + 'proforma-mcp'
+$Packages = @($Platforms | ForEach-Object { "@proforma-mcp/proforma-$_" }) + 'proforma-mcp'
 
 function Invoke-Checked([string]$What, [scriptblock]$Block) {
     & $Block
@@ -40,10 +40,12 @@ $user = npm whoami
 Write-Host "Publishing as $user"
 
 foreach ($p in $Packages) {
-    $tgz = Get-ChildItem $dir -File | Where-Object { $_.Name -like "$p-[0-9]*.tgz" } | Select-Object -First 1
+    # npm pack file name: '@scope/name' -> 'scope-name-<version>.tgz'
+    $file = ($p -replace '^@', '') -replace '/', '-'
+    $tgz = Get-ChildItem $dir -File | Where-Object { $_.Name -like "$file-[0-9]*.tgz" } | Select-Object -First 1
     if (-not $tgz) { throw "package tarball for $p not found in $dir" }
     # resumable: skip versions that are already on the registry
-    $version = $tgz.BaseName.Substring($p.Length + 1)
+    $version = $tgz.BaseName.Substring($file.Length + 1)
     $existing = npm view "$p@$version" version 2>&1
     if ($LASTEXITCODE -eq 0 -and "$existing".Trim() -eq $version) {
         Write-Host "== skip $p@$version (already published)"

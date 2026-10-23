@@ -153,7 +153,7 @@ cargo run -- lint --file examples/sore_throat.pf
 
 Releases: push a `vX.Y.Z` tag. The release workflow builds Linux/macOS/Windows (x64 + arm64)
 binaries and publishes `proforma-mcp` (command: `proforma`) plus the platform packages
-`proforma-<os>-<cpu>` to npm with **trusted publishing (GitHub OIDC)** — no npm token is stored
+`@proforma-mcp/proforma-<os>-<cpu>` to npm with **trusted publishing (GitHub OIDC)** — no npm token is stored
 anywhere. The very first version has to be published once from a maintainer's `npm login`
 session, because npm can only attach a trusted publisher to an existing package; see
 [`scripts/npm-bootstrap.ps1`](scripts/npm-bootstrap.ps1) (Windows PowerShell) or

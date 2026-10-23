@@ -79,6 +79,8 @@ jobs:
           if-no-files-found: error
 
   # ── 2. Assemble npm packages (tarballs keep the executable bit) ─────────────
+  # Platform packages live in the @proforma-mcp org (npm's spam filter blocks
+  # new unscoped "*-win32-x64" names); `npm pack` names them proforma-mcp-proforma-<platform>-<v>.tgz.
   package:
     name: Package
     needs: build
@@ -119,7 +121,7 @@ jobs:
             chmod 755 "$DIR/bin/${BINARY}"
             cat > "$DIR/package.json" <<PKGJSON
           {
-            "name": "proforma-${PLATFORM}",
+            "name": "@proforma-mcp/proforma-${PLATFORM}",
             "version": "${VERSION}",
             "description": "proforma native binary for ${OS}/${CPU}",
             "os": ["${OS}"],
@@ -195,7 +197,7 @@ jobs:
             fi
           }
           for PLATFORM in $PLATFORMS; do
-            publish "dist/proforma-${PLATFORM}-${VERSION}.tgz"
+            publish "dist/proforma-mcp-proforma-${PLATFORM}-${VERSION}.tgz"
           done
           publish "dist/proforma-mcp-${VERSION}.tgz"
 
