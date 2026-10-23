@@ -389,7 +389,18 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, LexError> {
             };
             (tok, n)
         } else if b.is_ascii_digit() || (b == b'.' && is_digit(c.peek(1))) {
-            lex_number(&c)
+            let (tok, len) = lex_number(&c);
+            if let Tok::Date(t) | Tok::DateTime(t) | Tok::Time(t) = &tok {
+                if !valid_date_time(t) {
+                    return Err(LexError {
+                        message: format!("invalid date/time literal {} (Composer drops it, causing a syntax error)", t),
+                        line: start.line,
+                        col: start.col,
+                        offset: start.start,
+                    });
+                }
+            }
+            (tok, len)
         } else if b == b'\'' || b == b'"' {
             let (tok, len) = lex_quoted(&c, b)?;
             (tok, len)
@@ -536,6 +547,30 @@ fn lex_quoted(c: &Cursor, quote: u8) -> Result<(Tok, usize), LexError> {
         col: c.col,
         offset: c.pos,
     })
+}
+
+/// Strict calendar/clock validation (Java `Date.valueOf` / `Time.valueOf`).
+fn valid_date_time(t: &str) -> bool {
+    let num = |s: &str| s.parse::<u32>().unwrap_or(u32::MAX);
+    let date_ok = |d: &str| {
+        let (y, m, day) = (num(&d[0..4]), num(&d[5..7]), num(&d[8..10]));
+        let leap = (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
+        let max = match m {
+            1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+            4 | 6 | 9 | 11 => 30,
+            2 if leap => 29,
+            2 => 28,
+            _ => return false,
+        };
+        (1..=max).contains(&day)
+    };
+    let time_ok = |s: &str| num(&s[0..2]) < 24 && num(&s[3..5]) < 60 && num(&s[6..8]) < 60;
+    match t.len() {
+        10 => date_ok(t),
+        12 => time_ok(t),
+        23 => date_ok(&t[..10]) && time_ok(&t[11..]),
+        _ => true,
+    }
 }
 
 /// True if `s` can be written as a bare (unquoted) atom.

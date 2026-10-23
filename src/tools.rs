@@ -45,8 +45,11 @@ fn json<T: Serialize>(v: &T) -> String {
 
 // ── file helpers ─────────────────────────────────────────────────────────────
 
+/// Read a .pf file: UTF-8 if valid, otherwise windows-1252 (Composer's encoding).
 fn read(path: &str) -> Result<String, ToolError> {
-    std::fs::read_to_string(path).map_err(|e| ToolError(format!("cannot read '{}': {}", path, e)))
+    let bytes =
+        std::fs::read(path).map_err(|e| ToolError(format!("cannot read '{}': {}", path, e)))?;
+    Ok(crate::encoding::decode(&bytes).0)
 }
 
 /// Parse a file for read-only use (partial documents are fine).
@@ -73,7 +76,7 @@ fn load_for_edit(path: &str) -> Result<Document, ToolError> {
     Ok(out.doc)
 }
 
-fn write_atomic(path: &str, text: &str) -> Result<(), ToolError> {
+fn write_atomic(path: &str, bytes: &[u8]) -> Result<(), ToolError> {
     let p = Path::new(path);
     let dir = p.parent().filter(|d| !d.as_os_str().is_empty());
     let tmp = match dir {
@@ -83,7 +86,7 @@ fn write_atomic(path: &str, text: &str) -> Result<(), ToolError> {
         )),
         None => Path::new(&format!(".{}.tmp", path)).to_path_buf(),
     };
-    std::fs::write(&tmp, text)?;
+    std::fs::write(&tmp, bytes)?;
     std::fs::rename(&tmp, p).map_err(|e| {
         let _ = std::fs::remove_file(&tmp);
         ToolError(format!("cannot write '{}': {}", path, e))
@@ -100,7 +103,9 @@ fn save(path: &str, doc: &Document, report: ChangeReport) -> ToolResult {
             d.render(path)
         )));
     }
-    write_atomic(path, &text)?;
+    // Composer reads and writes the Windows code page (windows-1252)
+    let (bytes, enc) = crate::encoding::encode(&text);
+    write_atomic(path, &bytes)?;
     let diags = lint::lint(
         &check.doc,
         &check.diagnostics,
@@ -115,6 +120,9 @@ fn save(path: &str, doc: &Document, report: ChangeReport) -> ToolResult {
         .filter(|d| d.severity == Severity::Warning)
         .count();
     let mut out = report.changes.join("\n");
+    if enc == crate::encoding::Encoding::Utf8 {
+        out.push_str("\nwarning: the file contains characters outside windows-1252 and was saved as UTF-8; Composer will display them incorrectly");
+    }
     for w in &report.warnings {
         out.push_str(&format!("\nwarning: {}", w));
     }
@@ -575,7 +583,7 @@ impl ToMermaid {
                 } else {
                     m
                 };
-                write_atomic(&path, &text)?;
+                write_atomic(&path, text.as_bytes())?;
                 Ok(format!("wrote {}", path))
             }
             None => Ok(m),

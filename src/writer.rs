@@ -9,7 +9,8 @@
 //! - names containing `'` or `\` are escaped (Composer writes them raw);
 //! - textual warning flags that are not identifiers are quoted;
 //! - argument metaprops are kept even without a name/caption/description;
-//! - 1.8-only source attributes (default_value, dynamic483, derivation483) are kept.
+//! - numeric argument weights inside symbolic decisions are kept (Composer
+//!   writes them as `argument :: ,cond;`, which it cannot read back).
 
 use crate::ast::*;
 use crate::lexer::is_bare_atom;
@@ -19,6 +20,66 @@ const INDENT: &str = "     ";
 
 struct Out {
     s: String,
+    names: Names,
+}
+
+/// Name resolution used when writing references: with `ignore.task.case` /
+/// `ignore.data.case` (or in legacy files) the engine resolves names
+/// case-insensitively and Composer writes the referenced object's own name.
+#[derive(Default)]
+struct Names {
+    tasks: Vec<String>,
+    data: Vec<String>,
+    ci_task: bool,
+    ci_data: bool,
+}
+
+impl Names {
+    fn new(doc: &Document) -> Self {
+        let props = crate::props::parse(doc.metaprops.as_deref().unwrap_or(""));
+        let legacy = doc.engine_version.is_none();
+        let on = |k: &str| {
+            legacy
+                || props
+                    .iter()
+                    .any(|(pk, v)| pk == k && v.eq_ignore_ascii_case("true"))
+        };
+        Names {
+            tasks: doc
+                .items
+                .iter()
+                .skip(1)
+                .filter(|i| i.kind.is_task())
+                .map(|i| i.name.clone())
+                .collect(),
+            data: doc
+                .items
+                .iter()
+                .filter(|i| i.kind == ItemKind::Data)
+                .map(|i| i.name.clone())
+                .collect(),
+            ci_task: on("ignore.task.case"),
+            ci_data: on("ignore.data.case"),
+        }
+    }
+
+    fn resolve<'a>(list: &'a [String], ci: bool, name: &'a str) -> &'a str {
+        if !ci || list.iter().any(|n| n == name) {
+            return name;
+        }
+        list.iter()
+            .find(|n| n.eq_ignore_ascii_case(name))
+            .map(|n| n.as_str())
+            .unwrap_or(name)
+    }
+
+    fn task<'a>(&'a self, name: &'a str) -> &'a str {
+        Self::resolve(&self.tasks, self.ci_task, name)
+    }
+
+    fn data<'a>(&'a self, name: &'a str) -> &'a str {
+        Self::resolve(&self.data, self.ci_data, name)
+    }
 }
 
 impl Out {
@@ -74,7 +135,12 @@ fn generic(out: &mut Out, level: usize, attrs: &[Attr]) {
             | (Attr::Metaprops(s), "metaprops") => Some(s),
             _ => None,
         }) {
-            if kw == "metaprops" && v.is_empty() {
+            if kw == "metaprops" {
+                // Composer re-serializes properties (sorted, escaped); empty ones are dropped
+                let norm = crate::props::normalize(v);
+                if !norm.is_empty() {
+                    atom_prop(out, level, kw, &norm);
+                }
                 continue;
             }
             atom_prop(out, level, kw, v);
@@ -124,7 +190,10 @@ fn flag(attrs: &[Attr], kw: &str) -> Option<bool> {
 
 /// Serialize a whole guideline as engine version 1.9.
 pub fn write(doc: &Document) -> String {
-    let mut out = Out { s: String::new() };
+    let mut out = Out {
+        s: String::new(),
+        names: Names::new(doc),
+    };
     out.line(0, "/** PROforma version 1.9 (plain text) **/");
     out.blank();
     out.line(
@@ -134,12 +203,23 @@ pub fn write(doc: &Document) -> String {
     out.line(0, "engine_version :: '1.9' ;");
     out.blank();
 
-    let root_name = doc.root().map(|r| r.name.as_str()).unwrap_or("guideline");
+    let root = doc.root();
+    let root_name = root.map(|r| r.name.as_str()).unwrap_or("guideline");
     let (md_name, fields) = match &doc.metadata {
         Some(m) => (m.name.as_str(), m.fields.as_slice()),
-        None => (root_name, &[][..]),
+        None => ("", &[][..]),
     };
-    header(&mut out, "metadata", md_name);
+    // On load the engine fills an empty metadata name/title/desc from the root
+    // plan's name/caption/description, so a Composer save always contains them.
+    header(
+        &mut out,
+        "metadata",
+        if md_name.is_empty() {
+            root_name
+        } else {
+            md_name
+        },
+    );
     for f in [
         MetaField::Title,
         MetaField::Desc,
@@ -148,22 +228,38 @@ pub fn write(doc: &Document) -> String {
         MetaField::Cdate,
         MetaField::Mdate,
     ] {
-        if let Some((_, v)) = fields.iter().find(|(k, _)| *k == f) {
+        let given = fields
+            .iter()
+            .find(|(k, _)| *k == f)
+            .map(|(_, v)| v.as_str())
+            .filter(|v| !v.is_empty());
+        let value = given.or_else(|| match f {
+            MetaField::Title => root.and_then(|r| r.caption()),
+            MetaField::Desc => root.and_then(|r| r.description()),
+            _ => None,
+        });
+        if let Some(v) = value {
             atom_prop(&mut out, 1, f.as_str(), v);
         }
     }
     out.line(0, "end metadata.");
     out.blank();
+    // root-plan metaprops are merged into the guideline metaprops on load
+    let mut props = crate::props::parse(doc.metaprops.as_deref().unwrap_or(""));
+    if let Some(Attr::Metaprops(rp)) = root.and_then(|r| first(&r.attrs, "metaprops")) {
+        for (k, v) in crate::props::parse(rp) {
+            if !props.iter().any(|(pk, _)| *pk == k) {
+                props.push((k, v));
+            }
+        }
+    }
     out.line(
         0,
-        &format!(
-            "metaprops :: {} ;",
-            atom(doc.metaprops.as_deref().unwrap_or(""))
-        ),
+        &format!("metaprops :: {} ;", atom(&crate::props::to_string(&props))),
     );
     out.blank();
 
-    let Some(root) = doc.root() else {
+    let Some(root) = root else {
         return out.s;
     };
     write_task(&mut out, root);
@@ -189,12 +285,19 @@ pub fn write(doc: &Document) -> String {
         write_data(&mut out, d);
     }
 
-    let funcs: Vec<&Item> = doc
+    // duplicate function names: the engine keeps the last definition
+    let mut funcs: Vec<&Item> = Vec::new();
+    for f in doc
         .items
         .iter()
         .skip(1)
         .filter(|i| i.kind == ItemKind::Function)
-        .collect();
+    {
+        match funcs.iter_mut().find(|x| x.name == f.name) {
+            Some(slot) => *slot = f,
+            None => funcs.push(f),
+        }
+    }
     if !funcs.is_empty() {
         out.blank();
     }
@@ -248,8 +351,11 @@ fn visit<'a>(
 }
 
 /// Serialize a single top-level component (for display).
-pub fn write_item(item: &Item, _doc: &Document) -> String {
-    let mut out = Out { s: String::new() };
+pub fn write_item(item: &Item, doc: &Document) -> String {
+    let mut out = Out {
+        s: String::new(),
+        names: Names::new(doc),
+    };
     match item.kind {
         ItemKind::Data => write_data(&mut out, item),
         ItemKind::Function => write_function(&mut out, item),
@@ -260,15 +366,21 @@ pub fn write_item(item: &Item, _doc: &Document) -> String {
 
 /// Serialize a nested attribute (component, candidate, source, ...) for display.
 pub fn write_attr(attr: &Attr, level: usize) -> String {
-    let mut out = Out { s: String::new() };
+    let mut out = Out {
+        s: String::new(),
+        names: Names::default(),
+    };
     match attr {
-        Attr::Component(b) => write_component(&mut out, b),
+        Attr::Component(b) => write_component(&mut out, b, &[]),
         Attr::Candidate(b) => write_candidate(&mut out, b),
         Attr::Source(b) => write_source(&mut out, b),
         Attr::Argument(a) => write_argument(&mut out, a, false),
         Attr::WarningCondition(w) => write_warning(&mut out, w),
         other => {
-            let mut tmp = Out { s: String::new() };
+            let mut tmp = Out {
+                s: String::new(),
+                names: Names::default(),
+            };
             write_simple(&mut tmp, level, other);
             return tmp.s;
         }
@@ -372,8 +484,9 @@ fn write_task(out: &mut Out, t: &Item) {
             if let Some(e) = first_expr(a, "terminate") {
                 expr_prop(out, 1, "terminate", e);
             }
-            for c in t.components() {
-                write_component(out, c);
+            let siblings: Vec<&Block> = t.components().collect();
+            for c in &siblings {
+                write_component(out, c, &siblings);
             }
         }
         ItemKind::Action => {
@@ -423,11 +536,14 @@ fn write_parameters(out: &mut Out, ps: &[Parameter]) {
     }
 }
 
-fn write_component(out: &mut Out, c: &Block) {
+/// `siblings` resolves `completed(x)` (case-insensitive) to the component's
+/// actual name, as Composer writes the resolved object.
+fn write_component(out: &mut Out, c: &Block, siblings: &[&Block]) {
     out.line(1, &format!("component :: {} ;", atom(&c.name)));
     let a = &c.attrs;
     generic(out, 2, a);
-    atom_prop(out, 2, "task_definition", c.task_definition());
+    let def = out.names.task(c.task_definition()).to_string();
+    atom_prop(out, 2, "task_definition", &def);
     for kw in ["autonomous", "optional", "terminal"] {
         if flag(a, kw) == Some(true) {
             yes(out, 2, kw);
@@ -439,6 +555,11 @@ fn write_component(out: &mut Out, c: &Block) {
         }
     }
     for s in c.schedule_constraints() {
+        let s = siblings
+            .iter()
+            .find(|x| x.name.eq_ignore_ascii_case(s))
+            .map(|x| x.name.as_str())
+            .unwrap_or(s);
         out.line(
             2,
             &format!("schedule_constraint :: completed({}) ;", atom(s)),
@@ -473,18 +594,11 @@ fn write_source(out: &mut Out, s: &Block) {
     out.line(1, &format!("source :: {} ;", atom(&s.name)));
     let a = &s.attrs;
     generic(out, 2, a);
-    atom_prop(out, 2, "data_definition", s.data_definition());
-    if let Some(e) = first_expr(a, "default_value") {
-        expr_prop(out, 2, "default_value", e);
-    }
+    let def = out.names.data(s.data_definition()).to_string();
+    atom_prop(out, 2, "data_definition", &def);
+    // default_value / dynamic483 / derivation483 are 1.8-only: a 1.9 save drops them
     if flag(a, "mandatory") == Some(false) {
         out.line(2, "mandatory :: no ;");
-    }
-    if flag(a, "dynamic483") == Some(true) {
-        yes(out, 2, "dynamic483");
-    }
-    if let Some(e) = first_expr(a, "derivation483") {
-        expr_prop(out, 2, "derivation483", e);
     }
 }
 
@@ -509,7 +623,11 @@ fn write_candidate(out: &mut Out, c: &Block) {
 }
 
 fn write_argument(out: &mut Out, arg: &Argument, _in_candidate: bool) {
-    let support = arg.support.label();
+    // numeric weights are re-rendered in the engine's canonical form
+    let support = match &arg.support {
+        Support::Weight(w) => canonical(&w.node),
+        other => other.label(),
+    };
     let head = format!(
         "argument :: {},{}",
         support.trim(),
@@ -602,6 +720,67 @@ fn write_function(out: &mut Out, f: &Item) {
         expr_prop(out, 1, "function_body", e);
     }
     out.line(0, "end function.");
+}
+
+/// The engine's canonical expression form (`ExpressionUtils.getStringForm` for
+/// nodes without original text), used for numeric argument weights.
+pub fn canonical(n: &Node) -> String {
+    match n {
+        Node::Empty => String::new(),
+        Node::Atom(a) => format!("'{}'", a),
+        Node::Complex(a, b) => format!("'{}:{}'", a, b),
+        Node::Int(i) => i.to_string(),
+        Node::Real(r) => java_double(r),
+        Node::Str(s) => format!("\"{}\"", s),
+        Node::Date(d) | Node::DateTime(d) | Node::Time(d) => d.clone(),
+        Node::ResultOf(d) => format!("result_of('{}')", d),
+        Node::Call(f, args) => format!(
+            "{}({})",
+            f,
+            args.iter().map(canonical).collect::<Vec<_>>().join(",")
+        ),
+        Node::List(v) => format!(
+            "[{}]",
+            v.iter().map(canonical).collect::<Vec<_>>().join(",")
+        ),
+        Node::Neg(x) => format!("-({})", canonical(x)),
+        Node::Paren(x) => match x.as_ref() {
+            inner @ Node::Bin(..) => format!("({})", canonical(inner)),
+            inner => canonical(inner),
+        },
+        Node::Bin(op, a, b) => {
+            let sym = match op {
+                BinOp::Append => "#",
+                other => other.symbol(),
+            };
+            format!("{} {} {}", canonical(a), sym, canonical(b))
+        }
+    }
+}
+
+/// Java `Double.toString`.
+fn java_double(raw: &str) -> String {
+    let Ok(d) = raw.parse::<f64>() else {
+        return raw.to_string();
+    };
+    let a = d.abs();
+    if d == 0.0 || (1e-3..1e7).contains(&a) {
+        let s = format!("{}", d);
+        if s.contains('.') {
+            s
+        } else {
+            format!("{}.0", s)
+        }
+    } else {
+        let s = format!("{:e}", d);
+        let (m, e) = s.split_once('e').unwrap();
+        let m = if m.contains('.') {
+            m.to_string()
+        } else {
+            format!("{}.0", m)
+        };
+        format!("{}E{}", m, e)
+    }
 }
 
 #[cfg(test)]

@@ -28,6 +28,7 @@ pub fn lint(doc: &Document, parse_diags: &[Diagnostic], opts: &LintOptions) -> V
         let mut l = Linter {
             env: &env,
             out: Vec::new(),
+            item_start: 0,
         };
         l.header();
         l.construction();
@@ -74,7 +75,9 @@ fn metaprop(props: &str, key: &str) -> Option<String> {
 impl<'a> Env<'a> {
     pub fn new(doc: &'a Document) -> Self {
         let props = doc.metaprops.as_deref().unwrap_or("");
-        let flag = |k| metaprop(props, k).is_some_and(|v| v.eq_ignore_ascii_case("true"));
+        // legacy (pre-1.7) guidelines are always case-insensitive
+        let legacy = doc.engine_version.is_none();
+        let flag = |k| legacy || metaprop(props, k).is_some_and(|v| v.eq_ignore_ascii_case("true"));
         Env {
             doc,
             root: doc.root(),
@@ -610,6 +613,7 @@ impl<'e, 'a> Typer<'e, 'a> {
                 "Incorrectly specified user function - first argument must be a java class name"
                     .into(),
             );
+            return Ty::Untypeable;
         }
         ret
     }
@@ -685,6 +689,8 @@ enum AssertMode<'a> {
 struct Linter<'e, 'a> {
     env: &'e Env<'a>,
     out: Vec<Diagnostic>,
+    /// index into `out` where the component currently being verified started
+    item_start: usize,
 }
 
 impl<'e, 'a> Linter<'e, 'a> {
@@ -1122,7 +1128,12 @@ impl<'e, 'a> Linter<'e, 'a> {
 
     fn verify_task(&mut self, t: &'a Item) {
         let name = t.name.clone();
+        self.item_start = self.out.len();
         for a in &t.attrs {
+            // the engine aborts the rest of a component after an internal error (PF-V002)
+            if self.aborted() {
+                return;
+            }
             match a {
                 Attr::Goal(e) => {
                     let mut ty = self.typer(&name, e.span);
@@ -1174,23 +1185,30 @@ impl<'e, 'a> Linter<'e, 'a> {
                     self.verify_candidate(t, c);
                 }
             }
-            ItemKind::Enquiry => {
-                if t.sources().next().is_none() {
-                    self.push(
-                        Diagnostic::warning("PF-V004", "The Enquiry has no sources")
-                            .at(t.span)
-                            .in_component(name),
-                    );
-                }
+            ItemKind::Enquiry if t.sources().next().is_none() => {
+                self.push(
+                    Diagnostic::warning("PF-V004", "The Enquiry has no sources")
+                        .at(t.span)
+                        .in_component(name),
+                );
             }
             _ => {}
         }
+    }
+
+    fn aborted(&self) -> bool {
+        self.out[self.item_start..]
+            .iter()
+            .any(|d| d.code == "PF-V002")
     }
 
     fn verify_component(&mut self, plan: &'a Item, c: &'a Block) {
         let pname = plan.name.clone();
         let def = self.env.task_def(c.task_definition());
         for a in &c.attrs {
+            if self.aborted() {
+                return;
+            }
             match a {
                 Attr::CycleRepeat(e, _) => {
                     let mut ty = self.typer(&pname, e.span);
@@ -1276,7 +1294,7 @@ impl<'e, 'a> Linter<'e, 'a> {
                             ty.vctx = VCtx::ArgCondition(dec);
                             ty.escalate = true;
                             ty.check(w, Ty::Real, &format!("weight for argument: {}", arg.condition.text));
-                            self.absorb(ty);
+                            self.absorb_unchecked(ty, "numeric argument weight");
                         }
                         (s, true) => self.push(
                             Diagnostic::error(
@@ -1682,7 +1700,13 @@ fn assertion(ty: &mut Typer, n: &Node, mode: &AssertMode) {
                     "PF-V022",
                     format!(
                         "Data item or parameter {} cannot be assigned a value of type {}",
-                        lhs, rt
+                        // parameter names are looked up (and reported) lower-cased
+                        if matches!(mode, AssertMode::ParamValue(_)) {
+                            lhs.to_lowercase()
+                        } else {
+                            lhs.clone()
+                        },
+                        rt
                     ),
                 );
             }

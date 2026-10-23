@@ -57,6 +57,7 @@ pub fn parse(src: &str) -> ParseOutput {
         }
     };
     let mut p = Parser::new(src, tokens);
+    p.legacy = detect_version(src).is_none() && !src.contains("engine_version");
     let doc = p.document();
     ParseOutput {
         doc,
@@ -340,6 +341,8 @@ struct Parser<'a> {
     pos: usize,
     diags: Vec<Diagnostic>,
     current: Option<String>,
+    /// Legacy (pre-1.7) dialect: captions, descriptions and procedures are expressions.
+    legacy: bool,
 }
 
 impl<'a> Parser<'a> {
@@ -350,6 +353,7 @@ impl<'a> Parser<'a> {
             pos: 0,
             diags: Vec::new(),
             current: None,
+            legacy: false,
         }
     }
 
@@ -615,7 +619,7 @@ impl<'a> Parser<'a> {
             self.expect(Tok::DoubleColon)?;
             doc.metaprops = Some(self.atom("a metaprops value")?);
             self.expect(Tok::Semi)?;
-        } else {
+        } else if !self.legacy {
             let span = self.peek().span;
             self.compat(
                 "PF-L009",
@@ -843,6 +847,29 @@ impl<'a> Parser<'a> {
         self.expect(Tok::Semi).map(|_| ())
     }
 
+    /// Legacy captions/descriptions/procedures are expressions. Composer converts
+    /// them: a quoted string or atom becomes its text, anything else `${expr}`.
+    fn legacy_text(&mut self) -> PResult<String> {
+        let next_is_semi = self.peek_at(1).tok == Tok::Semi;
+        match self.peek().tok.clone() {
+            Tok::Str(s) if next_is_semi => {
+                self.advance();
+                Ok(s)
+            }
+            Tok::Atom {
+                value,
+                quoted: true,
+            } if next_is_semi => {
+                self.advance();
+                Ok(value)
+            }
+            _ => {
+                let e = self.expr()?;
+                Ok(format!("${{{}}}", e.text))
+            }
+        }
+    }
+
     fn yes_no(&mut self) -> PResult<bool> {
         let t = self.peek().clone();
         let v = match &t.tok {
@@ -867,6 +894,9 @@ impl<'a> Parser<'a> {
         };
         let head = self.kw_attr_head()?;
         let attr = match kw {
+            Kw::Caption if self.legacy => Attr::Caption(self.legacy_text()?),
+            Kw::Description if self.legacy => Attr::Description(self.legacy_text()?),
+            Kw::Procedure if self.legacy => Attr::Procedure(self.legacy_text()?),
             Kw::Caption => Attr::Caption(self.atom("a caption")?),
             Kw::Description => Attr::Description(self.atom("a description")?),
             Kw::Metaprops => Attr::Metaprops(self.atom("a metaprops value")?),
@@ -1357,7 +1387,14 @@ impl<'a> Parser<'a> {
             Tok::Kw(Kw::ResultOf) => {
                 self.advance();
                 self.expect(Tok::LParen)?;
-                let n = self.atom("a decision name")?;
+                // the grammar requires an ATOM here (a "string" is a syntax error)
+                let n = match self.peek().tok.clone() {
+                    Tok::Atom { value, .. } => {
+                        self.advance();
+                        value
+                    }
+                    _ => return self.expected("a decision name (identifier or 'quoted atom')"),
+                };
                 self.expect(Tok::RParen)?;
                 Ok(Node::ResultOf(n))
             }
