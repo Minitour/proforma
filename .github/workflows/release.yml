@@ -197,9 +197,9 @@ jobs:
             fi
           }
           for PLATFORM in $PLATFORMS; do
-            publish "dist/proforma-mcp-proforma-${PLATFORM}-${VERSION}.tgz"
+            publish "./dist/proforma-mcp-proforma-${PLATFORM}-${VERSION}.tgz"
           done
-          publish "dist/proforma-mcp-${VERSION}.tgz"
+          publish "./dist/proforma-mcp-${VERSION}.tgz"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
