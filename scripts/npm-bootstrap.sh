@@ -32,6 +32,12 @@ echo "Publishing as $(npm whoami)"
 
 for p in $PACKAGES; do
   tgz="$(ls "$dir"/"$p"-[0-9]*.tgz)"
+  version="$(basename "$tgz" .tgz)"; version="${version#"$p"-}"
+  # resumable: skip versions that are already on the registry
+  if [ "$(npm view "$p@$version" version 2>/dev/null)" = "$version" ]; then
+    echo "== skip $p@$version (already published)"
+    continue
+  fi
   echo "== npm publish $(basename "$tgz")"
   npm publish "$tgz" --access public
 done

@@ -42,6 +42,13 @@ Write-Host "Publishing as $user"
 foreach ($p in $Packages) {
     $tgz = Get-ChildItem $dir -File | Where-Object { $_.Name -like "$p-[0-9]*.tgz" } | Select-Object -First 1
     if (-not $tgz) { throw "package tarball for $p not found in $dir" }
+    # resumable: skip versions that are already on the registry
+    $version = $tgz.BaseName.Substring($p.Length + 1)
+    $existing = npm view "$p@$version" version 2>&1
+    if ($LASTEXITCODE -eq 0 -and "$existing".Trim() -eq $version) {
+        Write-Host "== skip $p@$version (already published)"
+        continue
+    }
     Write-Host "== npm publish $($tgz.Name)"
     Invoke-Checked "npm publish $($tgz.Name)" { npm publish $tgz.FullName --access public }
 }
