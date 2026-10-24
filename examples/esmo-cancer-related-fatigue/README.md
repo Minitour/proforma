@@ -6,7 +6,7 @@ diagnosis and treatment", Ann Oncol 2020;31(6):713–723*.
 | File | |
 |---|---|
 | [`esmo_crf.pf`](esmo_crf.pf) | the guideline (PROforma 1.9, Deontics Composer format) |
-| [`esmo_crf.html`](esmo_crf.html) | report: per-stage diagrams, decision tables with evidence grades, data model, source |
+| [`esmo_crf.html`](esmo_crf.html) | viewer: task tree, plan canvas (pan, zoom, open sub-plans), properties, decision tables with evidence grades, data model, source |
 | [`esmo_crf.mmd`](esmo_crf.mmd) | complete pathway as a Mermaid diagram |
 
 **Structure (Figure 1 of the guideline):**

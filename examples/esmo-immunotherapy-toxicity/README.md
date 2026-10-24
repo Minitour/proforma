@@ -6,7 +6,7 @@ Practice Guidelines for diagnosis, treatment and follow-up", Ann Oncol 2017;28(S
 | File | |
 |---|---|
 | [`esmo_irae.pf`](esmo_irae.pf) | the guideline (PROforma 1.9, Deontics Composer format) |
-| [`esmo_irae.html`](esmo_irae.html) | report: per-stage diagrams, decision tables with evidence grades, data model, source |
+| [`esmo_irae.html`](esmo_irae.html) | viewer: task tree, plan canvas (pan, zoom, open sub-plans), properties, decision tables with evidence grades, data model, source |
 | [`esmo_irae.mmd`](esmo_irae.mmd) | complete pathway as a Mermaid diagram |
 | [`modelling-notes.md`](modelling-notes.md) | modelling choices not taken literally from the source |
 | [`build.sh`](build.sh) | rebuilds the `.pf` with the proforma CLI |

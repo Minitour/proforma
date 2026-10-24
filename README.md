@@ -116,12 +116,12 @@ guideline-to-PROforma workflow:
 4. produce a shareable HTML report with
    [`scripts/build_report.mjs`](skills/proforma/scripts/build_report.mjs).
 
-The report has per-plan Mermaid diagrams, decision tables with evidence grades, the data model and the
+The report is a self-contained viewer laid out like a guideline editor: task tree, plan canvas with pan, zoom and drill-down into sub-plans, a properties panel, decision tables with evidence grades, the data model and the
 source. The skill ships its test cases under `evals/`.
 
 ## Examples
 
-Each example has its own folder with the `.pf` file, an HTML report and a Mermaid diagram.
+Each example has its own folder with the `.pf` file, an HTML viewer and a Mermaid diagram.
 
 | Example | Guideline | Contents |
 |---|---|---|

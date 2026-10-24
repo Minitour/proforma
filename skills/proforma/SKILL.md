@@ -106,13 +106,20 @@ node <this-skill>/scripts/build_report.mjs $F --out guideline.html \
      --notes modelling-notes.md
 ```
 
-`build_report.mjs` (Node only, no dependencies) writes a self-contained HTML page with:
-- one diagram per plan, plus the complete pathway;
-- a table for each decision showing its arguments and evidence grades;
-- tables of the tasks and the data model;
-- the lint output and the `.pf` source.
+`build_report.mjs` (Node only, no dependencies; the page template is `scripts/report/`) writes a
+self-contained HTML viewer laid out like a guideline editor:
+- a task tree, and a plan canvas that draws each plan at its stored task positions with the editor's
+  shapes and colours, scheduling arrows, decision branch labels and precondition/cycle badges. Drag to
+  pan, wheel or pinch to zoom, double-click a plan to open it (breadcrumbs lead back). When stored
+  positions stack parallel tasks in one column, it switches to an automatic grid layout;
+- a properties panel for the selected task: caption, description, linked expressions, scheduling,
+  cycles, candidates and arguments with evidence grades, and metaprops grouped into goal,
+  ServiceRequest, sources and provenance;
+- data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
-It finds the CLI on its own (`$PROFORMA_BIN`, then `proforma` on PATH, then `npx proforma-mcp`).
+It reads the guideline through `proforma export` and `proforma lint`, so it needs proforma-mcp 0.2.0 or
+later. It finds the CLI on its own: `--bin` / `$PROFORMA_BIN`, a global `npm install -g proforma-mcp`,
+`proforma` on PATH, or a private install of the pinned version in `~/.cache/proforma-mcp`.
 
 Write `modelling-notes.md` as a short bullet list of every modelling choice that is not literally in the
 guideline (chosen thresholds, tie-breaking rules, intervals, simplifications). The report shows it
@@ -126,7 +133,7 @@ Give the user:
 - a short description of the structure (stages, decisions, how recommendations became rules);
 - the modelling choices that need clinical review.
 
-Show the Mermaid diagram inline when the user asks to see it. Note that the model is a research
+Show the Mermaid diagram inline when the user asks to see it, and point to the `.html` viewer for exploring the plans. Note that the model is a research
 representation, not validated clinical decision support.
 
 ## Editing or explaining an existing .pf file
