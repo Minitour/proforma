@@ -1,4 +1,10 @@
-# proforma
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img alt="proforma" src="assets/logo-light.svg" width="560">
+  </picture>
+</p>
+
 
 [![CI](https://github.com/Minitour/proforma/actions/workflows/ci.yml/badge.svg)](https://github.com/Minitour/proforma/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -98,20 +104,31 @@ proforma mermaid  --file triage.pf --output triage.md
 proforma check-expression --file triage.pf --expression "result_of(refer) = urgent"
 ```
 
-## Agent skill and examples
+## Agent skill
 
-* [`skills/proforma`](skills/proforma) is an agent skill (for Claude Code / Claude) that teaches the
-  guideline-to-PROforma workflow: extract the logic from a guideline, build the `.pf` with the CLI,
-  lint until clean, and produce a shareable HTML report with
-  [`scripts/build_report.mjs`](skills/proforma/scripts/build_report.mjs). The report has per-plan Mermaid
-  diagrams, decision tables with evidence grades, the data model and the source. The skill ships its
-  test cases under `evals/`.
-* [`examples/esmo_crf.pf`](examples/esmo_crf.pf) encodes the ESMO 2020 cancer-related fatigue guideline
-  (Fabi et al., Ann Oncol 2020): screening, diagnostic assessment and management, with graded
-  recommendations as decision arguments. Composer's engine loads it with no verifier issues. The
-  report is [`examples/esmo_crf.html`](examples/esmo_crf.html) and the diagram is
-  [`examples/esmo_crf.mmd`](examples/esmo_crf.mmd).
-* [`examples/sore_throat.pf`](examples/sore_throat.pf) is a small guideline built step by step with the CLI.
+[`skills/proforma`](skills/proforma) is an agent skill (for Claude Code / Claude) that teaches the
+guideline-to-PROforma workflow:
+1. extract the logic from a guideline;
+2. build the `.pf` with the CLI;
+3. lint until clean;
+4. produce a shareable HTML report with
+   [`scripts/build_report.mjs`](skills/proforma/scripts/build_report.mjs).
+
+The report has per-plan Mermaid diagrams, decision tables with evidence grades, the data model and the
+source. The skill ships its test cases under `evals/`.
+
+## Examples
+
+Each example has its own folder with the `.pf` file, an HTML report and a Mermaid diagram.
+
+| Example | Guideline | Contents |
+|---|---|---|
+| [`esmo-immunotherapy-toxicity`](examples/esmo-immunotherapy-toxicity) | ESMO 2017, management of toxicities from immunotherapy (Haanen et al., Ann Oncol 2017) | baseline assessment, a surveillance cycle and grade-based management for 9 organ systems ([report](examples/esmo-immunotherapy-toxicity/esmo_irae.html)) |
+| [`esmo-cancer-related-fatigue`](examples/esmo-cancer-related-fatigue) | ESMO 2020, cancer-related fatigue (Fabi et al., Ann Oncol 2020) | screening, diagnostic assessment and management ([report](examples/esmo-cancer-related-fatigue/esmo_crf.html)) |
+| [`sore-throat`](examples/sore-throat) | tutorial | small guideline built step by step with the CLI |
+
+The ESMO models lint clean, and Deontics' engine loads them with 0 verifier issues. Evidence grades
+from the source are attached to the decision arguments.
 
 ## Lint codes
 
@@ -163,7 +180,7 @@ research/oracle/oracle.sh parse research/oracle/cases/ex1.pf
 ```bash
 cargo test
 cargo clippy --all-targets -- -D warnings
-cargo run -- lint --file examples/sore_throat.pf
+cargo run -- lint --file examples/sore-throat/sore_throat.pf
 ```
 
 Releases: push a `vX.Y.Z` tag. The release workflow builds Linux/macOS/Windows (x64 + arm64)

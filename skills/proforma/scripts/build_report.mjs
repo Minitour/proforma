@@ -63,9 +63,10 @@ const json = (...a) => JSON.parse(cli(...a, "--format", "json"));
 const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const attr = (attrs, k) => ((attrs || []).find((a) => a.attr === k) || {}).value;
-// highlight evidence grades written like [II, B] / [I, A] / [IV, C]
-const grade = (s) =>
-  esc(s).replace(/\[(I{1,3}|IV|V), ([A-E])\]/g, (m, lvl, g) => `<span class="grade g${g}">${lvl}, ${g}</span>`);
+// highlight evidence grades written like [II, B] / [I, A] / [IV-V, B]
+const LEVEL = "(?:I{1,3}|IV|V)";
+const GRADE_RE = new RegExp(`\\[(${LEVEL}(?:\\s*[-–]\\s*${LEVEL})?),\\s*([A-E])\\]`, "g");
+const grade = (s) => esc(s).replace(GRADE_RE, (m, lvl, g) => `<span class="grade g${g}">${lvl}, ${g}</span>`);
 const strip = (m) => m.replace(/^---[\s\S]*?---\n/, "");
 
 // ── read the guideline ───────────────────────────────────────────────────────
@@ -106,10 +107,24 @@ for (const p of items.filter((i) => i.kind === "plan")) {
   // skip a root plan that only wraps a single sub-plan (the sub-plan gets its own view)
   if (p.name === root.name && cs.length === 1 && kindOf(cs[0].attrs?.find((a) => a.attr === "task_definition")?.value || cs[0].name) === "plan") continue;
   const hasDecision = cs.some((c) => kindOf(attr(c.attrs, "task_definition") || c.name) === "decision");
-  const parallel = cs.filter((c) => !(c.attrs || []).some((a) => a.attr === "schedule_constraint")).length;
+  // widest fan-out: components that share the same antecedents run side by side
+  const fanOut = Math.max(
+    0,
+    ...Object.values(
+      cs.reduce((acc, c) => {
+        const key = (c.attrs || [])
+          .filter((a) => a.attr === "schedule_constraint")
+          .map((a) => a.value)
+          .sort()
+          .join(",");
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {})
+    )
+  );
   const extra = [];
   if (hasDecision) extra.push("--candidates");
-  if (hasDecision || parallel >= 4) extra.push("--direction", "LR");
+  if (hasDecision || fanOut >= 4) extra.push("--direction", "LR");
   const caption = attr(full[p.name].attrs, "caption") || p.name;
   const desc = attr(full[p.name].attrs, "description") || "";
   stages.push([caption, desc, strip(cli("mermaid", "--file", file, "--label", "caption", "--mode", "drilldown", "--plan", p.name, ...extra))]);

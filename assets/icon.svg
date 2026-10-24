@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128" role="img" aria-label="proforma">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a1538"/>
+      <stop offset="1" stop-color="#5b0e2d"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- scheduling arrows -->
+    <g stroke="#FFDCD9" stroke-width="5" fill="none">
+      <path d="M46 46 L54 54"/>
+      <path d="M74 74 L82 82"/>
+    </g>
+    <!-- enquiry -->
+    <path d="M32 16 L48 32 L32 48 L16 32 Z" fill="#E6FFE6" stroke="#009700" stroke-width="4"/>
+    <!-- decision -->
+    <circle cx="64" cy="64" r="15" fill="#FFFFFF" stroke="#B40F78" stroke-width="4"/>
+    <circle cx="64" cy="64" r="5" fill="#B40F78"/>
+    <!-- action -->
+    <rect x="80" y="80" width="32" height="32" rx="8" fill="#E4FAFA" stroke="#008585" stroke-width="4"/>
+    <path d="M88 96 L94 102 L105 89" fill="none" stroke="#008585" stroke-width="4"/>
+  </g>
+</svg>

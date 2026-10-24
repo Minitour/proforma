@@ -49,4 +49,4 @@ jobs:
         shell: bash
         run: |
           cargo build --release
-          for f in examples/*.pf; do ./target/release/proforma lint --file "$f"; done
+          for f in examples/*/*.pf; do ./target/release/proforma lint --file "$f"; done

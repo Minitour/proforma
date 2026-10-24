@@ -1,0 +1,9 @@
+- **Grades are entered by the clinician** (CTCAE v4 grade per organ system, or the severity categories of the figures). The model does not derive grades from laboratory values.
+- **Several irAEs can coexist.** Each organ system is a separate sub-plan that runs when its grade or flag is present. Endocrinopathies use a multiple-choice decision because thyroid, pituitary and pancreatic toxicities can occur together.
+- **The surveillance cycle repeats until follow-up ends.** The guideline gives no fixed interval (it asks for blood tests before every infusion), so no `cycle_repeat` interval is set.
+- **Escalation within a grade** (e.g. "no improvement after 2-3 days → add MMF", "no response in 3-5 days → infliximab") is written into the action procedures rather than modelled as separate decisions, to keep the pathway readable.
+- **Diarrhoea/colitis grade 3-4:** Table 2 of the source repeats the hepatitis wording (MMF, hepatologist) for severe diarrhoea. The model follows Figure 8 and the main text: i.v. (methyl)prednisolone 1-2 mg/kg, then infliximab 5 mg/kg if there is no response within 3-5 days.
+- **Pneumonitis grade 1:** Table 2 groups grades 1-2 ("interrupt ICPi … prednisone 1-2 mg/kg"). The model follows Figure 9, which separates grade 1 (consider delaying ICPi, monitor every 2-3 days) from grade 2.
+- **Arthralgia and nephritis:** Table 2 gives one recommendation each, so the grade bands come from Figures 13 and 14.
+- **Neurological toxicity:** severity categories (mild / moderate / severe) follow Figure 10. The syndrome-specific management of Figures 11-12 is summarised in the procedures, plus a separate action for Guillain-Barré or myasthenia-like syndromes.
+- **Not modelled:** ocular and haematological toxicities and allograft rejection. The guideline describes them, but gives no actionable algorithm.

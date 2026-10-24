@@ -1,0 +1,797 @@
+/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'esmo_irae' ;
+     title :: 'Management of toxicities from immunotherapy: ESMO Clinical Practice Guidelines (2017)' ;
+     desc :: 'Baseline assessment, surveillance and grade-based management of immune-related adverse events (irAEs) from immune checkpoint inhibitors (ICPi), following Table 2 and the management algorithms of the ESMO guideline. Evidence levels/grades of recommendation in brackets.' ;
+     version :: '1.0' ;
+     author :: 'Derived from Haanen et al., Ann Oncol 2017;28(Suppl 4):iv119-iv142' ;
+end metadata.
+
+metaprops :: '' ;
+
+plan  :: 'esmo_irae' ;
+     caption :: 'Management of toxicities from immunotherapy: ESMO Clinical Practice Guidelines (2017)' ;
+     component :: 'baseline_assessment' ;
+          task_definition :: 'baseline_assessment' ;
+          ltwh :: 40,40,0,0;
+     component :: 'patient_education' ;
+          task_definition :: 'patient_education' ;
+          schedule_constraint :: completed('baseline_assessment') ;
+          ltwh :: 40,140,0,0;
+     component :: 'irae_surveillance' ;
+          task_definition :: 'irae_surveillance' ;
+          schedule_constraint :: completed('patient_education') ;
+          cycle_until ::follow_up_ended = "yes";
+          ltwh :: 40,240,0,0;
+end plan.
+
+enquiry  :: 'baseline_assessment' ;
+     caption :: 'Patient selection and baseline assessment' ;
+     description :: 'Before treatment: patient and family history, general physical condition, autoimmune diseases, baseline laboratory tests (incl. TSH, FT4, cortisol, glucose, liver and renal function) and radiology (CT chest/abdomen/pelvis, often brain MRI). Patients with autoimmune disease or prior irAEs are at higher risk.' ;
+     source :: 'autoimmune_history' ;
+          data_definition :: 'autoimmune_history' ;
+     source :: 'icpi_regimen' ;
+          data_definition :: 'icpi_regimen' ;
+     source :: 'prior_irae' ;
+          data_definition :: 'prior_irae' ;
+end enquiry.
+
+action  :: 'patient_education' ;
+     caption :: 'Inform patient about potential irAEs' ;
+     procedure :: 'Inform the patient about potential adverse events before starting treatment; symptoms must be reported directly to the treating team so that work-up and action can start promptly.' ;
+end action.
+
+enquiry  :: 'toxicity_assessment' ;
+     caption :: 'Assess and grade toxicities (CTCAE)' ;
+     description :: 'At every visit / before every infusion: symptoms, examination and blood tests (LFTs, TFTs, glucose, creatinine, electrolytes); exclude other causes (infection, disease progression, other drugs).' ;
+     source :: 'arthralgia_grade' ;
+          data_definition :: 'arthralgia_grade' ;
+     source :: 'diabetes_grade' ;
+          data_definition :: 'diabetes_grade' ;
+     source :: 'diarrhoea_grade' ;
+          data_definition :: 'diarrhoea_grade' ;
+     source :: 'follow_up_ended' ;
+          data_definition :: 'follow_up_ended' ;
+     source :: 'gbs_or_myasthenia' ;
+          data_definition :: 'gbs_or_myasthenia' ;
+     source :: 'hepatitis_grade' ;
+          data_definition :: 'hepatitis_grade' ;
+     source :: 'hypophysitis_severity' ;
+          data_definition :: 'hypophysitis_severity' ;
+     source :: 'myocarditis_suspected' ;
+          data_definition :: 'myocarditis_suspected' ;
+     source :: 'nephritis_grade' ;
+          data_definition :: 'nephritis_grade' ;
+     source :: 'neuro_severity' ;
+          data_definition :: 'neuro_severity' ;
+     source :: 'pneumonitis_grade' ;
+          data_definition :: 'pneumonitis_grade' ;
+     source :: 'skin_grade' ;
+          data_definition :: 'skin_grade' ;
+     source :: 'thyroid_status' ;
+          data_definition :: 'thyroid_status' ;
+     source :: 'thyroid_symptomatic' ;
+          data_definition :: 'thyroid_symptomatic' ;
+end enquiry.
+
+decision  :: 'skin_management' ;
+     caption :: 'Skin toxicity by grade' ;
+     candidate :: 'skin_continue' ;
+          caption :: 'Continue ICPi with topical treatment' ;
+          argument :: for,skin_grade <= 2 attributes
+               caption :: 'Grade 1-2: continue ICPi (check weekly); topical emollients, antihistamines and/or topical corticosteroid creams; reinitiate ICPi when <= grade 1' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'skin_interrupt' ;
+          caption :: 'Interrupt ICPi, potent topical steroids' ;
+          argument :: for,skin_grade = 3 attributes
+               caption :: 'Grade 3: interrupt ICPi and start topical emollients, antihistamines and high-strength corticosteroid creams [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'skin_discontinue' ;
+          caption :: 'Discontinue ICPi, i.v. steroids, dermatology' ;
+          argument :: for,skin_grade = 4 attributes
+               caption :: 'Grade 4: discontinue ICPi (permanently), consider admission, consult dermatologist immediately, i.v. (methyl)prednisolone 1-2 mg/kg [II, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'skin_topical' ;
+     caption :: 'Topical treatment, continue ICPi' ;
+     precondition ::result_of(skin_management) = skin_continue;
+     procedure :: 'Avoid skin irritants and sun exposure; topical emollients; mild (G1) or moderate/potent (G2) topical steroids; oral or topical antihistamines for itch; continue ICPi.' ;
+end action.
+
+action  :: 'skin_grade3' ;
+     caption :: 'Withhold ICPi; potent topical steroids' ;
+     precondition ::result_of(skin_management) = skin_interrupt;
+     procedure :: 'Withhold ICPi; potent topical steroids; systemic prednisolone 0.5-1 mg/kg (i.v. if severe) weaned over 1-4 weeks; dermatology review, consider biopsy; recommence ICPi at G1 after discussion.' ;
+end action.
+
+action  :: 'skin_grade4' ;
+     caption :: 'Admit; i.v. (methyl)prednisolone 1-2 mg/kg' ;
+     precondition ::result_of(skin_management) = skin_discontinue;
+     procedure :: 'Permanently discontinue ICPi; admit under dermatology supervision; i.v. (methyl)prednisolone 1-2 mg/kg tapered when toxicity resolves; urgent dermatology review, punch biopsy, clinical photography.' ;
+end action.
+
+plan  :: 'skin_toxicity' ;
+     caption :: 'Immune-related skin toxicity' ;
+     precondition ::skin_grade >= 1;
+     component :: 'skin_management' ;
+          task_definition :: 'skin_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'skin_topical' ;
+          task_definition :: 'skin_topical' ;
+          schedule_constraint :: completed('skin_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'skin_grade3' ;
+          task_definition :: 'skin_grade3' ;
+          schedule_constraint :: completed('skin_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'skin_grade4' ;
+          task_definition :: 'skin_grade4' ;
+          schedule_constraint :: completed('skin_management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+decision  :: 'endocrine_management' ;
+     caption :: 'Endocrinopathy management' ;
+     choice_mode :: multiple ;
+     candidate :: 'hyperthyroid_treatment' ;
+          caption :: 'Beta-blocker for symptomatic hyperthyroidism' ;
+          argument :: for,thyroid_status = "hyperthyroid" and thyroid_symptomatic = "yes" attributes
+               caption :: 'Symptomatic hyperthyroidism (usually G1-2): interrupt ICPi, start propranolol or atenolol/metoprolol; restart ICPi when asymptomatic [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hypothyroid_hrt' ;
+          caption :: 'Thyroid hormone replacement' ;
+          argument :: for,thyroid_status = "hypothyroid" attributes
+               caption :: 'Hypothyroidism: start levothyroxine 50-100 ug/day depending on severity, increase until TSH is normal [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hypophysitis_steroids' ;
+          caption :: 'High-dose steroids and HRT for hypophysitis' ;
+          argument :: for,hypophysitis_severity = "moderate" or hypophysitis_severity = "severe" attributes
+               caption :: 'Hypophysitis with headache, diplopia or other neurological symptoms: (methyl)prednisolone 1 mg/kg, taper over 2-4 weeks; HRT for the affected axes [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hypophysitis_hrt' ;
+          caption :: 'Hormone replacement, continue ICPi' ;
+          argument :: for,hypophysitis_severity = "mild" attributes
+               caption :: 'Vague symptoms or asymptomatic: replace cortisol and/or thyroxine as needed and continue ICPi with appropriate HRT (Figure 6)' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'diabetes_insulin' ;
+          caption :: 'Insulin for new-onset type 1 diabetes' ;
+          argument :: for,diabetes_grade >= 1 attributes
+               caption :: 'New-onset type 1 DM: start insulin; grade 3-4 (ketoacidosis): admit immediately [I, A]. Corticosteroids are not recommended' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'beta_blocker' ;
+     caption :: 'Interrupt ICPi; beta-blocker' ;
+     precondition ::result_set(endocrine_management) includes "hyperthyroid_treatment";
+     procedure :: 'Interrupt ICPi; propranolol or atenolol/metoprolol; restart ICPi when asymptomatic. Rarely carbimazole or steroids are needed.' ;
+end action.
+
+action  :: 'levothyroxine' ;
+     caption :: 'Start levothyroxine' ;
+     precondition ::result_set(endocrine_management) includes "hypothyroid_hrt";
+     procedure :: 'Levothyroxine 50-100 ug/day (0.5-1.5 ug/kg; start low in elderly or cardiac history), titrate to normal TSH; continue ICPi. Prednisolone 1 mg/kg for painful thyroiditis.' ;
+end action.
+
+action  :: 'hypophysitis_high_dose' ;
+     caption :: 'Withhold ICPi; (methyl)prednisolone 1 mg/kg' ;
+     precondition ::result_set(endocrine_management) includes "hypophysitis_steroids";
+     procedure :: 'Withhold ICPi; send pituitary axis bloods, then (methyl)prednisolone 1 mg/kg (i.v. if severe mass effect or hypoadrenalism); MRI pituitary, visual fields; endocrinology; wean to replacement dose over 2-4 weeks; sick-day rules.' ;
+end action.
+
+action  :: 'hypophysitis_replacement' ;
+     caption :: 'Hormone replacement, continue ICPi' ;
+     precondition ::result_set(endocrine_management) includes "hypophysitis_hrt";
+     procedure :: 'Replace cortisol (hydrocortisone 20/10/10 mg if 9am cortisol low) and/or thyroxine; continue ICPi with HRT; MRI pituitary; refer to endocrinology; patient education (alert card).' ;
+end action.
+
+action  :: 'insulin_treatment' ;
+     caption :: 'Start insulin' ;
+     precondition ::result_set(endocrine_management) includes "diabetes_insulin";
+     procedure :: 'Start insulin; admit if ketoacidotic (G3-4) and treat per local DKA guidelines; measure C-peptide, anti-GAD and islet cell antibodies; restart ICPi once regulated.' ;
+end action.
+
+plan  :: 'endocrine_toxicity' ;
+     caption :: 'Immune-related endocrinopathies' ;
+     precondition ::thyroid_status != "normal" or hypophysitis_severity != "none" or diabetes_grade >= 1;
+     component :: 'endocrine_management' ;
+          task_definition :: 'endocrine_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'beta_blocker' ;
+          task_definition :: 'beta_blocker' ;
+          schedule_constraint :: completed('endocrine_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'levothyroxine' ;
+          task_definition :: 'levothyroxine' ;
+          schedule_constraint :: completed('endocrine_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'hypophysitis_high_dose' ;
+          task_definition :: 'hypophysitis_high_dose' ;
+          schedule_constraint :: completed('endocrine_management') ;
+          ltwh :: 40,340,0,0;
+     component :: 'hypophysitis_replacement' ;
+          task_definition :: 'hypophysitis_replacement' ;
+          schedule_constraint :: completed('endocrine_management') ;
+          ltwh :: 40,440,0,0;
+     component :: 'insulin_treatment' ;
+          task_definition :: 'insulin_treatment' ;
+          schedule_constraint :: completed('endocrine_management') ;
+          ltwh :: 40,540,0,0;
+end plan.
+
+decision  :: 'hepatitis_management' ;
+     caption :: 'Hepatitis by grade' ;
+     candidate :: 'hep_continue' ;
+          caption :: 'Continue ICPi, repeat LFTs' ;
+          argument :: for,hepatitis_grade = 1 attributes
+               caption :: 'Grade 1 (ALT/AST > ULN-3x ULN): continue treatment; repeat LFTs in 1 week' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hep_withhold' ;
+          caption :: 'Withhold ICPi, close LFT monitoring' ;
+          argument :: for,hepatitis_grade = 2 attributes
+               caption :: 'Grade 2: withhold ICPi and monitor AST/ALT 1-2 times per week; if no improvement after 1 week start (methyl)prednisolone 0.5-1 mg/kg [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hep_discontinue' ;
+          caption :: 'Discontinue ICPi, steroids 1-2 mg/kg' ;
+          argument :: for,hepatitis_grade = 3 attributes
+               caption :: 'Grade 3: discontinue ICPi and start (methyl)prednisolone 1-2 mg/kg; add MMF 1000 mg 3x daily if no improvement in 2-3 days [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'hep_permanent' ;
+          caption :: 'Permanently discontinue, admit, i.v. steroids' ;
+          argument :: for,hepatitis_grade = 4 attributes
+               caption :: 'Grade 4: permanently discontinue ICPi, admit, i.v. (methyl)prednisolone 2 mg/kg; add MMF if no improvement in 2-3 days; consult hepatologist [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'hep_grade1' ;
+     caption :: 'Continue ICPi; repeat LFTs in 1 week' ;
+     precondition ::result_of(hepatitis_management) = hep_continue;
+     procedure :: 'Continue ICPi; if ALT/AST > ULN-3x ULN repeat in 1 week.' ;
+end action.
+
+action  :: 'hep_grade2' ;
+     caption :: 'Withhold ICPi; LFTs 1-2x weekly' ;
+     precondition ::result_of(hepatitis_management) = hep_withhold;
+     procedure :: 'Withhold ICPi; recheck LFTs/INR/albumin every 3 days; review medication and alcohol; liver screen (hepatitis A/B/C, E, autoantibodies); if rising or no improvement after 1 week start oral prednisolone 0.5-1 mg/kg; resume ICPi after taper when prednisolone <= 10 mg.' ;
+end action.
+
+action  :: 'hep_grade3' ;
+     caption :: 'Discontinue ICPi; (methyl)prednisolone 1-2 mg/kg' ;
+     precondition ::result_of(hepatitis_management) = hep_discontinue;
+     procedure :: 'Discontinue ICPi; (methyl)prednisolone 1-2 mg/kg; daily LFTs/INR/albumin, ultrasound with Doppler; add MMF 1000 mg 3x daily if no improvement in 2-3 days; taper over 4-6 weeks.' ;
+end action.
+
+action  :: 'hep_grade4' ;
+     caption :: 'Admit; i.v. (methyl)prednisolone 2 mg/kg' ;
+     precondition ::result_of(hepatitis_management) = hep_permanent;
+     procedure :: 'Permanently discontinue ICPi; admit; i.v. (methyl)prednisolone 2 mg/kg; add MMF if no improvement in 2-3 days; hepatology consult, consider liver biopsy; ATG or tacrolimus if refractory; taper over 6 weeks.' ;
+end action.
+
+plan  :: 'hepatotoxicity' ;
+     caption :: 'Immune-related hepatotoxicity' ;
+     precondition ::hepatitis_grade >= 1;
+     component :: 'hepatitis_management' ;
+          task_definition :: 'hepatitis_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'hep_grade1' ;
+          task_definition :: 'hep_grade1' ;
+          schedule_constraint :: completed('hepatitis_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'hep_grade2' ;
+          task_definition :: 'hep_grade2' ;
+          schedule_constraint :: completed('hepatitis_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'hep_grade3' ;
+          task_definition :: 'hep_grade3' ;
+          schedule_constraint :: completed('hepatitis_management') ;
+          ltwh :: 40,340,0,0;
+     component :: 'hep_grade4' ;
+          task_definition :: 'hep_grade4' ;
+          schedule_constraint :: completed('hepatitis_management') ;
+          ltwh :: 40,440,0,0;
+end plan.
+
+decision  :: 'colitis_management' ;
+     caption :: 'Diarrhoea/colitis by grade' ;
+     candidate :: 'gi_symptomatic' ;
+          caption :: 'Continue ICPi, antidiarrhoeals' ;
+          argument :: for,diarrhoea_grade = 1 attributes
+               caption :: 'Grade 1 (non-severe): ICPi can be continued; antidiarrhoeal treatment (e.g. loperamide), fluid and electrolyte supplementation [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'gi_steroids' ;
+          caption :: 'Withhold ICPi, oral steroids' ;
+          argument :: for,diarrhoea_grade = 2 attributes
+               caption :: 'Grade 2: withhold ICPi; budesonide or oral corticosteroids 1 mg/kg; if no improvement in 3-5 days colonoscopy and, for colitis, infliximab 5 mg/kg [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'gi_admit' ;
+          caption :: 'Discontinue ICPi, admit, i.v. steroids' ;
+          argument :: for,diarrhoea_grade >= 3 attributes
+               caption :: 'Grade 3-4: permanently discontinue anti-CTLA4, admit, i.v. (methyl)prednisolone 1-2 mg/kg; switch to infliximab if no response within 3-5 days [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'gi_grade1' ;
+     caption :: 'Symptomatic management, continue ICPi' ;
+     precondition ::result_of(colitis_management) = gi_symptomatic;
+     procedure :: 'Oral fluids, loperamide, avoid high-fibre/lactose diet; baseline bloods and stool tests (C. difficile, culture, viral PCR); escalate if G1 persists > 14 days.' ;
+end action.
+
+action  :: 'gi_grade2' ;
+     caption :: 'Withhold ICPi; prednisolone 0.5-1 mg/kg' ;
+     precondition ::result_of(colitis_management) = gi_steroids;
+     procedure :: 'Withhold ICPi; prednisolone 0.5-1 mg/kg (or budesonide 9 mg od if no bloody diarrhoea); do not wait for endoscopy to start; contact patient every 72h; if no improvement in 72h or worsening manage as severe.' ;
+end action.
+
+action  :: 'gi_grade34' ;
+     caption :: 'Admit; i.v. (methyl)prednisolone 1-2 mg/kg' ;
+     precondition ::result_of(colitis_management) = gi_admit;
+     procedure :: 'Admit and isolate until infection excluded; i.v. (methyl)prednisolone 1-2 mg/kg; gastroenterology review and sigmoidoscopy/colonoscopy; infliximab 5 mg/kg if no improvement in 72h (no perforation, sepsis, TB, hepatitis, NYHA III/IV CHF); vedolizumab, MMF or tacrolimus as alternatives; early surgical review if bleeding, pain or distension.' ;
+end action.
+
+plan  :: 'gi_toxicity' ;
+     caption :: 'Diarrhoea and colitis' ;
+     precondition ::diarrhoea_grade >= 1;
+     component :: 'colitis_management' ;
+          task_definition :: 'colitis_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'gi_grade1' ;
+          task_definition :: 'gi_grade1' ;
+          schedule_constraint :: completed('colitis_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'gi_grade2' ;
+          task_definition :: 'gi_grade2' ;
+          schedule_constraint :: completed('colitis_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'gi_grade34' ;
+          task_definition :: 'gi_grade34' ;
+          schedule_constraint :: completed('colitis_management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+decision  :: 'pneumonitis_management' ;
+     caption :: 'Pneumonitis by grade' ;
+     candidate :: 'pn_grade1' ;
+          caption :: 'Delay ICPi, monitor' ;
+          argument :: for,pneumonitis_grade = 1 attributes
+               caption :: 'Grade 1 (radiographic changes only): consider delaying ICPi; monitor symptoms every 2-3 days; if worsening treat as grade 2 or 3-4' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'pn_grade2' ;
+          caption :: 'Interrupt ICPi, oral prednisone' ;
+          argument :: for,pneumonitis_grade = 2 attributes
+               caption :: 'Grade 1-2: interrupt ICPi, try to rule out infection and start prednisone 1-2 mg/kg orally; taper over 4-6 weeks [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'pn_grade34' ;
+          caption :: 'Discontinue ICPi, admit, high-dose i.v. steroids' ;
+          argument :: for,pneumonitis_grade >= 3 attributes
+               caption :: 'Grade 3-4: discontinue ICPi permanently, admit (ICU if necessary), high-dose (methyl)prednisolone 2-4 mg/kg i.v.; add infliximab, MMF or cyclophosphamide if deterioration; taper over 4-6 weeks [IV-V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'pn_monitor' ;
+     caption :: 'Delay ICPi; monitor every 2-3 days' ;
+     precondition ::result_of(pneumonitis_management) = pn_grade1;
+     procedure :: 'Consider delay of treatment; monitor symptoms every 2-3 days; chest X-ray, bloods, sputum for infection as indicated.' ;
+end action.
+
+action  :: 'pn_oral_steroids' ;
+     caption :: 'Withhold ICPi; prednisolone 1 mg/kg' ;
+     precondition ::result_of(pneumonitis_management) = pn_grade2;
+     procedure :: 'Withhold ICPi; antibiotics if infection suspected; if no evidence of infection or no improvement after 48h add prednisolone 1 mg/kg/day orally; consider Pneumocystis prophylaxis; HRCT +/- bronchoscopy and BAL; daily symptom monitoring; if no improvement after 48h manage as grade 3.' ;
+end action.
+
+action  :: 'pn_admit' ;
+     caption :: 'Admit; i.v. (methyl)prednisolone 2-4 mg/kg' ;
+     precondition ::result_of(pneumonitis_management) = pn_grade34;
+     procedure :: 'Discontinue ICPi; admit; i.v. (methyl)prednisolone 2-4 mg/kg/day; empirical antibiotics; HRCT and respiratory review; if not improving after 48h add infliximab 5 mg/kg or MMF; discuss escalation and ventilation.' ;
+end action.
+
+plan  :: 'pneumonitis' ;
+     caption :: 'Immune-related pneumonitis' ;
+     precondition ::pneumonitis_grade >= 1;
+     component :: 'pneumonitis_management' ;
+          task_definition :: 'pneumonitis_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'pn_monitor' ;
+          task_definition :: 'pn_monitor' ;
+          schedule_constraint :: completed('pneumonitis_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'pn_oral_steroids' ;
+          task_definition :: 'pn_oral_steroids' ;
+          schedule_constraint :: completed('pneumonitis_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'pn_admit' ;
+          task_definition :: 'pn_admit' ;
+          schedule_constraint :: completed('pneumonitis_management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+decision  :: 'neuro_management' ;
+     caption :: 'Neurological toxicity by severity' ;
+     candidate :: 'neuro_workup' ;
+          caption :: 'Withhold ICPi, work-up' ;
+          argument :: for,neuro_severity = "mild" attributes
+               caption :: 'Mild neurological AEs: withhold ICPi and perform work-up (MRI, lumbar puncture) to define the nature of neurotoxicity [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'neuro_moderate' ;
+          caption :: 'Withhold ICPi, prednisone 0.5-1 mg/kg' ;
+          argument :: for,neuro_severity = "moderate" attributes
+               caption :: 'Moderate symptoms: withhold ICPi; prednisone 0.5-1 mg/kg should be considered [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'neuro_severe' ;
+          caption :: 'Admit, high-dose steroids' ;
+          argument :: for,neuro_severity = "severe" attributes
+               caption :: 'Deterioration or severe symptoms: admit and start (methyl)prednisolone 1-2 mg/kg orally or i.v. [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'neuro_mild' ;
+     caption :: 'Withhold ICPi; neurological work-up' ;
+     precondition ::result_of(neuro_management) = neuro_workup;
+     procedure :: 'Low threshold to withhold ICPi; comprehensive neurological examination; diabetic screen, B12/folate, HIV, TSH; MRI brain/spine; monitor closely for progression.' ;
+end action.
+
+action  :: 'neuro_prednisone' ;
+     caption :: 'Withhold ICPi; prednisone 0.5-1 mg/kg' ;
+     precondition ::result_of(neuro_management) = neuro_moderate;
+     procedure :: 'Withhold ICPi; initial observation or prednisone 0.5-1 mg/kg; pregabalin or duloxetine for pain; neurology consult; resume ICPi once back to grade 1.' ;
+end action.
+
+action  :: 'neuro_admit' ;
+     caption :: 'Admit; (methyl)prednisolone 1-2 mg/kg' ;
+     precondition ::result_of(neuro_management) = neuro_severe;
+     procedure :: 'Withhold ICPi and admit; (methyl)prednisolone 2 mg/kg i.v.; neurologist in care; daily neurological review +/- vital capacity; NCS/EMG, lumbar puncture.' ;
+end action.
+
+action  :: 'plasmapheresis_ivig' ;
+     caption :: 'Plasmapheresis or i.v. immunoglobulin' ;
+     precondition ::gbs_or_myasthenia = "yes";
+     procedure :: 'For Guillain-Barre or myasthenia-like symptoms consider plasmapheresis or i.v. immunoglobulin [V, B]; pyridostigmine for myasthenia; monitor respiratory function.' ;
+end action.
+
+plan  :: 'neurological_toxicity' ;
+     caption :: 'Neurological toxicity' ;
+     precondition ::neuro_severity != "none";
+     component :: 'neuro_management' ;
+          task_definition :: 'neuro_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'neuro_mild' ;
+          task_definition :: 'neuro_mild' ;
+          schedule_constraint :: completed('neuro_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'neuro_prednisone' ;
+          task_definition :: 'neuro_prednisone' ;
+          schedule_constraint :: completed('neuro_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'neuro_admit' ;
+          task_definition :: 'neuro_admit' ;
+          schedule_constraint :: completed('neuro_management') ;
+          ltwh :: 40,340,0,0;
+     component :: 'plasmapheresis_ivig' ;
+          task_definition :: 'plasmapheresis_ivig' ;
+          schedule_constraint :: completed('neuro_management') ;
+          ltwh :: 40,440,0,0;
+end plan.
+
+action  :: 'myocarditis_management' ;
+     caption :: 'Suspected myocarditis: admit, high-dose steroids' ;
+     precondition ::myocarditis_suspected = "yes";
+     procedure :: 'Admit immediately and start high-dose (methyl)prednisolone 1-2 mg/kg; early cardiology consultation; in case of deterioration add another immunosuppressive drug (MMF or tacrolimus) [V, B].' ;
+end action.
+
+decision  :: 'arthralgia_management' ;
+     caption :: 'Arthralgia by grade' ;
+     candidate :: 'rheum_nsaids' ;
+          caption :: 'Analgesia, continue ICPi' ;
+          argument :: for,arthralgia_grade = 1 attributes
+               caption :: 'Mild arthralgia: NSAIDs/analgesia (paracetamol, ibuprofen); continue ICPi [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'rheum_low_dose_steroids' ;
+          caption :: 'Low-dose prednisone' ;
+          argument :: for,arthralgia_grade = 2 attributes
+               caption :: 'No improvement / moderate: low-dose steroids (prednisone 10-20 mg) [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'rheum_referral' ;
+          caption :: 'Rheumatology referral, prednisone 1 mg/kg' ;
+          argument :: for,arthralgia_grade = 3 attributes
+               caption :: 'Severe polyarthritis: refer to or consult a rheumatologist and start prednisone 1 mg/kg; infliximab or another anti-TNF-alpha drug if needed [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'arthralgia_g1' ;
+     caption :: 'Analgesia; continue ICPi' ;
+     precondition ::result_of(arthralgia_management) = rheum_nsaids;
+     procedure :: 'Paracetamol and/or ibuprofen; continue ICPi; rheumatological history and examination.' ;
+end action.
+
+action  :: 'arthralgia_g2' ;
+     caption :: 'Escalate analgesia; prednisolone 10-20 mg' ;
+     precondition ::result_of(arthralgia_management) = rheum_low_dose_steroids;
+     procedure :: 'Escalate analgesia (diclofenac, naproxen or etoricoxib); if inadequately controlled prednisolone 10-20 mg or intra-articular steroids; consider withholding ICPi; early rheumatology referral.' ;
+end action.
+
+action  :: 'arthralgia_g3' ;
+     caption :: 'Withhold ICPi; prednisolone 0.5-1 mg/kg' ;
+     precondition ::result_of(arthralgia_management) = rheum_referral;
+     procedure :: 'Withhold ICPi; prednisolone 0.5-1 mg/kg (1 mg/kg per Table 2); rheumatology advice; consider anti-TNF-alpha therapy if no improvement after 4 weeks.' ;
+end action.
+
+plan  :: 'rheumatological_toxicity' ;
+     caption :: 'Rheumatological toxicity' ;
+     precondition ::arthralgia_grade >= 1;
+     component :: 'arthralgia_management' ;
+          task_definition :: 'arthralgia_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'arthralgia_g1' ;
+          task_definition :: 'arthralgia_g1' ;
+          schedule_constraint :: completed('arthralgia_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'arthralgia_g2' ;
+          task_definition :: 'arthralgia_g2' ;
+          schedule_constraint :: completed('arthralgia_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'arthralgia_g3' ;
+          task_definition :: 'arthralgia_g3' ;
+          schedule_constraint :: completed('arthralgia_management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+decision  :: 'nephritis_management' ;
+     caption :: 'Nephritis by grade' ;
+     candidate :: 'renal_continue' ;
+          caption :: 'Continue ICPi, weekly creatinine' ;
+          argument :: for,nephritis_grade = 1 attributes
+               caption :: 'Grade 1: continue ICPi, repeat creatinine weekly; review hydration, medication and urinary infection' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'renal_withhold' ;
+          caption :: 'Withhold ICPi, steroids if irAE' ;
+          argument :: for,nephritis_grade = 2 attributes
+               caption :: 'Rule out other causes, stop nephrotoxic drugs; interrupt ICPi depending on severity; (methyl)prednisolone; consider renal biopsy [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'renal_discontinue' ;
+          caption :: 'Discontinue ICPi, admit, i.v. steroids' ;
+          argument :: for,nephritis_grade >= 3 attributes
+               caption :: 'Severe renal insufficiency: permanently discontinue ICPi, admit, (methyl)prednisolone 1-2 mg/kg; nephrology consultation, renal biopsy [V, B]' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'renal_g1' ;
+     caption :: 'Continue ICPi; weekly creatinine' ;
+     precondition ::result_of(nephritis_management) = renal_continue;
+     procedure :: 'Continue ICPi; repeat creatinine weekly; urine dipstick and protein assessment; ultrasound if obstruction suspected.' ;
+end action.
+
+action  :: 'renal_g2' ;
+     caption :: 'Withhold ICPi; prednisolone 0.5-1 mg/kg if irAE' ;
+     precondition ::result_of(nephritis_management) = renal_withhold;
+     procedure :: 'Withhold ICPi; hydration and review creatinine in 48-72h; if attributed to irAE start oral prednisolone 0.5-1 mg/kg; discuss with nephrologist and need for biopsy; recommence ICPi when back to G1/baseline.' ;
+end action.
+
+action  :: 'renal_g34' ;
+     caption :: 'Admit; i.v. (methyl)prednisolone 1-2 mg/kg' ;
+     precondition ::result_of(nephritis_management) = renal_discontinue;
+     procedure :: 'Withhold/discontinue ICPi; admit for monitoring and fluid balance; daily creatinine/K+; nephrology and biopsy; i.v. (methyl)prednisolone 1-2 mg/kg; grade 4: manage where renal replacement therapy is available.' ;
+end action.
+
+plan  :: 'renal_toxicity' ;
+     caption :: 'Renal toxicity (nephritis)' ;
+     precondition ::nephritis_grade >= 1;
+     component :: 'nephritis_management' ;
+          task_definition :: 'nephritis_management' ;
+          ltwh :: 40,40,0,0;
+     component :: 'renal_g1' ;
+          task_definition :: 'renal_g1' ;
+          schedule_constraint :: completed('nephritis_management') ;
+          ltwh :: 40,140,0,0;
+     component :: 'renal_g2' ;
+          task_definition :: 'renal_g2' ;
+          schedule_constraint :: completed('nephritis_management') ;
+          ltwh :: 40,240,0,0;
+     component :: 'renal_g34' ;
+          task_definition :: 'renal_g34' ;
+          schedule_constraint :: completed('nephritis_management') ;
+          ltwh :: 40,340,0,0;
+end plan.
+
+plan  :: 'irae_surveillance' ;
+     caption :: 'irAE surveillance and management cycle' ;
+     description :: 'irAEs mostly occur within the first 3 months but may appear up to 1 year after discontinuation. Severe irAEs usually require stopping the ICPi and immunosuppression (high-dose corticosteroids; sometimes TNF-alpha antagonists, mycophenolate or tacrolimus) with careful tapering; consider Pneumocystis prophylaxis for prolonged (>6 weeks) immunosuppression.' ;
+     component :: 'toxicity_assessment' ;
+          task_definition :: 'toxicity_assessment' ;
+          ltwh :: 40,40,0,0;
+     component :: 'skin_toxicity' ;
+          task_definition :: 'skin_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,140,0,0;
+     component :: 'endocrine_toxicity' ;
+          task_definition :: 'endocrine_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,240,0,0;
+     component :: 'hepatotoxicity' ;
+          task_definition :: 'hepatotoxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,340,0,0;
+     component :: 'gi_toxicity' ;
+          task_definition :: 'gi_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,440,0,0;
+     component :: 'pneumonitis' ;
+          task_definition :: 'pneumonitis' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,540,0,0;
+     component :: 'neurological_toxicity' ;
+          task_definition :: 'neurological_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,640,0,0;
+     component :: 'myocarditis_management' ;
+          task_definition :: 'myocarditis_management' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,740,0,0;
+     component :: 'rheumatological_toxicity' ;
+          task_definition :: 'rheumatological_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,840,0,0;
+     component :: 'renal_toxicity' ;
+          task_definition :: 'renal_toxicity' ;
+          schedule_constraint :: completed('toxicity_assessment') ;
+          ltwh :: 40,940,0,0;
+end plan.
+
+
+data  :: 'icpi_regimen' ;
+     type :: text ;
+     caption :: 'Checkpoint inhibitor regimen' ;
+     range ::"anti_ctla4","anti_pd1_pdl1","combination";
+end data.
+
+data  :: 'autoimmune_history' ;
+     type :: text ;
+     caption :: 'History of (or active treatment for) autoimmune disease?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'prior_irae' ;
+     type :: text ;
+     caption :: 'Previous irAEs on another checkpoint inhibitor?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'follow_up_ended' ;
+     type :: text ;
+     caption :: 'irAE follow-up can end (therapy completed and follow-up period over)?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'skin_grade' ;
+     type :: integer ;
+     caption :: 'Skin toxicity CTCAE grade (0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'hepatitis_grade' ;
+     type :: integer ;
+     caption :: 'Hepatitis CTCAE grade (ALT/AST elevation; 0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'diarrhoea_grade' ;
+     type :: integer ;
+     caption :: 'Diarrhoea/colitis CTCAE grade (0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'pneumonitis_grade' ;
+     type :: integer ;
+     caption :: 'Pneumonitis CTCAE grade (0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'nephritis_grade' ;
+     type :: integer ;
+     caption :: 'Nephritis CTCAE grade (creatinine rise; 0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'arthralgia_grade' ;
+     type :: integer ;
+     caption :: 'Arthralgia grade (0 = none)' ;
+     range ::0,1,2,3;
+end data.
+
+data  :: 'thyroid_status' ;
+     type :: text ;
+     caption :: 'Thyroid function (TSH/FT4)' ;
+     range ::"normal","hypothyroid","hyperthyroid";
+end data.
+
+data  :: 'thyroid_symptomatic' ;
+     type :: text ;
+     caption :: 'Symptoms of thyroid dysfunction?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'hypophysitis_severity' ;
+     type :: text ;
+     caption :: 'Hypophysitis presentation' ;
+     range ::"none","mild","moderate","severe";
+end data.
+
+data  :: 'diabetes_grade' ;
+     type :: integer ;
+     caption :: 'New-onset (type 1) diabetes grade (3-4 = ketoacidosis; 0 = none)' ;
+     range ::0,1,2,3,4;
+end data.
+
+data  :: 'neuro_severity' ;
+     type :: text ;
+     caption :: 'Neurological toxicity severity' ;
+     range ::"none","mild","moderate","severe";
+end data.
+
+data  :: 'gbs_or_myasthenia' ;
+     type :: text ;
+     caption :: 'Guillain-Barre or myasthenia-like syndrome?' ;
+     range ::"yes","no";
+end data.
+
+data  :: 'myocarditis_suspected' ;
+     type :: text ;
+     caption :: 'Myocarditis suspected?' ;
+     range ::"yes","no";
+end data.

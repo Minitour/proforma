@@ -1,0 +1,160 @@
+---
+title: Management of toxicities from immunotherapy: ESMO Clinical Practice Guidelines (2017)
+---
+flowchart TD
+    esmo_irae__baseline_assessment{"Patient selection and baseline assessment"}
+    class esmo_irae__baseline_assessment enquiry
+    esmo_irae__patient_education("Inform patient about potential irAEs")
+    class esmo_irae__patient_education action
+    subgraph esmo_irae__irae_surveillance["irAE surveillance and management cycle<br/>[cycle: until follow_up_ended = #quot;yes#quot;]"]
+        esmo_irae__irae_surveillance__toxicity_assessment{"Assess and grade toxicities (CTCAE)"}
+        class esmo_irae__irae_surveillance__toxicity_assessment enquiry
+        subgraph esmo_irae__irae_surveillance__skin_toxicity["Immune-related skin toxicity"]
+            esmo_irae__irae_surveillance__skin_toxicity__skin_management(("Skin toxicity by grade"))
+            class esmo_irae__irae_surveillance__skin_toxicity__skin_management decision
+            esmo_irae__irae_surveillance__skin_toxicity__skin_topical("Topical treatment, continue ICPi")
+            class esmo_irae__irae_surveillance__skin_toxicity__skin_topical action
+            esmo_irae__irae_surveillance__skin_toxicity__skin_grade3("Withhold ICPi; potent topical steroids")
+            class esmo_irae__irae_surveillance__skin_toxicity__skin_grade3 action
+            esmo_irae__irae_surveillance__skin_toxicity__skin_grade4("Admit; i.v. (methyl)prednisolone 1-2 mg/kg")
+            class esmo_irae__irae_surveillance__skin_toxicity__skin_grade4 action
+            esmo_irae__irae_surveillance__skin_toxicity__skin_management -->|"skin_continue"| esmo_irae__irae_surveillance__skin_toxicity__skin_topical
+            esmo_irae__irae_surveillance__skin_toxicity__skin_management -->|"skin_interrupt"| esmo_irae__irae_surveillance__skin_toxicity__skin_grade3
+            esmo_irae__irae_surveillance__skin_toxicity__skin_management -->|"skin_discontinue"| esmo_irae__irae_surveillance__skin_toxicity__skin_grade4
+        end
+        style esmo_irae__irae_surveillance__skin_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__endocrine_toxicity["Immune-related endocrinopathies"]
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management(("Endocrinopathy management"))
+            class esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management decision
+            esmo_irae__irae_surveillance__endocrine_toxicity__beta_blocker("Interrupt ICPi; beta-blocker")
+            class esmo_irae__irae_surveillance__endocrine_toxicity__beta_blocker action
+            esmo_irae__irae_surveillance__endocrine_toxicity__levothyroxine("Start levothyroxine")
+            class esmo_irae__irae_surveillance__endocrine_toxicity__levothyroxine action
+            esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_high_dose("Withhold ICPi; (methyl)prednisolone 1 mg/kg")
+            class esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_high_dose action
+            esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_replacement("Hormone replacement, continue ICPi")
+            class esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_replacement action
+            esmo_irae__irae_surveillance__endocrine_toxicity__insulin_treatment("Start insulin")
+            class esmo_irae__irae_surveillance__endocrine_toxicity__insulin_treatment action
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management -->|"hyperthyroid_treatment"| esmo_irae__irae_surveillance__endocrine_toxicity__beta_blocker
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management -->|"hypothyroid_hrt"| esmo_irae__irae_surveillance__endocrine_toxicity__levothyroxine
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management -->|"hypophysitis_steroids"| esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_high_dose
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management -->|"hypophysitis_hrt"| esmo_irae__irae_surveillance__endocrine_toxicity__hypophysitis_replacement
+            esmo_irae__irae_surveillance__endocrine_toxicity__endocrine_management -->|"diabetes_insulin"| esmo_irae__irae_surveillance__endocrine_toxicity__insulin_treatment
+        end
+        style esmo_irae__irae_surveillance__endocrine_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__hepatotoxicity["Immune-related hepatotoxicity"]
+            esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management(("Hepatitis by grade"))
+            class esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management decision
+            esmo_irae__irae_surveillance__hepatotoxicity__hep_grade1("Continue ICPi; repeat LFTs in 1 week")
+            class esmo_irae__irae_surveillance__hepatotoxicity__hep_grade1 action
+            esmo_irae__irae_surveillance__hepatotoxicity__hep_grade2("Withhold ICPi; LFTs 1-2x weekly")
+            class esmo_irae__irae_surveillance__hepatotoxicity__hep_grade2 action
+            esmo_irae__irae_surveillance__hepatotoxicity__hep_grade3("Discontinue ICPi; (methyl)prednisolone 1-2 mg/kg")
+            class esmo_irae__irae_surveillance__hepatotoxicity__hep_grade3 action
+            esmo_irae__irae_surveillance__hepatotoxicity__hep_grade4("Admit; i.v. (methyl)prednisolone 2 mg/kg")
+            class esmo_irae__irae_surveillance__hepatotoxicity__hep_grade4 action
+            esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management -->|"hep_continue"| esmo_irae__irae_surveillance__hepatotoxicity__hep_grade1
+            esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management -->|"hep_withhold"| esmo_irae__irae_surveillance__hepatotoxicity__hep_grade2
+            esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management -->|"hep_discontinue"| esmo_irae__irae_surveillance__hepatotoxicity__hep_grade3
+            esmo_irae__irae_surveillance__hepatotoxicity__hepatitis_management -->|"hep_permanent"| esmo_irae__irae_surveillance__hepatotoxicity__hep_grade4
+        end
+        style esmo_irae__irae_surveillance__hepatotoxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__gi_toxicity["Diarrhoea and colitis"]
+            esmo_irae__irae_surveillance__gi_toxicity__colitis_management(("Diarrhoea/colitis by grade"))
+            class esmo_irae__irae_surveillance__gi_toxicity__colitis_management decision
+            esmo_irae__irae_surveillance__gi_toxicity__gi_grade1("Symptomatic management, continue ICPi")
+            class esmo_irae__irae_surveillance__gi_toxicity__gi_grade1 action
+            esmo_irae__irae_surveillance__gi_toxicity__gi_grade2("Withhold ICPi; prednisolone 0.5-1 mg/kg")
+            class esmo_irae__irae_surveillance__gi_toxicity__gi_grade2 action
+            esmo_irae__irae_surveillance__gi_toxicity__gi_grade34("Admit; i.v. (methyl)prednisolone 1-2 mg/kg")
+            class esmo_irae__irae_surveillance__gi_toxicity__gi_grade34 action
+            esmo_irae__irae_surveillance__gi_toxicity__colitis_management -->|"gi_symptomatic"| esmo_irae__irae_surveillance__gi_toxicity__gi_grade1
+            esmo_irae__irae_surveillance__gi_toxicity__colitis_management -->|"gi_steroids"| esmo_irae__irae_surveillance__gi_toxicity__gi_grade2
+            esmo_irae__irae_surveillance__gi_toxicity__colitis_management -->|"gi_admit"| esmo_irae__irae_surveillance__gi_toxicity__gi_grade34
+        end
+        style esmo_irae__irae_surveillance__gi_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__pneumonitis["Immune-related pneumonitis"]
+            esmo_irae__irae_surveillance__pneumonitis__pneumonitis_management(("Pneumonitis by grade"))
+            class esmo_irae__irae_surveillance__pneumonitis__pneumonitis_management decision
+            esmo_irae__irae_surveillance__pneumonitis__pn_monitor("Delay ICPi; monitor every 2-3 days")
+            class esmo_irae__irae_surveillance__pneumonitis__pn_monitor action
+            esmo_irae__irae_surveillance__pneumonitis__pn_oral_steroids("Withhold ICPi; prednisolone 1 mg/kg")
+            class esmo_irae__irae_surveillance__pneumonitis__pn_oral_steroids action
+            esmo_irae__irae_surveillance__pneumonitis__pn_admit("Admit; i.v. (methyl)prednisolone 2-4 mg/kg")
+            class esmo_irae__irae_surveillance__pneumonitis__pn_admit action
+            esmo_irae__irae_surveillance__pneumonitis__pneumonitis_management -->|"pn_grade1"| esmo_irae__irae_surveillance__pneumonitis__pn_monitor
+            esmo_irae__irae_surveillance__pneumonitis__pneumonitis_management -->|"pn_grade2"| esmo_irae__irae_surveillance__pneumonitis__pn_oral_steroids
+            esmo_irae__irae_surveillance__pneumonitis__pneumonitis_management -->|"pn_grade34"| esmo_irae__irae_surveillance__pneumonitis__pn_admit
+        end
+        style esmo_irae__irae_surveillance__pneumonitis fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__neurological_toxicity["Neurological toxicity"]
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_management(("Neurological toxicity by severity"))
+            class esmo_irae__irae_surveillance__neurological_toxicity__neuro_management decision
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_mild("Withhold ICPi; neurological work-up")
+            class esmo_irae__irae_surveillance__neurological_toxicity__neuro_mild action
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_prednisone("Withhold ICPi; prednisone 0.5-1 mg/kg")
+            class esmo_irae__irae_surveillance__neurological_toxicity__neuro_prednisone action
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_admit("Admit; (methyl)prednisolone 1-2 mg/kg")
+            class esmo_irae__irae_surveillance__neurological_toxicity__neuro_admit action
+            esmo_irae__irae_surveillance__neurological_toxicity__plasmapheresis_ivig("Plasmapheresis or i.v. immunoglobulin")
+            class esmo_irae__irae_surveillance__neurological_toxicity__plasmapheresis_ivig action
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_management -->|"neuro_workup"| esmo_irae__irae_surveillance__neurological_toxicity__neuro_mild
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_management -->|"neuro_moderate"| esmo_irae__irae_surveillance__neurological_toxicity__neuro_prednisone
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_management -->|"neuro_severe"| esmo_irae__irae_surveillance__neurological_toxicity__neuro_admit
+            esmo_irae__irae_surveillance__neurological_toxicity__neuro_management --> esmo_irae__irae_surveillance__neurological_toxicity__plasmapheresis_ivig
+        end
+        style esmo_irae__irae_surveillance__neurological_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        esmo_irae__irae_surveillance__myocarditis_management("Suspected myocarditis: admit, high-dose steroids")
+        class esmo_irae__irae_surveillance__myocarditis_management action
+        subgraph esmo_irae__irae_surveillance__rheumatological_toxicity["Rheumatological toxicity"]
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_management(("Arthralgia by grade"))
+            class esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_management decision
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g1("Analgesia; continue ICPi")
+            class esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g1 action
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g2("Escalate analgesia; prednisolone 10-20 mg")
+            class esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g2 action
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g3("Withhold ICPi; prednisolone 0.5-1 mg/kg")
+            class esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g3 action
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_management -->|"rheum_nsaids"| esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g1
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_management -->|"rheum_low_dose_steroids"| esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g2
+            esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_management -->|"rheum_referral"| esmo_irae__irae_surveillance__rheumatological_toxicity__arthralgia_g3
+        end
+        style esmo_irae__irae_surveillance__rheumatological_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        subgraph esmo_irae__irae_surveillance__renal_toxicity["Renal toxicity (nephritis)"]
+            esmo_irae__irae_surveillance__renal_toxicity__nephritis_management(("Nephritis by grade"))
+            class esmo_irae__irae_surveillance__renal_toxicity__nephritis_management decision
+            esmo_irae__irae_surveillance__renal_toxicity__renal_g1("Continue ICPi; weekly creatinine")
+            class esmo_irae__irae_surveillance__renal_toxicity__renal_g1 action
+            esmo_irae__irae_surveillance__renal_toxicity__renal_g2("Withhold ICPi; prednisolone 0.5-1 mg/kg if irAE")
+            class esmo_irae__irae_surveillance__renal_toxicity__renal_g2 action
+            esmo_irae__irae_surveillance__renal_toxicity__renal_g34("Admit; i.v. (methyl)prednisolone 1-2 mg/kg")
+            class esmo_irae__irae_surveillance__renal_toxicity__renal_g34 action
+            esmo_irae__irae_surveillance__renal_toxicity__nephritis_management -->|"renal_continue"| esmo_irae__irae_surveillance__renal_toxicity__renal_g1
+            esmo_irae__irae_surveillance__renal_toxicity__nephritis_management -->|"renal_withhold"| esmo_irae__irae_surveillance__renal_toxicity__renal_g2
+            esmo_irae__irae_surveillance__renal_toxicity__nephritis_management -->|"renal_discontinue"| esmo_irae__irae_surveillance__renal_toxicity__renal_g34
+        end
+        style esmo_irae__irae_surveillance__renal_toxicity fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__skin_toxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__endocrine_toxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__hepatotoxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__gi_toxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__pneumonitis
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__neurological_toxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__myocarditis_management
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__rheumatological_toxicity
+        esmo_irae__irae_surveillance__toxicity_assessment --> esmo_irae__irae_surveillance__renal_toxicity
+    end
+    style esmo_irae__irae_surveillance fill:#FFDCD9,stroke:#E55344,stroke-width:2px
+    esmo_irae__baseline_assessment --> esmo_irae__patient_education
+    esmo_irae__patient_education --> esmo_irae__irae_surveillance
+    classDef action fill:#E4FAFA,stroke:#008585,stroke-width:2px,color:#000
+    classDef enquiry fill:#E6FFE6,stroke:#009700,stroke-width:2px,color:#000
+    classDef decision fill:#FFFFFF,stroke:#B40F78,stroke-width:2px,color:#000
+    classDef plan fill:#FFDCD9,stroke:#E55344,stroke-width:2px,color:#000
+    classDef keystone fill:#FEFBED,stroke:#D9AB0A,stroke-width:2px,color:#000
+    classDef candidate fill:#F8A2D3,stroke:#B40F78,stroke-dasharray:3 3,color:#000
+    classDef data fill:#F1F3F4,stroke:#5F6368,stroke-dasharray:2 2,color:#000
+    classDef missing fill:#FCE8E6,stroke:#D93025,stroke-width:2px,color:#000
+    classDef optional stroke-dasharray:6 4
+    classDef terminal stroke-width:4px
