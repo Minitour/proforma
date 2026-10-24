@@ -578,32 +578,223 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
         "▸ " + (t.components ? t.components.length : 0) + " tasks · double-click to open";
     }
     wireNode(g, c, t);
-    return { x1: cx - 36, x2: cx + 36, y1: cy - 32, y2: cy + 36 + lines.length * 14 + (drill ? 12 : 0), cx, cy };
+    const half = Math.max(36, (Math.max(...lines.map((l) => l.length)) * 6.4) / 2, drill ? 95 : 0);
+    return { x1: cx - half, x2: cx + half, y1: cy - 34, y2: cy + 36 + lines.length * 14 + (drill ? 12 : 0), cx, cy };
   }
 
-  // scheduling arrows between the components of one plan, clipped to their boxes
+  // ---- edge routing: orthogonal paths that go around the other boxes of the plan
+  // A* over a grid of CELL px; every box of the plan (inflated by MARGIN) is an
+  // obstacle, the edge's own ends included: a route leaves and enters at the ports. Turns cost extra, and cells already used by an
+  // earlier edge cost a little, so fan-outs spread instead of overlapping.
+  const CELL = 10;
+  const MARGIN = 10;
+  const TURN = 6;
+  const REUSE = 2;
+
+  function makeGrid(boxList) {
+    let x1 = Infinity;
+    let y1 = Infinity;
+    let x2 = -Infinity;
+    let y2 = -Infinity;
+    for (const b of boxList) {
+      x1 = Math.min(x1, b.x1);
+      y1 = Math.min(y1, b.y1);
+      x2 = Math.max(x2, b.x2);
+      y2 = Math.max(y2, b.y2);
+    }
+    let cell = CELL;
+    const pad = 80;
+    while (((x2 - x1 + 2 * pad) / cell) * ((y2 - y1 + 2 * pad) / cell) > 600000) cell *= 1.5;
+    const ox = x1 - pad;
+    const oy = y1 - pad;
+    const cols = Math.ceil((x2 - x1 + 2 * pad) / cell) + 1;
+    const rows = Math.ceil((y2 - y1 + 2 * pad) / cell) + 1;
+    const owner = new Int32Array(cols * rows).fill(-1);
+    boxList.forEach((b, i) => {
+      const c1 = Math.max(0, Math.floor((b.x1 - MARGIN - ox) / cell));
+      const c2 = Math.min(cols - 1, Math.ceil((b.x2 + MARGIN - ox) / cell));
+      const r1 = Math.max(0, Math.floor((b.y1 - MARGIN - oy) / cell));
+      const r2 = Math.min(rows - 1, Math.ceil((b.y2 + MARGIN - oy) / cell));
+      for (let r = r1; r <= r2; r++) for (let c = c1; c <= c2; c++) if (owner[r * cols + c] < 0) owner[r * cols + c] = i;
+    });
+    return { ox, oy, cell, cols, rows, owner, used: new Uint8Array(cols * rows) };
+  }
+
+  // where an edge leaves / enters a box, and the outward direction (0 right, 1 left, 2 down, 3 up)
+  function ports(pb, qb) {
+    if (qb.y1 >= pb.y2 - 4) return [{ x: pb.cx, y: pb.y2, d: 2 }, { x: qb.cx, y: qb.y1, d: 3 }];
+    if (qb.y2 <= pb.y1 + 4) return [{ x: pb.cx, y: pb.y1, d: 3 }, { x: qb.cx, y: qb.y2, d: 2 }];
+    if (qb.cx >= pb.cx) return [{ x: pb.x2, y: pb.cy, d: 0 }, { x: qb.x1, y: qb.cy, d: 1 }];
+    return [{ x: pb.x1, y: pb.cy, d: 1 }, { x: qb.x2, y: qb.cy, d: 0 }];
+  }
+
+  const DX = [1, -1, 0, 0];
+  const DY = [0, 0, 1, -1];
+
+  function route(G, pi, qi, sp, tp) {
+    const { ox, oy, cell, cols, rows, owner, used } = G;
+    const toCell = (p) => [
+      Math.max(0, Math.min(cols - 1, Math.round((p.x - ox) / cell) + DX[p.d] * Math.ceil(MARGIN / cell + 1))),
+      Math.max(0, Math.min(rows - 1, Math.round((p.y - oy) / cell) + DY[p.d] * Math.ceil(MARGIN / cell + 1))),
+    ];
+    const [sc, sr] = toCell(sp);
+    const [gc, gr] = toCell(tp);
+    // the end boxes are obstacles too: routes start and end on the cells just outside their ports
+    const free = (c, r) => owner[r * cols + c] < 0 || (c === sc && r === sr) || (c === gc && r === gr);
+    const N = cols * rows * 4;
+    const dist = new Float64Array(N).fill(Infinity);
+    const prev = new Int32Array(N).fill(-1);
+    const heap = [];
+    const push = (k, f) => {
+      heap.push([f, k]);
+      let i = heap.length - 1;
+      while (i > 0) {
+        const p = (i - 1) >> 1;
+        if (heap[p][0] <= heap[i][0]) break;
+        [heap[p], heap[i]] = [heap[i], heap[p]];
+        i = p;
+      }
+    };
+    const pop = () => {
+      const top = heap[0];
+      const last = heap.pop();
+      if (heap.length) {
+        heap[0] = last;
+        let i = 0;
+        for (;;) {
+          const l = 2 * i + 1;
+          const r = l + 1;
+          let m = i;
+          if (l < heap.length && heap[l][0] < heap[m][0]) m = l;
+          if (r < heap.length && heap[r][0] < heap[m][0]) m = r;
+          if (m === i) break;
+          [heap[m], heap[i]] = [heap[i], heap[m]];
+          i = m;
+        }
+      }
+      return top;
+    };
+    const h = (c, r) => Math.abs(c - gc) + Math.abs(r - gr);
+    const start = (sr * cols + sc) * 4 + sp.d;
+    dist[start] = 0;
+    push(start, h(sc, sr));
+    let found = -1;
+    let guard = 0;
+    while (heap.length && guard++ < 400000) {
+      const [, k] = pop();
+      const d = k & 3;
+      const ci = k >> 2;
+      const c = ci % cols;
+      const r = (ci - c) / cols;
+      if (c === gc && r === gr) {
+        found = k;
+        break;
+      }
+      const base = dist[k];
+      for (let nd = 0; nd < 4; nd++) {
+        if ((d ^ nd) === 1 && (d >> 1) === (nd >> 1)) continue; // no reversing
+        const nc = c + DX[nd];
+        const nr = r + DY[nd];
+        if (nc < 0 || nr < 0 || nc >= cols || nr >= rows || !free(nc, nr)) continue;
+        const nk = (nr * cols + nc) * 4 + nd;
+        const cost = base + 1 + (nd !== d ? TURN : 0) + (used[nr * cols + nc] ? REUSE : 0);
+        if (cost < dist[nk]) {
+          dist[nk] = cost;
+          prev[nk] = k;
+          push(nk, cost + h(nc, nr));
+        }
+      }
+    }
+    if (found < 0) return null;
+    const cellsOnPath = [];
+    for (let k = found; k >= 0; k = prev[k]) cellsOnPath.push(k >> 2);
+    cellsOnPath.reverse();
+    for (const ci of cellsOnPath) used[ci] = 1;
+    let pts = cellsOnPath.map((ci) => ({ x: ox + (ci % cols) * cell, y: oy + Math.floor(ci / cols) * cell }));
+    // line the first and last straight runs up with the ports, then add the ports
+    const align = (list, port) => {
+      const vertical = port.d >= 2;
+      const key = vertical ? "x" : "y";
+      const v0 = list[0][key];
+      for (let i = 0; i < list.length && list[i][key] === v0; i++) list[i][key] = port[key];
+    };
+    align(pts, sp);
+    pts.reverse();
+    align(pts, tp);
+    pts.reverse();
+    pts = [{ x: sp.x, y: sp.y }, ...pts, { x: tp.x, y: tp.y }];
+    // drop collinear points
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const a = out[out.length - 1];
+      const b = pts[i];
+      const c2 = pts[i + 1];
+      if ((a.x === b.x && b.x === c2.x) || (a.y === b.y && b.y === c2.y)) continue;
+      out.push(b);
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  }
+
+  function roundedPath(pts, rad) {
+    let d = "M" + pts[0].x + " " + pts[0].y;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const p = pts[i - 1];
+      const q = pts[i];
+      const n = pts[i + 1];
+      const l1 = Math.hypot(q.x - p.x, q.y - p.y);
+      const l2 = Math.hypot(n.x - q.x, n.y - q.y);
+      const r = Math.min(rad, l1 / 2, l2 / 2);
+      const a = { x: q.x - ((q.x - p.x) / (l1 || 1)) * r, y: q.y - ((q.y - p.y) / (l1 || 1)) * r };
+      const b = { x: q.x + ((n.x - q.x) / (l2 || 1)) * r, y: q.y + ((n.y - q.y) / (l2 || 1)) * r };
+      d += " L" + a.x + " " + a.y + " Q" + q.x + " " + q.y + " " + b.x + " " + b.y;
+    }
+    const last = pts[pts.length - 1];
+    return d + " L" + last.x + " " + last.y;
+  }
+
+  // a point halfway along a polyline, and whether that segment is vertical
+  function midpoint(pts) {
+    const segs = [];
+    let total = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const l = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+      segs.push(l);
+      total += l;
+    }
+    let left = total / 2;
+    for (let i = 1; i < pts.length; i++) {
+      if (left <= segs[i - 1]) {
+        const t = left / (segs[i - 1] || 1);
+        return { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t, vertical: pts[i].x === pts[i - 1].x };
+      }
+      left -= segs[i - 1];
+    }
+    return { x: pts[0].x, y: pts[0].y, vertical: true };
+  }
+
+  // scheduling arrows between the components of one plan, routed around the other boxes
   function drawEdges(layer, planTask, boxes) {
+    const names = [...boxes.keys()];
+    const boxList = names.map((n) => boxes.get(n));
+    if (!boxList.length) return;
+    const G = makeGrid(boxList);
     planTask.components.forEach((c) => {
       const t = tasks.get(c.task);
       for (const a of c.after) {
         const pb = boxes.get(a);
         const qb = boxes.get(c.name);
         if (!pb || !qb) continue;
-        const s1 = clip(pb, pb.cx, pb.cy, qb.cx, qb.cy);
-        const s2 = clip(qb, qb.cx, qb.cy, pb.cx, pb.cy);
-        const x1 = s1.x;
-        const y1 = s1.y + 2;
-        const x2 = s2.x;
-        const y2 = s2.y - 2;
-        svgEl("path", { class: "edge", d: "M" + x1 + " " + y1 + " L" + x2 + " " + y2, "marker-end": "url(#arrow)" }, layer);
+        const [sp, tp] = ports(pb, qb);
+        const pts = route(G, names.indexOf(a), names.indexOf(c.name), sp, tp) || [sp, tp];
+        svgEl("path", { class: "edge", d: roundedPath(pts, 10), "marker-end": "url(#arrow)", "data-plan": planTask.name, "data-from": a, "data-to": c.name }, layer);
         const anteComp = planTask.components.find((x) => x.name === a);
         const lbl = t ? branchLabel(t, tasks.get(anteComp ? anteComp.task : a)) : "";
         if (lbl) {
-          // beside a mostly vertical edge, above a mostly horizontal one
-          const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1);
-          svgEl("text", vertical
-            ? { class: "edge-label", x: (x1 + x2) / 2 + 10, y: (y1 + y2) / 2 + 4, "text-anchor": "start" }
-            : { class: "edge-label", x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6 }, layer).textContent = lbl;
+          const m = midpoint(pts);
+          svgEl("text", m.vertical
+            ? { class: "edge-label", x: m.x + 8, y: m.y + 4, "text-anchor": "start" }
+            : { class: "edge-label", x: m.x, y: m.y - 6 }, layer).textContent = lbl;
         }
       }
     });
