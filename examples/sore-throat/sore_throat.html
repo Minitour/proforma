@@ -81,12 +81,19 @@ main { flex: 1; min-height: 0; display: flex; }
 .view.on { display: flex; }
 
 /* workspace: tree | canvas | properties */
-#workspace { display: grid; grid-template-columns: var(--left-w, 250px) minmax(0, 1fr) 340px; position: relative; }
+#workspace { display: grid; grid-template-columns: var(--left-w, 250px) minmax(0, 1fr) var(--right-w, 340px); position: relative; }
 /* drag handle on the left pane's edge */
 .resizer { position: absolute; top: 0; bottom: 0; left: calc(var(--left-w, 250px) - 3px); width: 6px; cursor: col-resize; z-index: 3; touch-action: none; }
 .resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: 2px; width: 2px; background: transparent; transition: background .15s; }
 .resizer:hover::after, .resizer.drag::after { background: var(--accent); }
+.resizer.right { left: auto; right: calc(var(--right-w, 340px) - 3px); }
 body.resizing { cursor: col-resize; user-select: none; }
+.node.container .frame { fill-opacity: .22; stroke-width: 1.6; }
+.node.container .halo { stroke: transparent; }
+.node.container:hover > .halo { stroke: color-mix(in srgb, var(--sel) 45%, transparent); stroke-width: 2; }
+.node.container.sel > .halo { stroke: var(--sel); stroke-width: 3; }
+.frame-title { font: 600 12px system-ui, sans-serif; fill: var(--plan-stroke); }
+.toolbar button:disabled { opacity: .4; cursor: default; }
 aside { background: var(--panel); min-height: 0; overflow: auto; }
 aside.left { border-right: 1px solid var(--line); }
 aside.right { border-left: 1px solid var(--line); }
@@ -244,12 +251,14 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
         <button id="z100" title="Actual size">1:1</button>
         <div class="sep"></div>
         <button id="zup" title="Up to the parent plan (Backspace)">↑</button>
+        <button id="zexpand" title="Show all levels: sub-plans drawn inline (E)">⧉</button>
         <button id="zlayout" title="Layout: stored positions (click for automatic)">⊞</button>
         <button id="zlabel" title="Show captions instead of names">Aa</button>
       </div>
-      <div class="hint">Drag to pan · wheel or pinch to zoom · double-click a plan to open it</div>
+      <div class="hint">Drag to pan · wheel or pinch to zoom · double-click a plan to open it · ⧉ shows all levels</div>
       <div class="zoomlabel" id="zoomlabel">100%</div>
     </div>
+    <div class="resizer right" id="rightResizer" title="Drag to resize · double-click to reset"></div>
     <aside class="right">
       <div class="pane-title">Properties</div>
       <div class="props" id="props"></div>
@@ -512,6 +521,177 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     return lines;
   }
 
+  // where the ray from (cx, cy) towards (tx, ty) leaves box b
+  function clip(b, cx, cy, tx, ty) {
+    const dx = tx - cx;
+    const dy = ty - cy;
+    let t = 1;
+    if (dx > 0) t = Math.min(t, (b.x2 - cx) / dx);
+    if (dx < 0) t = Math.min(t, (b.x1 - cx) / dx);
+    if (dy > 0) t = Math.min(t, (b.y2 - cy) / dy);
+    if (dy < 0) t = Math.min(t, (b.y1 - cy) / dy);
+    return { x: cx + dx * t, y: cy + dy * t };
+  }
+
+  const labelOf = (c, t) => (state.label === "caption" && t.caption ? t.caption : c.name);
+  const labelLines = (c, t) => wrapLabel(labelOf(c, t), state.label === "caption" ? 26 : 22);
+
+  function badges(g, c, t, ifX, ifY, cycX, cycY) {
+    if (t.precondition) {
+      svgEl("circle", { cx: ifX, cy: ifY, r: 9, fill: "var(--decision-stroke)" }, g);
+      svgEl("text", { class: "badge", x: ifX, y: ifY }, g).textContent = "if";
+    }
+    if (c.cycle_repeat || c.number_of_cycles || c.cycle_until) {
+      svgEl("circle", { cx: cycX, cy: cycY, r: 9, fill: "var(--action-stroke)" }, g);
+      svgEl("text", { class: "badge", x: cycX, y: cycY }, g).textContent = "↻";
+    }
+  }
+
+  function wireNode(g, c, t) {
+    const title = svgEl("title", {}, g);
+    title.textContent = (t.caption ? t.caption + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
+    g.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectTask(c.task, { open: false });
+    });
+    g.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      if (t.kind === "plan") openPlan(c.task);
+    });
+    if (state.sel && state.sel.type === "task" && state.sel.name === c.task) g.classList.add("sel");
+  }
+
+  // one task icon with badges and label, centred on (cx, cy); returns its box
+  function drawNode(layer, c, t, cx, cy) {
+    const g = svgEl("g", { class: "node" + (c.optional ? " optional" : "") + (c.terminal ? " terminal" : ""), "data-task": c.task }, layer);
+    svgEl("rect", { class: "halo", x: cx - 40, y: cy - 38, width: 80, height: 76, rx: 12 }, g);
+    drawShape(g, t.kind, cx, cy);
+    badges(g, c, t, cx - 30, cy - 26, cx + 30, cy - 26);
+    const lines = labelLines(c, t);
+    lines.forEach((ln, i) => {
+      svgEl("text", { class: "lbl", x: cx, y: cy + 46 + i * 14 }, g).textContent = ln;
+    });
+    const drill = t.kind === "plan";
+    if (drill) {
+      svgEl("text", { class: "plan-drill", x: cx, y: cy + 46 + lines.length * 14 }, g).textContent =
+        "▸ " + (t.components ? t.components.length : 0) + " tasks · double-click to open";
+    }
+    wireNode(g, c, t);
+    return { x1: cx - 36, x2: cx + 36, y1: cy - 32, y2: cy + 36 + lines.length * 14 + (drill ? 12 : 0), cx, cy };
+  }
+
+  // scheduling arrows between the components of one plan, clipped to their boxes
+  function drawEdges(layer, planTask, boxes) {
+    planTask.components.forEach((c) => {
+      const t = tasks.get(c.task);
+      for (const a of c.after) {
+        const pb = boxes.get(a);
+        const qb = boxes.get(c.name);
+        if (!pb || !qb) continue;
+        const s1 = clip(pb, pb.cx, pb.cy, qb.cx, qb.cy);
+        const s2 = clip(qb, qb.cx, qb.cy, pb.cx, pb.cy);
+        const x1 = s1.x;
+        const y1 = s1.y + 2;
+        const x2 = s2.x;
+        const y2 = s2.y - 2;
+        svgEl("path", { class: "edge", d: "M" + x1 + " " + y1 + " L" + x2 + " " + y2, "marker-end": "url(#arrow)" }, layer);
+        const anteComp = planTask.components.find((x) => x.name === a);
+        const lbl = t ? branchLabel(t, tasks.get(anteComp ? anteComp.task : a)) : "";
+        if (lbl) {
+          // beside a mostly vertical edge, above a mostly horizontal one
+          const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1);
+          svgEl("text", vertical
+            ? { class: "edge-label", x: (x1 + x2) / 2 + 10, y: (y1 + y2) / 2 + 4, "text-anchor": "start" }
+            : { class: "edge-label", x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6 }, layer).textContent = lbl;
+        }
+      }
+    });
+  }
+
+  // ---- expanded view: every sub-plan drawn inline as a frame, recursively
+  const LEAF_W = 150;
+  const LEAF_H = 124;
+  const PAD = 22;
+  const HEAD = 34;
+  const GAP_X = 36;
+  const GAP_Y = 46;
+  const PER_ROW = 5;
+
+  function levelsOf(comps) {
+    const byName = new Map(comps.map((c) => [c.name, c]));
+    const level = new Map();
+    const lv = (c, stack) => {
+      if (level.has(c.name)) return level.get(c.name);
+      if (stack.includes(c.name)) return 0;
+      const ante = c.after.map((a) => byName.get(a)).filter(Boolean);
+      const v = ante.length ? Math.max(...ante.map((a) => lv(a, stack.concat(c.name)))) + 1 : 0;
+      level.set(c.name, v);
+      return v;
+    };
+    comps.forEach((c) => lv(c, []));
+    return level;
+  }
+
+  function layoutExpanded(planName, stack) {
+    const p = tasks.get(planName);
+    const items = p.components.map((c) => {
+      const t = tasks.get(c.task) || { kind: "task", name: c.task, components: [] };
+      const sub = t.kind === "plan" && t.components.length && !stack.includes(t.name) ? layoutExpanded(t.name, stack.concat(t.name)) : null;
+      return { c, t, sub, w: sub ? sub.w + 2 * PAD : LEAF_W, h: sub ? sub.h + HEAD + PAD : LEAF_H };
+    });
+    const level = levelsOf(p.components);
+    const byLevel = new Map();
+    items.forEach((it, i) => {
+      const l = level.get(it.c.name) || 0;
+      if (!byLevel.has(l)) byLevel.set(l, []);
+      byLevel.get(l).push(i);
+    });
+    const rows = [];
+    for (const l of [...byLevel.keys()].sort((a, b) => a - b)) {
+      const idx = byLevel.get(l);
+      for (let s = 0; s < idx.length; s += PER_ROW) rows.push(idx.slice(s, s + PER_ROW));
+    }
+    const info = rows.map((r) => ({
+      r,
+      w: r.reduce((n, i) => n + items[i].w, 0) + GAP_X * (r.length - 1),
+      h: Math.max(...r.map((i) => items[i].h)),
+    }));
+    const W = Math.max(LEAF_W, ...info.map((x) => x.w));
+    let y = 0;
+    for (const row of info) {
+      let x = (W - row.w) / 2;
+      for (const i of row.r) {
+        items[i].x = x;
+        items[i].y = y;
+        x += items[i].w + GAP_X;
+      }
+      y += row.h + GAP_Y;
+    }
+    return { w: W, h: Math.max(LEAF_H, y - GAP_Y), items };
+  }
+
+  function drawExpanded(L, ox, oy, planTask, layers) {
+    const boxes = new Map();
+    for (const it of L.items) {
+      const x = ox + it.x;
+      const y = oy + it.y;
+      if (it.sub) {
+        const g = svgEl("g", { class: "node container" + (it.c.optional ? " optional" : ""), "data-task": it.c.task }, layers.frames);
+        svgEl("rect", { class: "halo", x: x - 4, y: y - 4, width: it.w + 8, height: it.h + 8, rx: 17 }, g);
+        svgEl("rect", { class: "shape frame", x, y, width: it.w, height: it.h, rx: 14, fill: "var(--plan-fill)", stroke: "var(--plan-stroke)" }, g);
+        const title = labelOf(it.c, it.t);
+        svgEl("text", { class: "frame-title", x: x + 14, y: y + 22 }, g).textContent = title.length > 60 ? title.slice(0, 58) + "…" : title;
+        badges(g, it.c, it.t, x + it.w - 18, y + 17, x + it.w - 42, y + 17);
+        wireNode(g, it.c, it.t);
+        boxes.set(it.c.name, { x1: x, x2: x + it.w, y1: y, y2: y + it.h, cx: x + it.w / 2, cy: y + it.h / 2 });
+        drawExpanded(it.sub, x + PAD, y + HEAD, it.t, layers);
+      } else {
+        boxes.set(it.c.name, drawNode(layers.nodes, it.c, it.t, x + it.w / 2, y + 40));
+      }
+    }
+    drawEdges(layers.edges, planTask, boxes);
+  }
+
   function render() {
     vp.innerHTML = "";
     const plan = tasks.get(state.plan);
@@ -520,91 +700,24 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     const defs = svgEl("defs", {}, vp);
     const mk = svgEl("marker", { id: "arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 9, markerHeight: 9, orient: "auto-start-reverse" }, defs);
     svgEl("path", { d: "M0 0 L10 5 L0 10 z", fill: "var(--edge)" }, mk);
+    const layers = { frames: svgEl("g", {}, vp), edges: svgEl("g", {}, vp), nodes: svgEl("g", {}, vp) };
 
-    const pos = planLayout(plan);
-    const centers = new Map();
-    const radius = new Map();
-    const boxes = new Map();
-    // where the ray from (cx, cy) towards (tx, ty) leaves a node's box
-    const clip = (b, cx, cy, tx, ty) => {
-      const dx = tx - cx;
-      const dy = ty - cy;
-      let t = 1;
-      if (dx > 0) t = Math.min(t, (b.x2 - cx) / dx);
-      if (dx < 0) t = Math.min(t, (b.x1 - cx) / dx);
-      if (dy > 0) t = Math.min(t, (b.y2 - cy) / dy);
-      if (dy < 0) t = Math.min(t, (b.y1 - cy) / dy);
-      return { x: cx + dx * t, y: cy + dy * t };
-    };
-    plan.components.forEach((c, i) => centers.set(c.name, { x: pos[i].x + NODE / 2, y: pos[i].y + NODE / 2 }));
-    const edgeLayer = svgEl("g", {}, vp);
-    const nodeLayer = svgEl("g", {}, vp);
-
-    plan.components.forEach((c) => {
-      const t = tasks.get(c.task) || { kind: "task", name: c.task };
-      const { x: cx, y: cy } = centers.get(c.name);
-      const g = svgEl("g", { class: "node" + (c.optional ? " optional" : "") + (c.terminal ? " terminal" : ""), "data-task": c.task }, nodeLayer);
-      svgEl("rect", { class: "halo", x: cx - 40, y: cy - 38, width: 80, height: 76, rx: 12 }, g);
-      radius.set(c.name, drawShape(g, t.kind, cx, cy));
-      const nLines = wrapLabel(state.label === "caption" && t.caption ? t.caption : c.name, state.label === "caption" ? 26 : 22).length;
-      boxes.set(c.name, { x1: cx - 36, x2: cx + 36, y1: cy - 32, y2: cy + 36 + nLines * 14 + (t.kind === "plan" ? 12 : 0) });
-      // badges: precondition (if) and cycles
-      if (t.precondition) {
-        svgEl("circle", { cx: cx - 30, cy: cy - 26, r: 9, fill: "var(--decision-stroke)" }, g);
-        svgEl("text", { class: "badge", x: cx - 30, y: cy - 26 }, g).textContent = "if";
-      }
-      if (c.cycle_repeat || c.number_of_cycles || c.cycle_until) {
-        svgEl("circle", { cx: cx + 30, cy: cy - 26, r: 9, fill: "var(--action-stroke)" }, g);
-        svgEl("text", { class: "badge", x: cx + 30, y: cy - 26 }, g).textContent = "↻";
-      }
-      const label = state.label === "caption" && t.caption ? t.caption : c.name;
-      const lines = wrapLabel(label, state.label === "caption" ? 26 : 22);
-      lines.forEach((ln, i) => {
-        svgEl("text", { class: "lbl", x: cx, y: cy + 46 + i * 14 }, g).textContent = ln;
+    if (state.expanded) {
+      drawExpanded(layoutExpanded(plan.name, [plan.name]), 0, 0, plan, layers);
+    } else {
+      const pos = planLayout(plan);
+      const boxes = new Map();
+      plan.components.forEach((c, i) => {
+        const t = tasks.get(c.task) || { kind: "task", name: c.task };
+        boxes.set(c.name, drawNode(layers.nodes, c, t, pos[i].x + NODE / 2, pos[i].y + NODE / 2));
       });
-      if (t.kind === "plan") {
-        svgEl("text", { class: "plan-drill", x: cx, y: cy + 46 + lines.length * 14 }, g).textContent =
-          "▸ " + (t.components ? t.components.length : 0) + " tasks · double-click to open";
-      }
-      const title = svgEl("title", {}, g);
-      title.textContent = (t.caption ? t.caption + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
-      g.addEventListener("click", (e) => {
-        e.stopPropagation();
-        selectTask(c.task, { open: false });
-      });
-      g.addEventListener("dblclick", (e) => {
-        e.stopPropagation();
-        if (t.kind === "plan") openPlan(c.task);
-      });
-      if (state.sel && state.sel.type === "task" && state.sel.name === c.task) g.classList.add("sel");
-    });
-
-    plan.components.forEach((c) => {
-      const t = tasks.get(c.task);
-      for (const a of c.after) {
-        const p = centers.get(a);
-        const q = centers.get(c.name);
-        if (!p || !q) continue;
-        const s1 = clip(boxes.get(a), p.x, p.y, q.x, q.y);
-        const s2 = clip(boxes.get(c.name), q.x, q.y, p.x, p.y);
-        const x1 = s1.x;
-        const y1 = s1.y + 2;
-        const x2 = s2.x;
-        const y2 = s2.y - 2;
-        svgEl("path", { class: "edge", d: "M" + x1 + " " + y1 + " L" + x2 + " " + y2, "marker-end": "url(#arrow)" }, edgeLayer);
-        const anteComp = plan.components.find((x) => x.name === a);
-        const lbl = t ? branchLabel(t, tasks.get(anteComp ? anteComp.task : a)) : "";
-        if (lbl) {
-          // beside a mostly vertical edge, above a mostly horizontal one
-          const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1);
-          svgEl("text", vertical
-            ? { class: "edge-label", x: (x1 + x2) / 2 + 10, y: (y1 + y2) / 2 + 4, "text-anchor": "start" }
-            : { class: "edge-label", x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6 }, edgeLayer).textContent = lbl;
-        }
-      }
-    });
+      drawEdges(layers.edges, plan, boxes);
+    }
     applyView();
-    $("#zlayout").classList.toggle("on", !!state.autoUsed);
+    const lb = $("#zlayout");
+    lb.classList.toggle("on", !state.expanded && !!state.autoUsed);
+    lb.disabled = !!state.expanded;
+    $("#zexpand").classList.toggle("on", !!state.expanded);
   }
 
   function renderCrumbs() {
@@ -744,6 +857,11 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
   $("#zup").onclick = () => {
     if (state.trail.length > 1) openPlan(state.trail[state.trail.length - 2], state.trail.slice(0, -1));
   };
+  $("#zexpand").onclick = () => {
+    state.expanded = !state.expanded;
+    render();
+    fit(false);
+  };
   $("#zlayout").onclick = (e) => {
     state.layout = state.layout === "stored" ? "auto" : "stored";
     e.currentTarget.classList.toggle("on", state.layout === "auto");
@@ -762,6 +880,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     if (e.key === "+" || e.key === "=") $("#zin").click();
     else if (e.key === "-") $("#zout").click();
     else if (e.key === "0") $("#zfit").click();
+    else if (e.key === "e" || e.key === "E") $("#zexpand").click();
     else if (e.key === "Backspace" || (e.key === "ArrowUp" && e.altKey)) $("#zup").click();
   });
 
@@ -956,17 +1075,15 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     $("#sourceview").innerHTML = '<div class="inner"><h2>PROforma source <span class="tag">' + esc(D.file || "") + "</span></h2><pre class=\"src\">" + html + "</pre></div>";
   }
 
-  // ---------------------------------------------------------------- resizable left pane
-  (function () {
+  // ---------------------------------------------------------------- resizable side panes
+  function makeResizer(handleId, cssVar, key, def, widthFromPointer) {
     const ws = $("#workspace");
-    const handle = $("#leftResizer");
+    const handle = $("#" + handleId);
     if (!ws || !handle) return;
-    const KEY = "pf-viewer-left-width";
-    const DEFAULT = 250;
     const clamp = (w) => Math.round(Math.max(160, Math.min(w, ws.clientWidth * 0.5)));
-    const setW = (w) => ws.style.setProperty("--left-w", clamp(w) + "px");
+    const setW = (w) => ws.style.setProperty(cssVar, clamp(w) + "px");
     try {
-      const saved = Number(localStorage.getItem(KEY));
+      const saved = Number(localStorage.getItem(key));
       if (saved) setW(saved);
     } catch (e) {
       /* storage unavailable: keep the default */
@@ -978,15 +1095,14 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
       document.body.classList.add("resizing");
     });
     handle.addEventListener("pointermove", (e) => {
-      if (!handle.classList.contains("drag")) return;
-      setW(e.clientX - ws.getBoundingClientRect().left);
+      if (handle.classList.contains("drag")) setW(widthFromPointer(e, ws.getBoundingClientRect()));
     });
     const end = () => {
       if (!handle.classList.contains("drag")) return;
       handle.classList.remove("drag");
       document.body.classList.remove("resizing");
       try {
-        localStorage.setItem(KEY, String(parseInt(getComputedStyle(ws).getPropertyValue("--left-w"), 10) || DEFAULT));
+        localStorage.setItem(key, String(parseInt(getComputedStyle(ws).getPropertyValue(cssVar), 10) || def));
       } catch (e) {
         /* ignore */
       }
@@ -994,14 +1110,16 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
     handle.addEventListener("dblclick", () => {
-      setW(DEFAULT);
+      setW(def);
       try {
-        localStorage.removeItem(KEY);
+        localStorage.removeItem(key);
       } catch (e) {
         /* ignore */
       }
     });
-  })();
+  }
+  makeResizer("leftResizer", "--left-w", "pf-viewer-left-width", 250, (e, r) => e.clientX - r.left);
+  makeResizer("rightResizer", "--right-w", "pf-viewer-right-width", 340, (e, r) => r.right - e.clientX);
 
   // ---------------------------------------------------------------- theme + mobile tree
   $("#themeToggle").onclick = () => {

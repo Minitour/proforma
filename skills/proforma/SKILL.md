@@ -108,10 +108,11 @@ node <this-skill>/scripts/build_report.mjs $F --out guideline.html \
 
 `build_report.mjs` (Node only, no dependencies; the page template is `scripts/report/`) writes a
 self-contained HTML viewer laid out like a guideline editor:
-- a task tree, and a plan canvas that draws each plan at its stored task positions with the editor's
+- a resizable task tree and properties pane, and a plan canvas that draws each plan at its stored task positions with the editor's
   shapes and colours, scheduling arrows, decision branch labels and precondition/cycle badges. Drag to
   pan, wheel or pinch to zoom, double-click a plan to open it (breadcrumbs lead back). When stored
   positions stack parallel tasks in one column, it switches to an automatic grid layout;
+  the ⧉ button (or E) shows all levels at once, with every sub-plan drawn inline as a nested frame;
 - a properties panel for the selected task: caption, description, linked expressions, scheduling,
   cycles, candidates and arguments with evidence grades, and metaprops grouped into goal,
   ServiceRequest, sources and provenance;

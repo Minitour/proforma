@@ -164,12 +164,14 @@ const html = `<!doctype html>
         <button id="z100" title="Actual size">1:1</button>
         <div class="sep"></div>
         <button id="zup" title="Up to the parent plan (Backspace)">↑</button>
+        <button id="zexpand" title="Show all levels: sub-plans drawn inline (E)">⧉</button>
         <button id="zlayout" title="Layout: stored positions (click for automatic)">⊞</button>
         <button id="zlabel" title="Show captions instead of names">Aa</button>
       </div>
-      <div class="hint">Drag to pan · wheel or pinch to zoom · double-click a plan to open it</div>
+      <div class="hint">Drag to pan · wheel or pinch to zoom · double-click a plan to open it · ⧉ shows all levels</div>
       <div class="zoomlabel" id="zoomlabel">100%</div>
     </div>
+    <div class="resizer right" id="rightResizer" title="Drag to resize · double-click to reset"></div>
     <aside class="right">
       <div class="pane-title">Properties</div>
       <div class="props" id="props"></div>
