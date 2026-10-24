@@ -692,6 +692,53 @@
     $("#sourceview").innerHTML = '<div class="inner"><h2>PROforma source <span class="tag">' + esc(D.file || "") + "</span></h2><pre class=\"src\">" + html + "</pre></div>";
   }
 
+  // ---------------------------------------------------------------- resizable left pane
+  (function () {
+    const ws = $("#workspace");
+    const handle = $("#leftResizer");
+    if (!ws || !handle) return;
+    const KEY = "pf-viewer-left-width";
+    const DEFAULT = 250;
+    const clamp = (w) => Math.round(Math.max(160, Math.min(w, ws.clientWidth * 0.5)));
+    const setW = (w) => ws.style.setProperty("--left-w", clamp(w) + "px");
+    try {
+      const saved = Number(localStorage.getItem(KEY));
+      if (saved) setW(saved);
+    } catch (e) {
+      /* storage unavailable: keep the default */
+    }
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("drag");
+      document.body.classList.add("resizing");
+    });
+    handle.addEventListener("pointermove", (e) => {
+      if (!handle.classList.contains("drag")) return;
+      setW(e.clientX - ws.getBoundingClientRect().left);
+    });
+    const end = () => {
+      if (!handle.classList.contains("drag")) return;
+      handle.classList.remove("drag");
+      document.body.classList.remove("resizing");
+      try {
+        localStorage.setItem(KEY, String(parseInt(getComputedStyle(ws).getPropertyValue("--left-w"), 10) || DEFAULT));
+      } catch (e) {
+        /* ignore */
+      }
+    };
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+    handle.addEventListener("dblclick", () => {
+      setW(DEFAULT);
+      try {
+        localStorage.removeItem(KEY);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  })();
+
   // ---------------------------------------------------------------- theme + mobile tree
   $("#themeToggle").onclick = () => {
     const r = document.documentElement;

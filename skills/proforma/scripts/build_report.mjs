@@ -153,6 +153,7 @@ const html = `<!doctype html>
       <div class="pane-title">Data</div>
       <ul class="tree tree-section" id="datatree"></ul>
     </aside>
+    <div class="resizer" id="leftResizer" title="Drag to resize · double-click to reset"></div>
     <div class="canvas-wrap">
       <div class="crumbs" id="crumbs"></div>
       <svg id="canvas" role="img" aria-label="Plan diagram"></svg>
