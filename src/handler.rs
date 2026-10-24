@@ -135,6 +135,16 @@ impl ProformaHandler {
     }
 
     #[tool(
+        description = "Export the whole guideline as query-friendly JSON (format proforma-export/1): metadata, every task with its attributes (preconditions, components with scheduling, candidates with arguments, sources), data items and functions; metaprops parsed into key/value maps; plan structure resolved (used_by, paths from the root, reachable). Use it to answer questions about a guideline or to check it with scripts. Optional output path."
+    )]
+    async fn export_json(
+        &self,
+        Parameters(p): Parameters<ExportJson>,
+    ) -> Result<CallToolResult, McpError> {
+        map_tool(p.run())
+    }
+
+    #[tool(
         description = "Create a new, valid PROforma 1.9 guideline file (engine_version, metadata, metaprops and an empty root plan)."
     )]
     async fn create_guideline(
@@ -383,7 +393,7 @@ mod tests {
         let tools = ProformaHandler::tool_router().list_all();
         assert_eq!(
             tools.len(),
-            27,
+            28,
             "{:?}",
             tools.iter().map(|t| &t.name).collect::<Vec<_>>()
         );

@@ -1,6 +1,6 @@
 {
   "name": "proforma-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server and CLI for PROforma (.pf) clinical guideline files: read, edit, lint and diagram (Mermaid)",
   "homepage": "https://github.com/Minitour/proforma",
   "repository": {
@@ -29,12 +29,12 @@
     "postinstall": "node ./bin/install.js"
   },
   "optionalDependencies": {
-    "@proforma-mcp/proforma-linux-x64": "0.1.0",
-    "@proforma-mcp/proforma-linux-arm64": "0.1.0",
-    "@proforma-mcp/proforma-darwin-x64": "0.1.0",
-    "@proforma-mcp/proforma-darwin-arm64": "0.1.0",
-    "@proforma-mcp/proforma-win32-x64": "0.1.0",
-    "@proforma-mcp/proforma-win32-arm64": "0.1.0"
+    "@proforma-mcp/proforma-linux-x64": "0.2.0",
+    "@proforma-mcp/proforma-linux-arm64": "0.2.0",
+    "@proforma-mcp/proforma-darwin-x64": "0.2.0",
+    "@proforma-mcp/proforma-darwin-arm64": "0.2.0",
+    "@proforma-mcp/proforma-win32-x64": "0.2.0",
+    "@proforma-mcp/proforma-win32-arm64": "0.2.0"
   },
   "engines": {
     "node": ">=18"

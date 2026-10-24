@@ -510,6 +510,49 @@ impl CheckExpression {
     }
 }
 
+/// Export the whole guideline as query-friendly JSON (tasks, components, candidates, data items, parsed metaprops).
+#[derive(Debug, Clone, Args, Deserialize, Serialize, JsonSchema)]
+pub struct ExportJson {
+    /// Path to the .pf file
+    #[arg(long)]
+    pub file: String,
+    /// Write the JSON to this file instead of returning it
+    #[arg(long)]
+    #[serde(default)]
+    pub output: Option<String>,
+}
+
+impl ExportJson {
+    pub fn run(self) -> ToolResult {
+        let out = load(&self.file)?;
+        let errors: Vec<_> = out.diagnostics.iter().filter(|d| d.is_fatal()).collect();
+        if let Some(e) = errors.first() {
+            return Err(ToolError(format!(
+                "{} has {} syntax error(s); fix them first (lint). First: {}",
+                self.file,
+                errors.len(),
+                e.message
+            )));
+        }
+        let text = json(&crate::export::export(&out.doc));
+        match self.output {
+            Some(path) => {
+                write_atomic(
+                    &path,
+                    format!(
+                        "{}
+",
+                        text
+                    )
+                    .as_bytes(),
+                )?;
+                Ok(format!("wrote {}", path))
+            }
+            None => Ok(text),
+        }
+    }
+}
+
 /// Export a plan as a Mermaid flowchart (shapes per task type, scheduling arrows, nested sub-plans, decision branches).
 #[derive(Debug, Clone, Args, Deserialize, Serialize, JsonSchema)]
 pub struct ToMermaid {

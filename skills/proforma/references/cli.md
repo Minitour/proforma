@@ -15,6 +15,7 @@ arguments over MCP. All take `--file` (`file`), the `.pf` path; the file on disk
 | `lint [--include-info] [--format json]` | `lint` | validation (exit code 1 on errors) |
 | `check-expression --expression e [--assertion]` | `check_expression` | parse and type an expression |
 | `mermaid [--plan p] [--mode expanded\|drilldown] [--label both\|name\|caption] [--candidates] [--data] [--direction TD\|LR] [--output f]` | `to_mermaid` | diagram |
+| `export [--output f]` | `export_json` | whole guideline as JSON (`proforma-export/1`): tasks, components, candidates, data items, parsed metaprops, paths from the root |
 | `create --name n [--title t] [--author a]` | `create_guideline` | new 1.9 file |
 | `add-task --plan p --kind k --name n [--caption] [--description] [--after x]... [--precondition e] [--ltwh l,t]` | `add_task` | definition + component |
 | `add-component --plan p --task-definition d [--name n] [--after x] [--pf text]` | `add_component` | reuse a definition |

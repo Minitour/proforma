@@ -68,6 +68,7 @@ Claude Code: `claude mcp add proforma -- npx -y proforma-mcp serve`
 | `lint` | Composer-equivalent validation + extra checks |
 | `check_expression` | Parse and type-check an expression; show what each name resolves to |
 | `to_mermaid` | Mermaid flowchart of a plan |
+| `export_json` | Whole guideline as query-friendly JSON (parsed metaprops, resolved plan structure) for scripts |
 | `create_guideline` | New valid 1.9 guideline |
 | `upsert_component` | Add/replace whole blocks written in PROforma |
 | `add_task` | New task definition + component in a plan |
@@ -101,6 +102,7 @@ proforma add-argument --file triage.pf --decision refer --candidate urgent --sup
 proforma outline  --file triage.pf
 proforma lint     --file triage.pf            # exit code 1 when errors are found
 proforma mermaid  --file triage.pf --output triage.md
+proforma export   --file triage.pf --output triage.json   # JSON model for scripts and queries
 proforma check-expression --file triage.pf --expression "result_of(refer) = urgent"
 ```
 

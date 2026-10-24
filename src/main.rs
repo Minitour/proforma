@@ -56,6 +56,8 @@ enum Command {
     CheckExpression(CheckExpression),
     /// Export a plan as a Mermaid flowchart
     Mermaid(ToMermaid),
+    /// Export the whole guideline as query-friendly JSON
+    Export(ExportJson),
     /// Create a new guideline file
     Create(CreateGuideline),
     /// Add or replace whole components from PROforma text
@@ -129,6 +131,7 @@ async fn main() {
         Command::Lint(t) => (t.run(), true),
         Command::CheckExpression(t) => (t.run(), false),
         Command::Mermaid(t) => (t.run(), false),
+        Command::Export(t) => (t.run(), false),
         Command::Create(t) => (t.run(), false),
         Command::Upsert(t) => (t.run(), false),
         Command::AddTask(t) => (t.run(), false),

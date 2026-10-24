@@ -6,6 +6,7 @@ pub mod builtins;
 pub mod diagnostics;
 pub mod edit;
 pub mod encoding;
+pub mod export;
 pub mod lexer;
 pub mod lint;
 pub mod mermaid;
