@@ -11,7 +11,7 @@
   --sel: #1a73e8;
   --canvas: #fbfbfc;
   --grid: #e3e6ea;
-  --edge: #5f6368;
+  --edge: #303030;
   --code-bg: #f3f4f6;
   --plan-fill: #ffdcd9; --plan-stroke: #e55344;
   --action-fill: #e4fafa; --action-stroke: #008585;
@@ -124,13 +124,13 @@ svg#canvas.panning, svg#canvas.panning .node { cursor: grabbing; }
 .node .shape { stroke-width: 2; }
 .node.optional .shape { stroke-dasharray: 6 4; }
 .node.terminal .shape { stroke-width: 4; }
-.node.sel .halo { stroke: var(--sel); stroke-width: 3; fill: none; }
+.node.sel .halo { stroke: #aac8ff; stroke-width: 3; fill: none; }
 .node .halo { stroke: transparent; fill: none; }
 .node:hover .halo { stroke: color-mix(in srgb, var(--sel) 45%, transparent); stroke-width: 2; }
-.node text.lbl { font: 12px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+.node text.lbl { font: 14px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
 .node text.lbl2 { font: 11px system-ui, sans-serif; fill: var(--muted); text-anchor: middle; }
 .badge { font: 600 9px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; }
-.edge { stroke: var(--edge); stroke-width: 1.6; fill: none; }
+.edge { stroke: var(--edge); stroke-width: 1.3; fill: none; }
 .edge-label { font: 11px system-ui, sans-serif; fill: var(--decision-stroke); paint-order: stroke; stroke: var(--canvas); stroke-width: 4px; text-anchor: middle; }
 .edge-label[text-anchor="start"] { text-anchor: start; }
 .plan-drill { font: 10px system-ui, sans-serif; fill: var(--muted); text-anchor: middle; }

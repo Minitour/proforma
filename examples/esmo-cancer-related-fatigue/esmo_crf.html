@@ -17,7 +17,7 @@
   --sel: #1a73e8;
   --canvas: #fbfbfc;
   --grid: #e3e6ea;
-  --edge: #5f6368;
+  --edge: #303030;
   --code-bg: #f3f4f6;
   --plan-fill: #ffdcd9; --plan-stroke: #e55344;
   --action-fill: #e4fafa; --action-stroke: #008585;
@@ -130,13 +130,13 @@ svg#canvas.panning, svg#canvas.panning .node { cursor: grabbing; }
 .node .shape { stroke-width: 2; }
 .node.optional .shape { stroke-dasharray: 6 4; }
 .node.terminal .shape { stroke-width: 4; }
-.node.sel .halo { stroke: var(--sel); stroke-width: 3; fill: none; }
+.node.sel .halo { stroke: #aac8ff; stroke-width: 3; fill: none; }
 .node .halo { stroke: transparent; fill: none; }
 .node:hover .halo { stroke: color-mix(in srgb, var(--sel) 45%, transparent); stroke-width: 2; }
-.node text.lbl { font: 12px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+.node text.lbl { font: 14px system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
 .node text.lbl2 { font: 11px system-ui, sans-serif; fill: var(--muted); text-anchor: middle; }
 .badge { font: 600 9px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; }
-.edge { stroke: var(--edge); stroke-width: 1.6; fill: none; }
+.edge { stroke: var(--edge); stroke-width: 1.3; fill: none; }
 .edge-label { font: 11px system-ui, sans-serif; fill: var(--decision-stroke); paint-order: stroke; stroke: var(--canvas); stroke-width: 4px; text-anchor: middle; }
 .edge-label[text-anchor="start"] { text-anchor: start; }
 .plan-drill { font: 10px system-ui, sans-serif; fill: var(--muted); text-anchor: middle; }
@@ -449,12 +449,13 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     // wide layers wrap into a grid so many parallel tasks stay readable
     const PER_ROW = 5;
     const pos = [];
-    const width = Math.min(PER_ROW, Math.max(...[...rows.values()].map((r) => r.length)));
+    const width = Math.max(...[...rows.values()].map((r) => (r.some((i) => comps[i].after.length) ? r.length : Math.min(PER_ROW, r.length))));
     let y = 40;
     for (const l of [...rows.keys()].sort((a, b) => a - b)) {
       const idx = rows.get(l);
-      for (let start = 0; start < idx.length; start += PER_ROW) {
-        const chunk = idx.slice(start, start + PER_ROW);
+      const per = idx.some((i) => comps[i].after.length) ? idx.length : PER_ROW;
+      for (let start = 0; start < idx.length; start += per) {
+        const chunk = idx.slice(start, start + per);
         chunk.forEach((i, j) => {
           pos[i] = { x: 40 + (j + (width - chunk.length) / 2) * 170, y };
         });
@@ -474,33 +475,64 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     return out.join(" / ");
   }
 
+  // Task icons as the PROforma plan editor draws them: small shapes with a diagonal
+  // light-to-dark gradient and a 2 px outline, centred on (cx, cy). Returns the icon's
+  // bounding rectangle, which is what scheduling arrows attach to.
+  const ICON = {
+    action: { light: "#E4FAFA", dark: "#6CDCDC", line: "#008585" },
+    plan: { light: "#FFDCD9", dark: "#FFB5AE", line: "#E55344" },
+    decision: { light: "#FFFFFF", dark: "#F8A2D3", line: "#B40F78" },
+    enquiry: { light: "#E6FFE6", dark: "#82F082", line: "#009700" },
+    task: { light: "#FEFBED", dark: "#F5DC7A", line: "#D9AB0A" },
+  };
+  const ICON_SCALE = 1.5; // the editor's icons, enlarged for reading at 100 %
+
+  // icon height per kind, so a task's icon top can line up with the frames in its row
+  const ICON_H = { plan: 35, action: 30, decision: 30, enquiry: 40, task: 36 };
+  const iconHeight = (kind) => (ICON_H[kind] || ICON_H.task) * ICON_SCALE;
+
+  function gradientFor(kind) {
+    const id = "grad-" + kind;
+    if (!svg.querySelector("#" + id)) {
+      const c = ICON[kind] || ICON.task;
+      let defs = svg.querySelector("defs.icons");
+      if (!defs) defs = svgEl("defs", { class: "icons" }, svg);
+      const g = svgEl("linearGradient", { id, x1: "100%", y1: "0%", x2: "0%", y2: "100%" }, defs);
+      svgEl("stop", { offset: "0%", "stop-color": c.light }, g);
+      svgEl("stop", { offset: "100%", "stop-color": c.dark }, g);
+    }
+    return "url(#" + id + ")";
+  }
+
   function drawShape(g, kind, cx, cy) {
-    const [f, s] = KIND_STYLE[kind] || KIND_STYLE.task;
-    const r = NODE / 2;
-    const common = { class: "shape", fill: f, stroke: s };
-    if (kind === "plan") {
-      svgEl("rect", Object.assign({ x: cx - 34, y: cy - 24, width: 68, height: 48, rx: 14 }, common), g);
-      for (let i = -1; i <= 1; i++) svgEl("rect", { x: cx + i * 14 - 5, y: cy - 5, width: 10, height: 10, rx: 2, fill: s, opacity: 0.55 }, g);
-      return 26;
-    }
-    if (kind === "action") {
-      svgEl("rect", Object.assign({ x: cx - 25, y: cy - 25, width: 50, height: 50, rx: 10 }, common), g);
-      svgEl("path", { d: "M" + (cx - 10) + " " + cy + " l7 7 l13 -15", fill: "none", stroke: s, "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, g);
-      return 27;
-    }
-    if (kind === "enquiry") {
+    const k = ICON[kind] ? kind : "task";
+    const c = ICON[k];
+    const s = ICON_SCALE;
+    const common = { class: "shape", fill: gradientFor(k), stroke: c.line, "stroke-width": 2 };
+    let w;
+    let h;
+    if (k === "plan") {
+      w = 50 * s;
+      h = 35 * s;
+      svgEl("rect", Object.assign({ x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 11 * s }, common), g);
+    } else if (k === "action") {
+      w = h = 30 * s;
+      svgEl("rect", Object.assign({ x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 2 * s }, common), g);
+    } else if (k === "decision") {
+      w = h = 30 * s;
+      svgEl("circle", Object.assign({ cx, cy, r: 15 * s }, common), g);
+    } else if (k === "enquiry") {
+      w = h = 40 * s;
+      const r = 20 * s;
       svgEl("path", Object.assign({ d: "M" + cx + " " + (cy - r) + " L" + (cx + r) + " " + cy + " L" + cx + " " + (cy + r) + " L" + (cx - r) + " " + cy + "Z" }, common), g);
-      const q = svgEl("text", { x: cx, y: cy + 1, "text-anchor": "middle", "dominant-baseline": "central", fill: s, "font-size": 20, "font-weight": 700 }, g);
-      q.textContent = "?";
-      return r - 2;
+    } else {
+      w = 36 * s;
+      h = 36 * s;
+      const b = 10 * s;
+      const t = 18 * s;
+      svgEl("path", Object.assign({ d: "M" + (cx - b) + " " + (cy + h / 2) + " L" + (cx - t) + " " + (cy - h / 2) + " H" + (cx + t) + " L" + (cx + b) + " " + (cy + h / 2) + "Z" }, common), g);
     }
-    if (kind === "decision") {
-      svgEl("circle", Object.assign({ cx, cy, r: 27, "stroke-width": 3 }, common), g);
-      svgEl("circle", { cx, cy, r: 7, fill: s }, g);
-      return 28;
-    }
-    svgEl("path", Object.assign({ d: "M" + (cx - 26) + " " + (cy + 22) + " L" + (cx - 16) + " " + (cy - 22) + " H" + (cx + 16) + " L" + (cx + 26) + " " + (cy + 22) + "Z" }, common), g);
-    return 26;
+    return { x1: cx - w / 2, x2: cx + w / 2, y1: cy - h / 2, y2: cy + h / 2, cx, cy };
   }
 
   function wrapLabel(text, max) {
@@ -562,239 +594,121 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     if (state.sel && state.sel.type === "task" && state.sel.name === c.task) g.classList.add("sel");
   }
 
-  // one task icon with badges and label, centred on (cx, cy); returns its box
+  // one task as the editor shows it: the icon centred on (cx, cy) with its caption
+  // below; returns the icon's rectangle, which arrows attach to
   function drawNode(layer, c, t, cx, cy) {
     const g = svgEl("g", { class: "node" + (c.optional ? " optional" : "") + (c.terminal ? " terminal" : ""), "data-task": c.task }, layer);
-    svgEl("rect", { class: "halo", x: cx - 40, y: cy - 38, width: 80, height: 76, rx: 12 }, g);
-    drawShape(g, t.kind, cx, cy);
-    badges(g, c, t, cx - 30, cy - 26, cx + 30, cy - 26);
+    const halo = svgEl("rect", { class: "halo", rx: 8 }, g);
+    const icon = drawShape(g, t.kind, cx, cy);
+    badges(g, c, t, icon.x1 - 4, icon.y1 - 4, icon.x2 + 4, icon.y1 - 4);
     const lines = labelLines(c, t);
+    const top = icon.y2 + 4;
     lines.forEach((ln, i) => {
-      svgEl("text", { class: "lbl", x: cx, y: cy + 46 + i * 14 }, g).textContent = ln;
+      svgEl("text", { class: "lbl", x: cx, y: top + 14 + i * 17 }, g).textContent = ln;
     });
-    const drill = t.kind === "plan";
-    if (drill) {
-      svgEl("text", { class: "plan-drill", x: cx, y: cy + 46 + lines.length * 14 }, g).textContent =
+    let bottom = top + lines.length * 17;
+    if (t.kind === "plan") {
+      svgEl("text", { class: "plan-drill", x: cx, y: bottom + 12 }, g).textContent =
         "▸ " + (t.components ? t.components.length : 0) + " tasks · double-click to open";
+      bottom += 16;
     }
+    const half = Math.max((icon.x2 - icon.x1) / 2, (Math.max(...lines.map((l) => l.length)) * 7.4) / 2) + 6;
+    halo.setAttribute("x", cx - half);
+    halo.setAttribute("y", icon.y1 - 6);
+    halo.setAttribute("width", 2 * half);
+    halo.setAttribute("height", bottom - icon.y1 + 10);
     wireNode(g, c, t);
-    const half = Math.max(36, (Math.max(...lines.map((l) => l.length)) * 6.4) / 2, drill ? 95 : 0);
-    return { x1: cx - half, x2: cx + half, y1: cy - 34, y2: cy + 36 + lines.length * 14 + (drill ? 12 : 0), cx, cy };
+    return icon;
   }
 
-  // ---- edge routing: orthogonal paths that go around the other boxes of the plan
-  // A* over a grid of CELL px; every box of the plan (inflated by MARGIN) is an
-  // obstacle, the edge's own ends included: a route leaves and enters at the ports. Turns cost extra, and cells already used by an
-  // earlier edge cost a little, so fan-outs spread instead of overlapping.
-  const CELL = 10;
-  const MARGIN = 10;
-  const TURN = 6;
-  const REUSE = 2;
-
-  function makeGrid(boxList) {
-    let x1 = Infinity;
-    let y1 = Infinity;
-    let x2 = -Infinity;
-    let y2 = -Infinity;
-    for (const b of boxList) {
-      x1 = Math.min(x1, b.x1);
-      y1 = Math.min(y1, b.y1);
-      x2 = Math.max(x2, b.x2);
-      y2 = Math.max(y2, b.y2);
-    }
-    let cell = CELL;
-    const pad = 80;
-    while (((x2 - x1 + 2 * pad) / cell) * ((y2 - y1 + 2 * pad) / cell) > 600000) cell *= 1.5;
-    const ox = x1 - pad;
-    const oy = y1 - pad;
-    const cols = Math.ceil((x2 - x1 + 2 * pad) / cell) + 1;
-    const rows = Math.ceil((y2 - y1 + 2 * pad) / cell) + 1;
-    const owner = new Int32Array(cols * rows).fill(-1);
-    boxList.forEach((b, i) => {
-      const c1 = Math.max(0, Math.floor((b.x1 - MARGIN - ox) / cell));
-      const c2 = Math.min(cols - 1, Math.ceil((b.x2 + MARGIN - ox) / cell));
-      const r1 = Math.max(0, Math.floor((b.y1 - MARGIN - oy) / cell));
-      const r2 = Math.min(rows - 1, Math.ceil((b.y2 + MARGIN - oy) / cell));
-      for (let r = r1; r <= r2; r++) for (let c = c1; c <= c2; c++) if (owner[r * cols + c] < 0) owner[r * cols + c] = i;
-    });
-    return { ox, oy, cell, cols, rows, owner, used: new Uint8Array(cols * rows) };
-  }
-
-  // where an edge leaves / enters a box, and the outward direction (0 right, 1 left, 2 down, 3 up)
-  function ports(pb, qb) {
-    if (qb.y1 >= pb.y2 - 4) return [{ x: pb.cx, y: pb.y2, d: 2 }, { x: qb.cx, y: qb.y1, d: 3 }];
-    if (qb.y2 <= pb.y1 + 4) return [{ x: pb.cx, y: pb.y1, d: 3 }, { x: qb.cx, y: qb.y2, d: 2 }];
-    if (qb.cx >= pb.cx) return [{ x: pb.x2, y: pb.cy, d: 0 }, { x: qb.x1, y: qb.cy, d: 1 }];
-    return [{ x: pb.x1, y: pb.cy, d: 1 }, { x: qb.x2, y: qb.cy, d: 0 }];
-  }
-
-  const DX = [1, -1, 0, 0];
-  const DY = [0, 0, 1, -1];
-
-  function route(G, pi, qi, sp, tp) {
-    const { ox, oy, cell, cols, rows, owner, used } = G;
-    const toCell = (p) => [
-      Math.max(0, Math.min(cols - 1, Math.round((p.x - ox) / cell) + DX[p.d] * Math.ceil(MARGIN / cell + 1))),
-      Math.max(0, Math.min(rows - 1, Math.round((p.y - oy) / cell) + DY[p.d] * Math.ceil(MARGIN / cell + 1))),
+  // Scheduling arrows as the PROforma plan editor draws them: a straight line between
+  // the two task icons (not their labels) with a filled triangle at the target.
+  // does the segment p-q pass through box b (shrunk by m)?
+  function segHitsBox(p, q, b, m) {
+    let t0 = 0;
+    let t1 = 1;
+    const dx = q.x - p.x;
+    const dy = q.y - p.y;
+    const edges = [
+      [-dx, p.x - (b.x1 + m)],
+      [dx, b.x2 - m - p.x],
+      [-dy, p.y - (b.y1 + m)],
+      [dy, b.y2 - m - p.y],
     ];
-    const [sc, sr] = toCell(sp);
-    const [gc, gr] = toCell(tp);
-    // the end boxes are obstacles too: routes start and end on the cells just outside their ports
-    const free = (c, r) => owner[r * cols + c] < 0 || (c === sc && r === sr) || (c === gc && r === gr);
-    const N = cols * rows * 4;
-    const dist = new Float64Array(N).fill(Infinity);
-    const prev = new Int32Array(N).fill(-1);
-    const heap = [];
-    const push = (k, f) => {
-      heap.push([f, k]);
-      let i = heap.length - 1;
-      while (i > 0) {
-        const p = (i - 1) >> 1;
-        if (heap[p][0] <= heap[i][0]) break;
-        [heap[p], heap[i]] = [heap[i], heap[p]];
-        i = p;
-      }
-    };
-    const pop = () => {
-      const top = heap[0];
-      const last = heap.pop();
-      if (heap.length) {
-        heap[0] = last;
-        let i = 0;
-        for (;;) {
-          const l = 2 * i + 1;
-          const r = l + 1;
-          let m = i;
-          if (l < heap.length && heap[l][0] < heap[m][0]) m = l;
-          if (r < heap.length && heap[r][0] < heap[m][0]) m = r;
-          if (m === i) break;
-          [heap[m], heap[i]] = [heap[i], heap[m]];
-          i = m;
-        }
-      }
-      return top;
-    };
-    const h = (c, r) => Math.abs(c - gc) + Math.abs(r - gr);
-    const start = (sr * cols + sc) * 4 + sp.d;
-    dist[start] = 0;
-    push(start, h(sc, sr));
-    let found = -1;
-    let guard = 0;
-    while (heap.length && guard++ < 400000) {
-      const [, k] = pop();
-      const d = k & 3;
-      const ci = k >> 2;
-      const c = ci % cols;
-      const r = (ci - c) / cols;
-      if (c === gc && r === gr) {
-        found = k;
-        break;
-      }
-      const base = dist[k];
-      for (let nd = 0; nd < 4; nd++) {
-        if ((d ^ nd) === 1 && (d >> 1) === (nd >> 1)) continue; // no reversing
-        const nc = c + DX[nd];
-        const nr = r + DY[nd];
-        if (nc < 0 || nr < 0 || nc >= cols || nr >= rows || !free(nc, nr)) continue;
-        const nk = (nr * cols + nc) * 4 + nd;
-        const cost = base + 1 + (nd !== d ? TURN : 0) + (used[nr * cols + nc] ? REUSE : 0);
-        if (cost < dist[nk]) {
-          dist[nk] = cost;
-          prev[nk] = k;
-          push(nk, cost + h(nc, nr));
-        }
+    for (const [pp, qq] of edges) {
+      if (pp === 0) {
+        if (qq < 0) return false;
+      } else {
+        const r = qq / pp;
+        if (pp < 0) t0 = Math.max(t0, r);
+        else t1 = Math.min(t1, r);
+        if (t0 > t1) return false;
       }
     }
-    if (found < 0) return null;
-    const cellsOnPath = [];
-    for (let k = found; k >= 0; k = prev[k]) cellsOnPath.push(k >> 2);
-    cellsOnPath.reverse();
-    for (const ci of cellsOnPath) used[ci] = 1;
-    let pts = cellsOnPath.map((ci) => ({ x: ox + (ci % cols) * cell, y: oy + Math.floor(ci / cols) * cell }));
-    // line the first and last straight runs up with the ports, then add the ports
-    const align = (list, port) => {
-      const vertical = port.d >= 2;
-      const key = vertical ? "x" : "y";
-      const v0 = list[0][key];
-      for (let i = 0; i < list.length && list[i][key] === v0; i++) list[i][key] = port[key];
-    };
-    align(pts, sp);
-    pts.reverse();
-    align(pts, tp);
-    pts.reverse();
-    pts = [{ x: sp.x, y: sp.y }, ...pts, { x: tp.x, y: tp.y }];
-    // drop collinear points
-    const out = [pts[0]];
-    for (let i = 1; i < pts.length - 1; i++) {
-      const a = out[out.length - 1];
-      const b = pts[i];
-      const c2 = pts[i + 1];
-      if ((a.x === b.x && b.x === c2.x) || (a.y === b.y && b.y === c2.y)) continue;
-      out.push(b);
-    }
-    out.push(pts[pts.length - 1]);
-    return out;
+    return true;
   }
 
-  function roundedPath(pts, rad) {
-    let d = "M" + pts[0].x + " " + pts[0].y;
-    for (let i = 1; i < pts.length - 1; i++) {
-      const p = pts[i - 1];
-      const q = pts[i];
-      const n = pts[i + 1];
-      const l1 = Math.hypot(q.x - p.x, q.y - p.y);
-      const l2 = Math.hypot(n.x - q.x, n.y - q.y);
-      const r = Math.min(rad, l1 / 2, l2 / 2);
-      const a = { x: q.x - ((q.x - p.x) / (l1 || 1)) * r, y: q.y - ((q.y - p.y) / (l1 || 1)) * r };
-      const b = { x: q.x + ((n.x - q.x) / (l2 || 1)) * r, y: q.y + ((n.y - q.y) / (l2 || 1)) * r };
-      d += " L" + a.x + " " + a.y + " Q" + q.x + " " + q.y + " " + b.x + " " + b.y;
-    }
-    const last = pts[pts.length - 1];
-    return d + " L" + last.x + " " + last.y;
-  }
-
-  // a point halfway along a polyline, and whether that segment is vertical
-  function midpoint(pts) {
-    const segs = [];
-    let total = 0;
-    for (let i = 1; i < pts.length; i++) {
-      const l = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
-      segs.push(l);
-      total += l;
-    }
-    let left = total / 2;
-    for (let i = 1; i < pts.length; i++) {
-      if (left <= segs[i - 1]) {
-        const t = left / (segs[i - 1] || 1);
-        return { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t, vertical: pts[i].x === pts[i - 1].x };
-      }
-      left -= segs[i - 1];
-    }
-    return { x: pts[0].x, y: pts[0].y, vertical: true };
-  }
-
-  // scheduling arrows between the components of one plan, routed around the other boxes
   function drawEdges(layer, planTask, boxes) {
-    const names = [...boxes.keys()];
-    const boxList = names.map((n) => boxes.get(n));
-    if (!boxList.length) return;
-    const G = makeGrid(boxList);
     planTask.components.forEach((c) => {
       const t = tasks.get(c.task);
       for (const a of c.after) {
         const pb = boxes.get(a);
         const qb = boxes.get(c.name);
         if (!pb || !qb) continue;
-        const [sp, tp] = ports(pb, qb);
-        const pts = route(G, names.indexOf(a), names.indexOf(c.name), sp, tp) || [sp, tp];
-        svgEl("path", { class: "edge", d: roundedPath(pts, 10), "marker-end": "url(#arrow)", "data-plan": planTask.name, "data-from": a, "data-to": c.name }, layer);
+        // rectangular anchors as in the editor; when one box lies wholly below the other,
+        // aim at the facing edge's midpoint so the line never cuts a neighbour in that row
+        let s1;
+        let s2;
+        if (qb.y1 >= pb.y2) {
+          s1 = { x: pb.cx, y: pb.y2 };
+          s2 = { x: qb.cx, y: qb.y1 };
+        } else if (qb.y2 <= pb.y1) {
+          s1 = { x: pb.cx, y: pb.y1 };
+          s2 = { x: qb.cx, y: qb.y2 };
+        } else {
+          s1 = clip(pb, pb.cx, pb.cy, qb.cx, qb.cy);
+          s2 = clip(qb, qb.cx, qb.cy, pb.cx, pb.cy);
+        }
+        // a straight line that would pass through another task (e.g. one that skips a
+        // level) detours around the blockers with straight segments
+        let pts = [s1, s2];
+        const blockers = [...boxes.entries()].filter(([n, b]) => n !== a && n !== c.name && segHitsBox(s1, s2, b, 1)).map(([, b]) => b);
+        if (blockers.length) {
+          const vertical = Math.abs(s2.y - s1.y) >= Math.abs(s2.x - s1.x);
+          if (vertical) {
+            const right = Math.max(...blockers.map((b) => b.x2)) + 28;
+            const left = Math.min(...blockers.map((b) => b.x1)) - 28;
+            const side = Math.abs(right - s1.x) <= Math.abs(s1.x - left) ? right : left;
+            const dir = s2.y > s1.y ? 1 : -1;
+            pts = [s1, { x: side, y: s1.y + dir * 18 }, { x: side, y: s2.y - dir * 18 }, s2];
+          } else {
+            const below = Math.max(...blockers.map((b) => b.y2)) + 28;
+            const above = Math.min(...blockers.map((b) => b.y1)) - 28;
+            const side = Math.abs(below - s1.y) <= Math.abs(s1.y - above) ? below : above;
+            const dir = s2.x > s1.x ? 1 : -1;
+            pts = [s1, { x: s1.x + dir * 18, y: side }, { x: s2.x - dir * 18, y: side }, s2];
+          }
+        }
+        svgEl("path", {
+          class: "edge",
+          d: "M" + pts.map((pt) => pt.x + " " + pt.y).join(" L"),
+          "marker-end": "url(#arrow)",
+          "data-plan": planTask.name,
+          "data-from": a,
+          "data-to": c.name,
+        }, layer);
         const anteComp = planTask.components.find((x) => x.name === a);
         const lbl = t ? branchLabel(t, tasks.get(anteComp ? anteComp.task : a)) : "";
         if (lbl) {
-          const m = midpoint(pts);
-          svgEl("text", m.vertical
-            ? { class: "edge-label", x: m.x + 8, y: m.y + 4, "text-anchor": "start" }
-            : { class: "edge-label", x: m.x, y: m.y - 6 }, layer).textContent = lbl;
+          // beside a mostly vertical edge, above a mostly horizontal one
+          const m0 = pts[Math.floor((pts.length - 1) / 2)];
+          const m1 = pts[Math.floor((pts.length - 1) / 2) + 1];
+          const vertical = Math.abs(m1.x - m0.x) < Math.abs(m1.y - m0.y);
+          const mx = (m0.x + m1.x) / 2;
+          const my = (m0.y + m1.y) / 2;
+          svgEl("text", vertical
+            ? { class: "edge-label", x: mx + 8, y: my + 4, "text-anchor": "start" }
+            : { class: "edge-label", x: mx, y: my - 6 }, layer).textContent = lbl;
         }
       }
     });
@@ -839,9 +753,13 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
       byLevel.get(l).push(i);
     });
     const rows = [];
+    // a layer whose tasks have antecedents stays on one row, so straight arrows from the
+    // row above reach every target without crossing a sibling; tasks with no incoming
+    // arrows (parallel work) wrap into a grid
     for (const l of [...byLevel.keys()].sort((a, b) => a - b)) {
       const idx = byLevel.get(l);
-      for (let s = 0; s < idx.length; s += PER_ROW) rows.push(idx.slice(s, s + PER_ROW));
+      const per = idx.some((i) => items[i].c.after.length) ? idx.length : PER_ROW;
+      for (let s = 0; s < idx.length; s += per) rows.push(idx.slice(s, s + per));
     }
     const info = rows.map((r) => ({
       r,
@@ -878,7 +796,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
         boxes.set(it.c.name, { x1: x, x2: x + it.w, y1: y, y2: y + it.h, cx: x + it.w / 2, cy: y + it.h / 2 });
         drawExpanded(it.sub, x + PAD, y + HEAD, it.t, layers);
       } else {
-        boxes.set(it.c.name, drawNode(layers.nodes, it.c, it.t, x + it.w / 2, y + 40));
+        boxes.set(it.c.name, drawNode(layers.nodes, it.c, it.t, x + it.w / 2, y + iconHeight(it.t.kind) / 2));
       }
     }
     drawEdges(layers.edges, planTask, boxes);
@@ -890,8 +808,8 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     renderCrumbs();
     if (!plan) return;
     const defs = svgEl("defs", {}, vp);
-    const mk = svgEl("marker", { id: "arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 9, markerHeight: 9, orient: "auto-start-reverse" }, defs);
-    svgEl("path", { d: "M0 0 L10 5 L0 10 z", fill: "var(--edge)" }, mk);
+    const mk = svgEl("marker", { id: "arrow", viewBox: "0 0 12 12", refX: 12, refY: 6, markerWidth: 12, markerHeight: 12, markerUnits: "userSpaceOnUse", orient: "auto" }, defs);
+    svgEl("path", { d: "M0 1 L12 6 L0 11 z", fill: "var(--edge)" }, mk);
     const layers = { frames: svgEl("g", {}, vp), edges: svgEl("g", {}, vp), nodes: svgEl("g", {}, vp) };
 
     if (state.expanded) {
