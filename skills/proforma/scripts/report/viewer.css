@@ -111,7 +111,7 @@ svg.ico { width: 16px; height: 16px; flex: none; }
 .crumbs .here { font-weight: 600; }
 .crumbs .plan-cap { color: var(--muted); margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }
 svg#canvas { flex: 1; width: 100%; min-height: 0; cursor: grab; touch-action: none; user-select: none; display: block; }
-svg#canvas.panning { cursor: grabbing; }
+svg#canvas.panning, svg#canvas.panning .node { cursor: grabbing; }
 .toolbar { position: absolute; right: 12px; top: 46px; display: flex; flex-direction: column; gap: 4px; z-index: 2; }
 .toolbar button { width: 32px; height: 30px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; cursor: pointer; font: 600 14px/1 system-ui, sans-serif; }
 .toolbar button:hover { border-color: var(--muted); }

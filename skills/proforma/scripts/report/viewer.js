@@ -283,7 +283,8 @@
     });
     g.addEventListener("dblclick", (e) => {
       e.stopPropagation();
-      if (t.kind === "plan") openPlan(c.task);
+      // a frame can sit several levels below the current plan: open it with its full path
+      if (t.kind === "plan") openPlan(c.task, trailTo(c.task));
     });
     if (state.sel && state.sel.type === "task" && state.sel.name === c.task) g.classList.add("sel");
   }
@@ -532,15 +533,15 @@
   );
   let drag = null;
   const pointers = new Map();
+  // Panning starts anywhere, including on tasks and plan frames: a press that
+  // moves more than a few pixels pans (and its click is swallowed); a press that
+  // does not move stays a click / double-click on whatever is under it.
+  const PAN_SLOP = 4;
+  let suppressClick = false;
   svg.addEventListener("pointerdown", (e) => {
-    // nodes keep their own click / double-click; pan only from the background
-    if (e.target.closest && e.target.closest(".node") && e.pointerType === "mouse") return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.size === 1) {
-      drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
-      svg.classList.add("panning");
-    }
-    if (e.pointerType === "mouse") svg.setPointerCapture(e.pointerId);
+    if (pointers.size === 1) drag = { id: e.pointerId, x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
   });
   svg.addEventListener("pointermove", (e) => {
     if (!pointers.has(e.pointerId)) return;
@@ -556,10 +557,20 @@
       if (before > 0) zoomAt(after / before, (a.x + b.x) / 2 - rect.left, (a.y + b.y) / 2 - rect.top);
       return;
     }
-    if (!drag) return;
+    if (!drag || drag.id !== e.pointerId) return;
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
-    if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    if (!drag.moved) {
+      if (Math.abs(dx) + Math.abs(dy) <= PAN_SLOP) return;
+      drag.moved = true;
+      svg.classList.add("panning");
+      // capture only once it is a pan, so plain clicks still reach the node
+      try {
+        svg.setPointerCapture(e.pointerId);
+      } catch (err) {
+        /* pointer already released */
+      }
+    }
     view.x = drag.vx + dx;
     view.y = drag.vy + dy;
     applyView();
@@ -567,10 +578,25 @@
   const endDrag = (e) => {
     pointers.delete(e.pointerId);
     if (pointers.size === 0) {
+      if (drag && drag.moved) {
+        // the click that follows a pan must not select whatever is under the pointer
+        suppressClick = true;
+        setTimeout(() => (suppressClick = false), 0);
+      }
       svg.classList.remove("panning");
       drag = null;
     }
   };
+  svg.addEventListener(
+    "click",
+    (e) => {
+      if (suppressClick) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    },
+    true
+  );
   svg.addEventListener("pointerup", endDrag);
   svg.addEventListener("pointercancel", endDrag);
   $("#zin").onclick = () => zoomAt(1.25, svg.clientWidth / 2, svg.clientHeight / 2);
