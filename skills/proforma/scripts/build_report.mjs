@@ -8,7 +8,9 @@
 //   node <skill>/scripts/build_report.mjs <guideline.pf> [--out <file.html>] [--source "<text>"] [--notes <file.md>]
 //                         [--badge "<text>"]... [--bin <proforma binary or bin/proforma.js>]
 //
-// The page has no external dependencies, so it can be opened locally or uploaded as is.
+// The page is self-contained: the template (report/viewer.css, report/viewer.js), the guideline
+// data and the source are inlined, and nothing is fetched, so it can be opened locally or
+// uploaded as is. The script refuses to write a page with an external reference.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -184,6 +186,14 @@ const html = `<!doctype html>
 </html>
 `;
 
+// the page must stay self-contained: everything is inlined, nothing is fetched
+// markup and CSS are what a browser would fetch from; the guideline text in the data payload is not
+const markup = html.replace(payload, "");
+const external = /<link\b|<(?:script|img|iframe)[^>]+\bsrc=|(?:src|href)="https?:/i.exec(markup) || /@import|url\(\s*['"]?https?:/i.exec(css);
+if (external) {
+  console.error(`build_report: refusing to write a page with an external reference: ${external[0]}`);
+  process.exit(2);
+}
 fs.mkdirSync(path.dirname(path.resolve(opts.out)), { recursive: true });
 fs.writeFileSync(opts.out, html);
 console.log(`wrote ${opts.out} (${Math.round(html.length / 1024)} KB)`);
