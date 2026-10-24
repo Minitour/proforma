@@ -1,0 +1,11 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.
+data :: d ; type :: datetime ; default_value :: 2020-01-01 ; end data.

@@ -1,0 +1,5 @@
+engine_version :: '1.9';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'a' ; end plan.
+action :: 'a' ; precondition :: 1 > 0 ; precondition :: 2 > 0 ; end action.

@@ -1,0 +1,11 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    precondition :: now() > 2020-13-45 ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.

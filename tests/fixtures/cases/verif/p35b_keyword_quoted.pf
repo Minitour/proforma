@@ -1,0 +1,12 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    precondition :: 'version' > 1 ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.
+data :: 'version' ; type :: integer ; end data.

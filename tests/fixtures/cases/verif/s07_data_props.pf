@@ -1,0 +1,20 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.
+data :: x ; type :: integer ; default_value :: "a" ; mandatory_validation :: x ; range :: 1, "2||two", 3.5 ;
+    warning_condition :: 1, x ; caption :: 'w' ;
+end data.
+data :: bb ; type :: boolean ; dynamic :: yes ; derivation :: i > 3 ; end data.
+data :: dd ; type :: integer ; derivation :: "x" ; end data.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: b ; type :: boolean ; end data.
+data :: Big ; type :: integer ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

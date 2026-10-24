@@ -1,0 +1,19 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    abort :: i ;
+    terminate :: 1 ;
+    component :: 'A' ;
+        number_of_cycles :: 2.5 ;
+        cycle_until :: i ;
+        cycle_repeat :: "x" days ;
+end plan.
+action :: 'A' ;
+    goal :: i ;
+    wait_condition :: zzz(1) ;
+end action.
+function :: g ; type :: integer ; function_trigger :: qqq(2) ; function_body :: zzz(1) ; end function.
+data :: i ; type :: integer ; end data.

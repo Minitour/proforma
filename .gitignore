@@ -1,10 +1,6 @@
 /target/
 /npm/node_modules/
 /npm/README.md
-# reference oracle build outputs (built locally against a Composer install)
-/research/oracle/classes/
-/research/oracle/classpath.txt
-*.class
 .*.tmp
 # skill-creator test runs
 /skills/proforma-workspace/

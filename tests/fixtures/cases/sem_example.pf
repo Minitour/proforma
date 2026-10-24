@@ -1,0 +1,62 @@
+engine_version :: '1.9' ;
+metadata :: 'chest_pain' ;
+     title :: 'Chest pain assessment' ;
+end metadata.
+metaprops :: '' ;
+plan :: 'chest_pain' ;
+     caption :: 'Chest pain assessment' ;
+     component :: 'assess' ;
+          ltwh :: 40,40,0,0;
+     component :: 'triage' ;
+          schedule_constraint :: completed('assess') ;
+          ltwh :: 40,140,0,0;
+     component :: 'urgent_care' ;
+          optional :: yes ;
+          schedule_constraint :: completed('triage') ;
+          ltwh :: 0,240,0,0;
+     component :: 'routine_care' ;
+          schedule_constraint :: completed('triage') ;
+          ltwh :: 120,240,0,0;
+end plan.
+
+enquiry :: 'assess' ;
+     caption :: 'Assess patient' ;
+     source :: 'troponin' ;
+end enquiry.
+
+decision :: 'triage' ;
+     candidate :: 'urgent' ;
+          argument :: for,troponin > 14 ;
+          recommendation :: netsupport(triage, urgent) >= 1 ;
+     candidate :: 'routine' ;
+          argument :: against,troponin > 14 ;
+          recommendation :: netsupport(triage, routine) >= 0 ;
+end decision.
+
+plan :: 'urgent_care' ;
+     precondition :: result_of(triage) = 'urgent' ;
+     component :: 'give_aspirin' ;
+          ltwh :: 40,40,0,0;
+     component :: 'refer' ;
+          terminal :: yes ;
+          schedule_constraint :: completed('give_aspirin') ;
+          ltwh :: 40,140,0,0;
+end plan.
+
+action :: 'routine_care' ;
+     precondition :: result_of(triage) = 'routine' ;
+     procedure :: 'Discharge with advice' ;
+end action.
+
+action :: 'give_aspirin' ;
+     procedure :: 'Aspirin 300 mg' ;
+end action.
+
+action :: 'refer' ;
+     procedure :: 'Refer to cardiology' ;
+end action.
+
+data :: 'troponin' ;
+     type :: real ;
+     unit :: 'ng/L' ;
+end data.

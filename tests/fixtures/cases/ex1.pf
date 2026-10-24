@@ -1,0 +1,121 @@
+/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'hypertension_review' ;
+     title :: 'Hypertension review' ;
+     desc :: 'Synthesized example guideline' ;
+     version :: '1.0' ;
+     author :: 'Example Author' ;
+end metadata.
+
+metaprops :: 'ignore.data.case=false
+' ;
+
+plan  :: 'hypertension_review' ;
+     caption :: 'Hypertension review' ;
+     description :: 'Synthesized example guideline' ;
+     component :: 'assess' ;
+          caption :: 'Assess patient' ;
+          metaprops :: 'ae.private.component.id=17000000000000
+' ;
+          task_definition :: 'assess' ;
+          ltwh :: 120,80,0,0;
+     component :: 'treatment' ;
+          caption :: 'Choose treatment' ;
+          metaprops :: 'ae.private.component.id=17000000000001
+' ;
+          task_definition :: 'treatment' ;
+          schedule_constraint :: completed('assess') ;
+          ltwh :: 320,80,0,0;
+     component :: 'prescribe' ;
+          caption :: 'Prescribe' ;
+          task_definition :: 'prescribe' ;
+          schedule_constraint :: completed('treatment') ;
+          ltwh :: 520,80,0,0;
+end plan.
+
+enquiry  :: 'assess' ;
+     source :: 'age' ;
+          caption :: 'Age (years)' ;
+          metaprops :: 'ae.private.component.id=17000000000002
+' ;
+          data_definition :: 'age' ;
+     source :: 'Diabetic' ;
+          caption :: 'Diabetic?' ;
+          data_definition :: 'Diabetic' ;
+          mandatory :: no ;
+     source :: 'sbp' ;
+          caption :: 'Systolic BP' ;
+          data_definition :: 'sbp' ;
+end enquiry.
+
+decision  :: 'treatment' ;
+     candidate :: 'ace_inhibitor' ;
+          caption :: 'ACE inhibitor' ;
+          metaprops :: 'ae.private.component.id=17000000000003
+ontology.coding=SNOMED\\:372733002
+' ;
+          argument :: for,age < 55 attributes
+               argument_name :: 'young' ;
+               caption :: 'Patient is under 55' ;
+               metaprops :: 'ae.private.component.id=17000000000004
+' ;
+          end attributes
+          ;
+          argument :: against,risk_band = "high" attributes
+               argument_name :: 'high_risk' ;
+          end attributes
+          ;
+          recommendation ::netsupport() > 0;
+     candidate :: 'ccb' ;
+          caption :: 'Calcium channel blocker' ;
+          argument :: for,age >= 55;
+          recommendation ::netsupport() > 0;
+end decision.
+
+action  :: 'prescribe' ;
+     caption :: 'Prescribe the chosen drug' ;
+     procedure :: 'prescribe_drug' ;
+end action.
+
+
+data  :: 'age' ;
+     type :: integer ;
+     caption :: 'Age (years)' ;
+     range ::0,120;
+     mandatory_validation ::age > 0;
+          warning_condition :: 1,age > 110 ;
+               caption :: 'Implausible age' ;
+     unit :: 'years' ;
+end data.
+
+data  :: 'Diabetic' ;
+     type :: boolean ;
+     caption :: 'Diabetic?' ;
+     true_value :: 'yes' ;
+     false_value :: 'no' ;
+     default_value ::"no";
+end data.
+
+data  :: 'sbp' ;
+     type :: real ;
+     caption :: 'Systolic BP' ;
+     unit :: 'mmHg' ;
+end data.
+
+data  :: 'risk_band' ;
+     type :: text ;
+     caption :: 'Risk band' ;
+     range ::"low||Low risk","high||High risk";
+     derivation ::risk_category;
+     dynamic :: yes ;
+end data.
+
+
+function  :: 'risk_category' ;
+     caption :: 'Risk category' ;
+     type :: text ;
+     function_body ::"high";
+end function.

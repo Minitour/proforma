@@ -1,0 +1,13 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+enquiry :: 'A' ;
+    source :: d ;
+        default_value :: 3 ;
+end enquiry.
+data :: d ; type :: date ; end data.

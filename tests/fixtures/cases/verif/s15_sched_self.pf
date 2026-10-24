@@ -1,0 +1,19 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+        schedule_constraint :: completed('A') ;
+    component :: 'B' ;
+        schedule_constraint :: completed('C') ;
+    component :: 'C' ;
+        schedule_constraint :: completed('b') ;
+end plan.
+action :: 'A' ;
+end action.
+action :: 'B' ;
+end action.
+action :: 'C' ;
+end action.

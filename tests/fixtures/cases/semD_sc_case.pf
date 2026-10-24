@@ -1,0 +1,6 @@
+engine_version :: '1.9';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'a' ; component :: 'b' ; schedule_constraint :: completed('A') ; end plan.
+action :: 'a' ; end action.
+action :: 'b' ; end action.

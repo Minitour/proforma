@@ -1,0 +1,8 @@
+engine_version :: '1.9';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'e' ; end plan.
+enquiry :: 'e' ; source :: 'sex' ; default_value :: "m" ; mandatory :: no ; end enquiry.
+data :: 'sex' ; type :: text ; range :: "m||Male", "f||Female" ; end data.
+data :: 'bmi' ; type :: real ; derivation :: 2.0 ; dynamic :: yes ; end data.
+data :: 'n' ; type :: integer ; range :: "1||Mild", "2||Severe" ; warning_condition :: 1, n > 1 ; caption :: 'too high' ; end data.

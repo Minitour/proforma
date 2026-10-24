@@ -1,0 +1,13 @@
+engine_version :: '1.9';
+metadata :: 'md'; title :: '';
+end metadata.
+metaprops :: 'a\:b=x y\=z\u00e9\\ ' ;
+plan :: 'P';
+  caption :: 'it\'s a \ back "dq" and ''arezzo'' é';
+  description :: 'line1
+line2';
+  component :: 'T'; caption :: '  spaced  ';
+end plan.
+task :: 'T';
+  parameters :: a attributes caption :: 'A' ; end attributes, b;
+end task.

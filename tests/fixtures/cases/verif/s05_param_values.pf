@@ -1,0 +1,21 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+        param_value :: p1 = 3 ;
+        param_value :: P2 = 3 ;
+        param_value :: p3 = 1 ;
+        param_value :: zz = 1 ;
+end plan.
+action :: 'A' ;
+    parameters :: p1 attributes type :: integer ; end attributes, p2 attributes type :: real ; end attributes, p3 ;
+    precondition :: p1 > 1 ;
+end action.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: b ; type :: boolean ; end data.
+data :: Big ; type :: integer ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

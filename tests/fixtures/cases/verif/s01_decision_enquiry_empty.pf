@@ -1,0 +1,18 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'D' ;
+    component :: 'E' ;
+end plan.
+decision :: 'D' ;
+end decision.
+enquiry :: 'E' ;
+end enquiry.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: b ; type :: boolean ; end data.
+data :: Big ; type :: integer ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

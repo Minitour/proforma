@@ -1,0 +1,18 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    precondition :: result_of(D) = "x" ;
+    component :: 'D' ;
+    component :: 'E' ;
+end plan.
+decision :: 'D' ;
+    choice_mode :: multiple ;
+    candidate :: c ; recommendation :: true() ;
+end decision.
+decision :: 'E' ;
+    precondition :: result_set(E) includes "x" ;
+    candidate :: c ; recommendation :: true() ;
+end decision.

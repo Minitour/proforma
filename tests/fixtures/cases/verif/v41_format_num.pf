@@ -1,0 +1,23 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    precondition :: format_num(r, 2) = "x" ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: t ; type :: text ; end data.
+data :: b ; type :: boolean ; end data.
+data :: dt ; type :: datetime ; end data.
+data :: d ; type :: date ; end data.
+data :: tm ; type :: time ; end data.
+data :: si ; type :: setof_integer ; end data.
+data :: sr ; type :: setof_real ; end data.
+data :: st ; type :: setof_text ; end data.
+data :: o ; type :: object ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

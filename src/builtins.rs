@@ -1,5 +1,5 @@
-//! Expression types and built-in function signatures, mirroring the reference
-//! engine's verifier (`Type.java`, `BuiltIn.java`, special cases in `Verifier.java`).
+//! Expression types and built-in function signatures, as the engine's verifier
+//! types them.
 
 use std::fmt;
 

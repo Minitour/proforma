@@ -1,0 +1,5 @@
+engine_version :: '1.9';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'd' ; end plan.
+decision :: 'd' ; candidate :: 'c' ; argument :: 2, 1 > 0 ; recommendation :: netsupport(d,c) >= 1 ; end decision.

@@ -1,0 +1,7 @@
+engine_version :: '1.8';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'e' ; component :: 'd'; schedule_constraint :: completed('e'); end plan.
+enquiry :: 'e' ; source :: 'age_at_visit' ; data_definition :: 'age' ; default_value :: 40 ; end enquiry.
+decision :: 'd' ; choice_mode :: multiple ; candidate :: 'c' ; argument :: for, age_at_visit > 18 ; recommendation :: result_of(d) = c ; end decision.
+data :: 'age' ; type :: integer ; caption :: 'Age' ; end data.

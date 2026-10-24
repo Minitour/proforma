@@ -1,0 +1,15 @@
+engine_version :: '1.8';
+metadata :: 'md';
+end metadata.
+metaprops :: '';
+plan :: 'P';
+  component :: 'E';
+end plan.
+enquiry :: 'E';
+  source :: 'src1'; default_value :: 3; data_definition :: 'd'; caption :: 'S1';
+  source :: 'src2'; dynamic483 :: yes; derivation483 :: src1 * 2; data_definition :: 'd';
+end enquiry.
+enquiry :: '__ORPHANS_ENQUIRY';
+  source :: 'free'; data_definition :: 'd';
+end enquiry.
+data :: 'd'; type :: integer; caption :: 'D'; end data.

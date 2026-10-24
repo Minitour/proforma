@@ -1,0 +1,12 @@
+engine_version :: '1.9';
+metadata :: 'md';
+end metadata.
+metaprops :: 'ignore.task.case=true
+ignore.data.case=true';
+plan :: 'Main' ;
+    component :: 'a' ;
+    precondition :: X > 1 ;
+end plan.
+action :: 'A' ;
+end action.
+data :: x ; type :: integer ; end data.

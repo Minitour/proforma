@@ -162,21 +162,6 @@ flowchart TD
 * Task definitions that no plan uses are silently dropped by Composer when it saves
   (`proforma` keeps them and reports `PF-G004`).
 
-The full reverse-engineered specifications are in [`docs/research`](docs/research):
-[serialization](docs/research/spec-serialization.md), [verification](docs/research/spec-verification.md)
-and [semantics](docs/research/spec-semantics.md).
-
-## Reference oracle (research)
-
-[`research/oracle`](research/oracle) contains a small Java harness that runs the reference
-engine's parser, verifier and writer from a **local** Composer installation (nothing from Composer
-is stored here), plus ~130 test guidelines used to derive and check the specs:
-
-```bash
-COMPOSER_HOME=/path/to/composer research/oracle/setup.sh
-research/oracle/oracle.sh parse research/oracle/cases/ex1.pf
-```
-
 ## Development
 
 ```bash

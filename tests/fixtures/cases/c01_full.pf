@@ -1,0 +1,98 @@
+engine_version :: '1.9';
+metadata :: 'md';
+  mdate :: '2024-02-02'; cdate :: '2024-01-01'; author :: 'A'; version :: '2'; desc :: 'D'; title :: 'T';
+end metadata.
+metaprops :: 'zeta=1
+alpha=two words
+';
+plan :: 'Main' ;
+    description :: 'root desc';
+    caption :: 'Root';
+    metaprops :: 'k=v';
+    terminate :: x = 1 ;
+    abort :: x  =  2 ;
+    precondition :: true();
+    component :: 'Act' ;
+        ltwh :: 1,2,3,4;
+        cycle_repeat :: 5 days;
+        cycle_until :: x > 3;
+        number_of_cycles :: 3;
+        param_value :: p = 4;
+        schedule_constraint :: completed('Ask');
+        schedule_constraint :: completed('Sub');
+        terminal :: yes; optional :: yes; autonomous :: yes;
+        metaprops :: 'ae.private.component.id=123';
+        description :: 'cd'; caption :: 'cc';
+        task_definition :: 'Act';
+    component :: 'Ask' ;
+    component :: 'Sub' ;
+        cycle_repeat :: 2 seconds;
+    component :: 'Choose';
+end plan.
+action :: 'Act' ;
+    caption :: 'An action';
+    procedure :: 'proc1';
+    wait_condition :: x>1;
+    postcondition :: x = 1 and y = 2;
+    trigger :: 'trig';
+    goal :: x < 4;
+    precondition :: x  >  0 ;
+    context :: 'ctx';
+    parameters :: p, q attributes type :: integer ; caption :: 'Q' ; end attributes;
+end action.
+plan :: 'Sub';
+    component :: 'Inner';
+end plan.
+task :: 'Inner';
+end task.
+task :: 'Unused';
+end task.
+enquiry :: 'Ask' ;
+    source :: 'zed' ; mandatory :: no;
+    source :: 'Beta' ;
+    source :: 'alpha' ; caption :: 'A src';
+end enquiry.
+decision :: 'Choose' ;
+    preselect_candidates :: yes;
+    support_mode :: numeric;
+    choice_mode :: multiple;
+    source :: 'alpha';
+    candidate :: 'c1' ;
+        description :: 'cand d';
+        recommendation :: netsupport(Choose, c1) >= 1 ;
+        argument :: 0.5, alpha > 1 ;
+        argument :: -2, alpha < 1 attributes caption :: 'neg'; end attributes ;
+        group :: 'g1';
+        priority :: 3;
+    candidate :: 'c2' ;
+        argument :: x, true() ;
+end decision.
+data :: 'zed' ;
+    type :: text ;
+    unit :: 'kg';
+    dynamic :: yes;
+    derivation :: alpha * 2;
+end data.
+data :: 'alpha' ;
+    type :: integer ;
+    metaprops :: 'm=1';
+    description :: 'dd';
+    caption :: 'Alpha';
+    warning_condition :: 'high', alpha > 10 ; caption :: 'H';
+    warning_condition :: -1.5, alpha < 0 ;
+    derivation :: 1;
+    mandatory_validation :: alpha > 0;
+    default_value :: 5;
+    range :: 1 , 2,3 ,  4;
+    false_value :: 'F'; true_value :: "T";
+end data.
+data :: 'Beta' ;
+    type :: boolean ;
+end data.
+function :: 'fn' ;
+    caption :: 'F';
+    type :: real ;
+    auto :: yes;
+    function_trigger :: alpha > 1;
+    function_body :: alpha / 2;
+end function.

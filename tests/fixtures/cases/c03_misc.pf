@@ -1,0 +1,22 @@
+engine_version :: '1.9';
+metadata :: 'md';
+end metadata.
+metaprops :: '';
+plan :: 'P';
+  component :: 'E'; cycle_repeat :: 1 minutes;
+  component :: 'F'; cycle_repeat :: x+1 hours;
+  component :: 'G'; cycle_repeat :: 3 weeks;
+end plan.
+enquiry :: 'E';
+  source :: 'd:x'; default_value :: 3;
+end enquiry.
+action :: 'F'; end action.
+action :: 'G'; end action.
+data :: 'd:x'; type :: text;
+  default_value :: 2020-01-02T03:04:05.000 /** comment **/ ;
+  range :: "1||One" , "2||Two";
+  warning_condition :: "very high", d:x > 1;
+  true_value :: "Yes";
+end data.
+data :: lower; type :: setof_text; derivation :: [ 'a',"b" ] ; dynamic :: yes; end data.
+data :: Upper; type :: object; end data.

@@ -1,0 +1,10 @@
+plan :: 'P';
+  caption :: "Legacy plan";
+  description :: 'atomdesc';
+  component :: 'A';
+end plan.
+action :: 'A';
+  caption :: "Do " # x;
+  procedure :: "proc";
+end action.
+data :: x; type :: integer; caption :: xcap; end data.

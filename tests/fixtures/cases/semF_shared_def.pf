@@ -1,0 +1,6 @@
+engine_version :: '1.9';
+metadata :: 'm'; end metadata.
+metaprops :: '';
+plan :: 'R' ; component :: 'x1' ; task_definition :: 'act' ; component :: 'x2' ; task_definition :: 'act' ; schedule_constraint :: completed('x1') ; component :: 'p' ; end plan.
+plan :: 'p' ; component :: 'x3' ; task_definition :: 'act' ; end plan.
+action :: 'act' ; caption :: 'Shared' ; end action.

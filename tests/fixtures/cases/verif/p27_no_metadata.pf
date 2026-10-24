@@ -1,0 +1,7 @@
+engine_version :: '1.9';
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.

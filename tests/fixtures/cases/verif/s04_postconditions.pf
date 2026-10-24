@@ -1,0 +1,22 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    postcondition :: i = 3 and r = 2 and zz = 1 and dyn = 2 and b = 1 ;
+    component :: 'A' ;
+    component :: 'B' ;
+end plan.
+action :: 'A' ;
+    postcondition :: f ;
+end action.
+action :: 'B' ;
+    postcondition :: notafn ;
+end action.
+function :: f ; type :: integer ; function_body :: 1 ; end function.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: b ; type :: boolean ; end data.
+data :: Big ; type :: integer ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

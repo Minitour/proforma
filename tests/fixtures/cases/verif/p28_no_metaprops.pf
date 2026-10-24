@@ -1,0 +1,8 @@
+engine_version :: '1.9';
+metadata :: 'md';
+end metadata.
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.

@@ -1,0 +1,11 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+        ltwh :: -1, 2, 3, 4 ;
+end plan.
+action :: 'A' ;
+end action.

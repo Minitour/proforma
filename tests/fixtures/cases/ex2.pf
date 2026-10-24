@@ -1,0 +1,95 @@
+/** PROforma version 1.9 (plain text) **/
+
+/** IMPORTANT: Keep all your comments below the engine_version line **/
+engine_version :: '1.9' ;
+
+metadata  :: 'followup' ;
+     title :: 'Follow-up protocol' ;
+     author :: 'Example Author' ;
+end metadata.
+
+metaprops :: '' ;
+
+plan  :: 'followup' ;
+     caption :: 'Follow-up protocol' ;
+     abort ::withdrawn = "yes";
+     component :: 'monitor' ;
+          caption :: 'Monitoring cycle' ;
+          task_definition :: 'monitor' ;
+          ltwh :: 40,40,0,0;
+     component :: 'select_tests' ;
+          caption :: 'Select tests' ;
+          task_definition :: 'select_tests' ;
+          optional :: yes ;
+          schedule_constraint :: completed('monitor') ;
+          ltwh :: 240,40,0,0;
+end plan.
+
+enquiry  :: 'measure' ;
+     caption :: 'Measure HbA1c' ;
+     source :: 'hba1c' ;
+          caption :: 'HbA1c (mmol/mol)' ;
+          data_definition :: 'hba1c' ;
+end enquiry.
+
+task  :: 'review' ;
+     caption :: 'Review results' ;
+     parameters :: 
+          'reviewer'
+          attributes
+               type :: text ;
+               caption :: 'Reviewer' ;
+          end attributes;
+     precondition ::hba1c > 0;
+end task.
+
+plan  :: 'monitor' ;
+     caption :: 'Monitoring cycle' ;
+     terminate ::hba1c < 48;
+     component :: 'measure' ;
+          task_definition :: 'measure' ;
+          number_of_cycles ::4;
+          cycle_repeat :: 3 days ;
+     component :: 'review' ;
+          task_definition :: 'review' ;
+          param_value ::reviewer = "gp";
+          schedule_constraint :: completed('measure') ;
+end plan.
+
+decision  :: 'select_tests' ;
+     caption :: 'Select additional tests' ;
+     source :: 'hba1c' ;
+          data_definition :: 'hba1c' ;
+     choice_mode :: multiple ;
+     support_mode :: numeric ;
+          preselect_candidates :: yes ;
+     candidate :: 'lipids' ;
+          caption :: 'Lipid profile' ;
+          priority :: 2 ;
+          argument :: 0.5,hba1c > 53 attributes
+               argument_name :: 'poor_control' ;
+          end attributes
+          ;
+          recommendation ::netsupport() >= 0.5;
+     candidate :: 'renal' ;
+          caption :: 'Renal function' ;
+          group :: 'labs' ;
+          argument :: 1,hba1c > 75;
+          recommendation ::netsupport() >= 0.5;
+end decision.
+
+
+data  :: 'hba1c' ;
+     type :: integer ;
+     caption :: 'HbA1c (mmol/mol)' ;
+     range ::20,200;
+          warning_condition :: 1,hba1c > 150 ;
+               caption :: 'Very high HbA1c' ;
+     unit :: 'mmol/mol' ;
+end data.
+
+data  :: 'withdrawn' ;
+     type :: text ;
+     range ::"yes||Withdrawn","no||Active";
+     default_value ::"no";
+end data.

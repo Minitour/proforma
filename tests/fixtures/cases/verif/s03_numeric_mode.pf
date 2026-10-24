@@ -1,0 +1,20 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'D' ;
+end plan.
+decision :: 'D' ;
+    support_mode :: numeric ;
+    candidate :: c1 ;
+        argument :: for, i > 1 ;
+        argument :: 3, i > 2 ;
+        recommendation :: netsupport() > 1 ;
+end decision.
+data :: i ; type :: integer ; end data.
+data :: r ; type :: real ; end data.
+data :: b ; type :: boolean ; end data.
+data :: Big ; type :: integer ; end data.
+data :: dyn ; type :: integer ; dynamic :: yes ; derivation :: i + 1 ; end data.

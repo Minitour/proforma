@@ -1,4 +1,4 @@
-//! Round-trip properties over every research case and the examples:
+//! Round-trip properties over every test guideline in tests/fixtures/cases and the examples:
 //! the writer's output must re-parse, and formatting must be idempotent.
 
 use std::path::{Path, PathBuf};
@@ -17,7 +17,7 @@ fn cases() -> Vec<PathBuf> {
         }
     }
     let mut v = Vec::new();
-    walk(Path::new("research/oracle/cases"), &mut v);
+    walk(Path::new("tests/fixtures/cases"), &mut v);
     walk(Path::new("examples"), &mut v);
     v.sort();
     v

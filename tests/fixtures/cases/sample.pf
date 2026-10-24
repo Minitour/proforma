@@ -1,0 +1,41 @@
+engine_version :: '1.9';
+
+metadata :: 'md';
+    title :: 'Sample';
+    author :: 'me';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    caption :: 'Main plan';
+    component :: 'Ask' ;
+        ltwh :: 10, 20, 100, 50 ;
+    component :: 'Choose' ;
+        schedule_constraint :: completed('Ask') ;
+end plan.
+
+enquiry :: 'Ask' ;
+    caption :: 'Ask questions';
+    source :: age ;
+        mandatory :: yes ;
+end enquiry.
+
+decision :: 'Choose' ;
+    candidate :: a ;
+        caption :: 'Option A';
+        argument :: for, age > 18 attributes argument_name :: adult; caption :: 'Adult'; end attributes ;
+        recommendation :: netsupport(Choose, a) >= 1 ;
+    candidate :: b ;
+        argument :: against, age >= 18 and age < 65 ;
+end decision.
+
+data :: age ;
+    type :: integer ;
+    caption :: 'Age';
+    range :: 0, 120;
+    warning_condition :: 1, age > 100 ; caption :: 'Old';
+end data.
+
+function :: double_it ;
+    type :: integer ;
+    function_body :: age * 2 ;
+end function.

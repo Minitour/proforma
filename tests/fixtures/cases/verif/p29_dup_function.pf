@@ -1,0 +1,12 @@
+engine_version :: '1.9';
+metadata :: 'md';
+    title :: 'T';
+end metadata.
+metaprops :: '';
+plan :: 'Main' ;
+    component :: 'A' ;
+end plan.
+action :: 'A' ;
+end action.
+function :: f ; type :: integer ; function_body :: 1 ; end function.
+function :: f ; type :: text ; function_body :: "a" ; end function.
