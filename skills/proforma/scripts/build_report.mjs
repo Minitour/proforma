@@ -15,6 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { prerender } from "./report/prerender.mjs";
 import { exportGuideline, lintGuideline } from "./lib/proforma.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -111,6 +112,15 @@ const warnings = lint.filter((d) => d.severity === "warning").length;
 const sub = [m.version && `version ${m.version}`, m.author, opts.source].filter(Boolean).join(" · ");
 const payload = JSON.stringify({ model, lint, source, file: path.basename(opts.file) }).replace(/</g, "\\u003c");
 
+// the first screen as static markup, so the page reads without JavaScript (thumbnails, previews)
+let pre = { ids: {}, canvasAttrs: "" };
+try {
+  pre = prerender(js, payload);
+} catch (e) {
+  console.error(`build_report: static preview skipped (${e.message})`);
+}
+const P = (id) => pre.ids[id] || "";
+
 const brand = `<svg class="brand" viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#8a1538"/><g stroke-linejoin="round" stroke-linecap="round"><g stroke="#FFDCD9" stroke-width="5" fill="none"><path d="M46 46 L54 54"/><path d="M74 74 L82 82"/></g><path d="M32 16 L48 32 L32 48 L16 32 Z" fill="#E6FFE6" stroke="#009700" stroke-width="4"/><circle cx="64" cy="64" r="15" fill="#FFFFFF" stroke="#B40F78" stroke-width="4"/><circle cx="64" cy="64" r="5" fill="#B40F78"/><rect x="80" y="80" width="32" height="32" rx="8" fill="#E4FAFA" stroke="#008585" stroke-width="4"/></g></svg>`;
 
 const html = `<!doctype html>
@@ -149,14 +159,14 @@ const html = `<!doctype html>
   <section class="view on" id="workspace">
     <aside class="left">
       <div class="pane-title">Tasks</div>
-      <ul class="tree tree-section" id="tree"></ul>
+      <ul class="tree tree-section" id="tree">${P("tree")}</ul>
       <div class="pane-title">Data</div>
-      <ul class="tree tree-section" id="datatree"></ul>
+      <ul class="tree tree-section" id="datatree">${P("datatree")}</ul>
     </aside>
     <div class="resizer" id="leftResizer" title="Drag to resize · double-click to reset"></div>
     <div class="canvas-wrap">
-      <div class="crumbs" id="crumbs"></div>
-      <svg id="canvas" role="img" aria-label="Plan diagram"></svg>
+      <div class="crumbs" id="crumbs">${P("crumbs")}</div>
+      <svg id="canvas" role="img" aria-label="Plan diagram"${pre.canvasAttrs}>${P("canvas")}</svg>
       <div class="toolbar">
         <button id="zin" title="Zoom in (+)">+</button>
         <button id="zout" title="Zoom out (−)">−</button>
@@ -169,12 +179,12 @@ const html = `<!doctype html>
         <button id="zlabel" title="Show captions instead of names">Aa</button>
       </div>
       <div class="hint">Drag to pan · wheel or pinch to zoom · double-click a plan to open it · ⧉ shows all levels</div>
-      <div class="zoomlabel" id="zoomlabel">100%</div>
+      <div class="zoomlabel" id="zoomlabel">${P("zoomlabel") || "100%"}</div>
     </div>
     <div class="resizer right" id="rightResizer" title="Drag to resize · double-click to reset"></div>
     <aside class="right">
       <div class="pane-title">Properties</div>
-      <div class="props" id="props"></div>
+      <div class="props" id="props">${P("props")}</div>
     </aside>
   </section>
   <section class="view doc" id="dataview"></section>

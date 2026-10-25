@@ -126,6 +126,9 @@
 
   // ---------------------------------------------------------------- canvas
   const svg = $("#canvas");
+  // drop the static first view build_report wrote for script-less renderers
+  svg.innerHTML = "";
+  svg.removeAttribute("viewBox");
   const vp = svgEl("g", {}, svg);
   const NODE = 64;
 
@@ -786,7 +789,7 @@
       if (!ks.length) continue;
       ks.forEach((k) => used.add(k));
       html += "<h3>" + esc(title) + '</h3><table class="mp">' +
-        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>";
+        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/\./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>";
     }
     return html;
   }

@@ -236,14 +236,20 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
   <section class="view on" id="workspace">
     <aside class="left">
       <div class="pane-title">Tasks</div>
-      <ul class="tree tree-section" id="tree"></ul>
+      <ul class="tree tree-section" id="tree"><li><div class="row" data-task="sore_throat" title="Sore throat assessment"><span class="twist">▾</span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9" rx="3" fill="var(--plan-fill)" stroke="var(--plan-stroke)" stroke-width="1.5"/></svg><span class="nm">sore_throat</span></div><ul><li><div class="row" data-task="assess" title="Assess patient"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 14.5 8 8 14.5 1.5 8Z" fill="var(--enquiry-fill)" stroke="var(--enquiry-stroke)" stroke-width="1.5"/></svg><span class="nm">assess</span></div></li><li><div class="row" data-task="manage" title="Choose management"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="var(--decision-fill)" stroke="var(--decision-stroke)" stroke-width="1.8"/><circle cx="8" cy="8" r="2" fill="var(--decision-stroke)"/></svg><span class="nm">manage</span></div></li><li><div class="row" data-task="prescribe" title="Prescribe phenoxymethylpenicillin"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="var(--action-fill)" stroke="var(--action-stroke)" stroke-width="1.5"/></svg><span class="nm">prescribe</span></div></li><li><div class="row" data-task="advise" title="Give self-care advice"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="var(--action-fill)" stroke="var(--action-stroke)" stroke-width="1.5"/></svg><span class="nm">advise</span></div></li></ul></li></ul>
       <div class="pane-title">Data</div>
-      <ul class="tree tree-section" id="datatree"></ul>
+      <ul class="tree tree-section" id="datatree"><li><div class="row" data-data="temperature"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4.5" rx="5.5" ry="2.5" fill="var(--panel-2)" stroke="var(--muted)"/><path d="M2.5 4.5v7c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-7" fill="var(--panel-2)" stroke="var(--muted)"/></svg><span class="nm">temperature</span></div></li><li><div class="row" data-data="centor_score"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4.5" rx="5.5" ry="2.5" fill="var(--panel-2)" stroke="var(--muted)"/><path d="M2.5 4.5v7c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-7" fill="var(--panel-2)" stroke="var(--muted)"/></svg><span class="nm">centor_score</span></div></li><li><div class="row" data-data="penicillin_allergy"><span class="twist"></span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><ellipse cx="8" cy="4.5" rx="5.5" ry="2.5" fill="var(--panel-2)" stroke="var(--muted)"/><path d="M2.5 4.5v7c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-7" fill="var(--panel-2)" stroke="var(--muted)"/></svg><span class="nm">penicillin_allergy</span></div></li></ul>
     </aside>
     <div class="resizer" id="leftResizer" title="Drag to resize · double-click to reset"></div>
     <div class="canvas-wrap">
-      <div class="crumbs" id="crumbs"></div>
-      <svg id="canvas" role="img" aria-label="Plan diagram"></svg>
+      <div class="crumbs" id="crumbs"><span class="here">sore_throat</span><span class="plan-cap" title="Sore throat assessment">Sore throat assessment</span></div>
+      <svg id="canvas" role="img" aria-label="Plan diagram" viewBox="2.7 6.0 301.4 443.5" preserveAspectRatio="xMidYMid meet"><g><defs><marker id="arrow" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 1 L12 6 L0 11 z" fill="var(--edge)"></path></marker></defs><g></g><g><path class="edge" d="M157 102 L157 199.5" marker-end="url(#arrow)" data-plan="sore_throat" data-from="assess" data-to="manage"></path><path class="edge" d="M157 244.5 L72 349.5" marker-end="url(#arrow)" data-plan="sore_throat" data-from="manage" data-to="prescribe"></path><text class="edge-label" x="122.5" y="301" text-anchor="start">antibiotics</text><path class="edge" d="M157 244.5 L242 349.5" marker-end="url(#arrow)" data-plan="sore_throat" data-from="manage" data-to="advise"></path><text class="edge-label" x="207.5" y="301" text-anchor="start">self_care</text></g><g><g class="node" data-task="assess"><rect class="halo" rx="8" x="121" y="36" width="72" height="91"></rect><path d="M157 42 L187 72 L157 102 L127 72Z" class="shape" fill="url(#grad-enquiry)" stroke="#009700" stroke-width="2"></path><text class="lbl" x="157" y="120">assess</text><title>Assess patient
+enquiry assess</title></g><g class="node" data-task="manage"><rect class="halo" rx="8" x="128.5" y="193.5" width="57" height="76"></rect><circle cx="157" cy="222" r="22.5" class="shape" fill="url(#grad-decision)" stroke="#B40F78" stroke-width="2"></circle><text class="lbl" x="157" y="262.5">manage</text><title>Choose management
+decision manage</title></g><g class="node" data-task="prescribe"><rect class="halo" rx="8" x="32.699999999999996" y="343.5" width="78.60000000000001" height="76"></rect><rect x="49.5" y="349.5" width="45" height="45" rx="3" class="shape" fill="url(#grad-action)" stroke="#008585" stroke-width="2"></rect><circle cx="45.5" cy="345.5" r="9" fill="var(--decision-stroke)"></circle><text class="badge" x="45.5" y="345.5">if</text><text class="lbl" x="72" y="412.5">prescribe</text><title>Prescribe phenoxymethylpenicillin
+action prescribe
+precondition: result_of(manage) = antibiotics and penicillin_allergy = "no"</title></g><g class="node" data-task="advise"><rect class="halo" rx="8" x="213.5" y="343.5" width="57" height="76"></rect><rect x="219.5" y="349.5" width="45" height="45" rx="3" class="shape" fill="url(#grad-action)" stroke="#008585" stroke-width="2"></rect><circle cx="215.5" cy="345.5" r="9" fill="var(--decision-stroke)"></circle><text class="badge" x="215.5" y="345.5">if</text><text class="lbl" x="242" y="412.5">advise</text><title>Give self-care advice
+action advise
+precondition: result_of(manage) = self_care</title></g></g></g><defs class="icons"><linearGradient id="grad-enquiry" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#E6FFE6"></stop><stop offset="100%" stop-color="#82F082"></stop></linearGradient><linearGradient id="grad-decision" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"></stop><stop offset="100%" stop-color="#F8A2D3"></stop></linearGradient><linearGradient id="grad-action" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#E4FAFA"></stop><stop offset="100%" stop-color="#6CDCDC"></stop></linearGradient></defs></svg>
       <div class="toolbar">
         <button id="zin" title="Zoom in (+)">+</button>
         <button id="zout" title="Zoom out (−)">−</button>
@@ -261,7 +267,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
     <div class="resizer right" id="rightResizer" title="Drag to resize · double-click to reset"></div>
     <aside class="right">
       <div class="pane-title">Properties</div>
-      <div class="props" id="props"></div>
+      <div class="props" id="props"><div class="empty">Select a task on the canvas or in the tree. Double-click a plan to open it.</div></div>
     </aside>
   </section>
   <section class="view doc" id="dataview"></section>
@@ -399,6 +405,9 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
 
   // ---------------------------------------------------------------- canvas
   const svg = $("#canvas");
+  // drop the static first view build_report wrote for script-less renderers
+  svg.innerHTML = "";
+  svg.removeAttribute("viewBox");
   const vp = svgEl("g", {}, svg);
   const NODE = 64;
 
@@ -1059,7 +1068,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
       if (!ks.length) continue;
       ks.forEach((k) => used.add(k));
       html += "<h3>" + esc(title) + '</h3><table class="mp">' +
-        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>";
+        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/\./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>";
     }
     return html;
   }

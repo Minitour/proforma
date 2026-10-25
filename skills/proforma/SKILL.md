@@ -118,6 +118,10 @@ self-contained HTML viewer laid out like a guideline editor:
   ServiceRequest, sources and provenance;
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
+The first screen (task tree, root plan diagram, breadcrumb, properties) is also written into the page as
+static markup, rendered at build time by the same viewer code (`scripts/report/prerender.mjs`), so
+link previews, thumbnails and renderers that do not run scripts show the guideline instead of empty panes.
+
 It reads the guideline through `proforma export` and `proforma lint`, so it needs proforma-mcp 0.2.0 or
 later. It finds the CLI on its own: `--bin` / `$PROFORMA_BIN`, a global `npm install -g proforma-mcp`,
 `proforma` on PATH, or a private install of the pinned version in `~/.cache/proforma-mcp`.
