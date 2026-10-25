@@ -155,6 +155,12 @@ table.mp td.k { color: var(--muted); width: 40%; font-family: ui-monospace, Cons
 .sup.for { background: #137333; } .sup.against { background: #c5221f; } .sup.confirming { background: #0b57d0; } .sup.excluding { background: #8e24aa; }
 .grade { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 3px; padding: 0 4px; border: 1px solid currentColor; margin: 0 2px; white-space: nowrap; }
 .grade.gA { color: #137333; } .grade.gB { color: #0b57d0; } .grade.gC { color: #b06000; } .grade.gD, .grade.gE { color: #c5221f; }
+.src { border-top: 1px solid var(--line); padding: 5px 4px; font-size: 12px; overflow-wrap: anywhere; }
+.cand .src, .args .src { border-top: 0; padding: 2px 0; }
+.src .cite { color: var(--ink); }
+blockquote.quote { margin: 4px 0 2px; padding: 3px 8px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-style: italic; }
+a.ext { text-decoration: none; }
+a.ext:hover code { text-decoration: underline; }
 a.ref { color: var(--sel); cursor: pointer; text-decoration: none; }
 a.ref:hover { text-decoration: underline; }
 

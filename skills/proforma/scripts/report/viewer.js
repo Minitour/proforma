@@ -773,23 +773,56 @@
     showProps();
   }
 
+  // Composer's native "Ontology coding" property is stored as the metaprop ontology.coding
+  // (SCHEME:code, e.g. SNOMED:197456007); its metaprops editor hides that key and shows the
+  // term as a field of its own. ontology.label (optional) carries the term's preferred name.
+  // ae.private.* keys are Composer's internal component ids.
+  const HIDDEN_META = (k) => k === "ontology.coding" || k === "ontology.label" || k.startsWith("ae.private.");
+  const ONTOLOGY_BROWSERS = {
+    SNOMED: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
+    SNOMEDCT: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
+  };
+  function ontologyHtml(mp) {
+    const v = mp && mp["ontology.coding"];
+    if (!v) return "";
+    const m = /^\s*([A-Za-z][A-Za-z0-9_-]*)\s*:\s*(\S+)\s*$/.exec(v);
+    const browse = m && ONTOLOGY_BROWSERS[m[1].toUpperCase()];
+    const chip = "<code>" + esc(v.trim()) + "</code>";
+    const label = mp["ontology.label"];
+    return (browse ? '<a class="ext" href="' + esc(browse(m[2])) + '" target="_blank" rel="noopener">' + chip + "</a>" : chip) +
+      (label ? ' <span class="muted">' + esc(label) + "</span>" : "");
+  }
+
+  // source / source.N citations, each with the verbatim excerpt quote / quote.N that justifies it
+  const SRC_KEY = /^(source|quote)(?:\.(\d+))?$/;
+  function sourcesHtml(mp) {
+    const ids = [...new Set(Object.keys(mp || {}).map((k) => SRC_KEY.exec(k)).filter(Boolean).map((m) => m[2] || ""))]
+      .sort((a, b) => (Number(a) || 0) - (Number(b) || 0));
+    return ids.map((i) => {
+      const s = mp[i ? "source." + i : "source"];
+      const q = mp[i ? "quote." + i : "quote"];
+      return '<div class="src">' + (s ? '<div class="cite">' + rich(s) + "</div>" : "") +
+        (q ? '<blockquote class="quote">' + rich(q) + "</blockquote>" : "") + "</div>";
+    }).join("");
+  }
+
   function metapropsHtml(mp) {
-    const keys = Object.keys(mp || {});
+    const keys = Object.keys(mp || {}).filter((k) => !HIDDEN_META(k));
     if (!keys.length) return "";
     const groups = [
       ["Goal", (k) => k.startsWith("goal.")],
-      ["ServiceRequest", (k) => k.startsWith("ServiceRequest.")],
-      ["Sources", (k) => k === "source" || /^source\.\d+$/.test(k)],
+      ["Order", (k) => k.startsWith("order.")],
+      ["Sources and quotes", (k) => SRC_KEY.test(k), () => sourcesHtml(mp)],
       ["Provenance and operationalization", () => true],
     ];
     const used = new Set();
     let html = "";
-    for (const [title, test] of groups) {
+    for (const [title, test, render] of groups) {
       const ks = keys.filter((k) => !used.has(k) && test(k));
       if (!ks.length) continue;
       ks.forEach((k) => used.add(k));
-      html += "<h3>" + esc(title) + '</h3><table class="mp">' +
-        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/\./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>";
+      html += "<h3>" + esc(title) + "</h3>" + (render ? render() : '<table class="mp">' +
+        ks.map((k) => '<tr><td class="k">' + esc(k).replace(/\./g, ".<wbr>") + "</td><td>" + rich(mp[k]) + "</td></tr>").join("") + "</table>");
     }
     return html;
   }
@@ -814,6 +847,7 @@
         kv([
           ["Caption", d.caption && rich(d.caption)],
           ["Description", d.description && rich(d.description)],
+          ["Ontology coding", ontologyHtml(d.metaprops)],
           ["Type", d.type && "<code>" + esc(d.type) + "</code>"],
           ["Unit", d.unit && esc(d.unit)],
           ["Range", d.range.length > 0 && d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ")],
@@ -833,6 +867,7 @@
       kv([
         ["Caption", t.caption && rich(t.caption)],
         ["Description", t.description && rich(t.description)],
+        ["Ontology coding", ontologyHtml(t.metaprops)],
         ["Precondition", t.precondition && "<code>" + linkExpr(t.precondition) + "</code>"],
         ["Wait condition", t.wait_condition && "<code>" + linkExpr(t.wait_condition) + "</code>"],
         ["Postcondition", t.postcondition && "<code>" + linkExpr(t.postcondition) + "</code>"],
@@ -860,9 +895,14 @@
       html += "<h3>Candidates</h3>" + t.candidates.map((c) =>
         '<div class="cand"><div class="cn">' + esc(c.name) + (c.caption ? ' <span class="tag">' + rich(c.caption) + "</span>" : "") + "</div>" +
         (c.description ? '<div class="muted">' + rich(c.description) + "</div>" : "") +
+        (ontologyHtml(c.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(c.metaprops) + "</div>" : "") +
+        sourcesHtml(c.metaprops) +
         '<ul class="args">' + (c.arguments.length ? c.arguments.map((a) =>
           '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" +
-          (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") + "</li>").join("") : '<li class="muted">no arguments</li>') + "</ul>" +
+          (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") +
+          (a.description ? '<div class="muted">' + rich(a.description) + "</div>" : "") +
+          (ontologyHtml(a.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(a.metaprops) + "</div>" : "") +
+          sourcesHtml(a.metaprops) + "</li>").join("") : '<li class="muted">no arguments</li>') + "</ul>" +
         '<div class="muted">recommended when <code>' + linkExpr(c.recommendation || "netsupport() > 0") + "</code></div></div>").join("");
     }
     html += metapropsHtml(t.metaprops);
