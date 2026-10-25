@@ -83,6 +83,10 @@ Things that commonly go wrong:
   and Composer drops comments on save too. Put explanations where they persist: `--caption` and
   `--description` on tasks, data items and candidates; argument captions for rationale and grades;
   `set-metadata --desc` for the guideline as a whole; and `modelling-notes.md` for assumptions.
+- Prefer Composer's native fields over free metaprops: `procedure` for what an action does, the
+  **ontology coding** (`ontology.coding=SNOMED:<code>`) for the clinical concept a task, data item,
+  candidate or argument stands for, and a `source.N` / `quote.N` pair recording the verbatim passage
+  each element was modelled from. See `references/modelling.md` §11.
 - Time intervals: `date_diff_hours(from, to)` returns *to − from*, so "48 h after treatment" is
   `date_diff_hours(completed_time(treat), now()) >= 48`.
 
@@ -113,9 +117,11 @@ self-contained HTML viewer laid out like a guideline editor:
   pan, wheel or pinch to zoom, double-click a plan to open it (breadcrumbs lead back). When stored
   positions stack parallel tasks in one column, it switches to an automatic grid layout;
   the ⧉ button (or E) shows all levels at once, with every sub-plan drawn inline as a nested frame;
-- a properties panel for the selected task: caption, description, linked expressions, scheduling,
-  cycles, candidates and arguments with evidence grades, and metaprops grouped into goal,
-  ServiceRequest, sources and provenance;
+- a properties panel for the selected task: caption, description, Composer's ontology coding (a
+  SNOMED CT code links to the SNOMED browser), linked expressions, procedure, scheduling, cycles,
+  candidates and arguments with evidence grades, ontology codings and source quotes, and metaprops
+  grouped into goal, order, sources with their quotes, and provenance (see `references/modelling.md`
+  §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
 The first screen (task tree, root plan diagram, breadcrumb, properties) is also written into the page as

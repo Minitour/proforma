@@ -14,6 +14,7 @@ why it is modelled that way, so you can adapt it to constructs not listed here.
 8. Data items
 9. Expressions: what the engine can and cannot type
 10. Names, captions, Composer compatibility
+11. Native fields, ontology coding and source quotes
 
 ---
 
@@ -150,3 +151,54 @@ Every data item that a decision or precondition reads should be requested by som
 - Lint codes: `PF-L` = syntax, `PF-K` = Composer compatibility (`proforma format` fixes these),
   `PF-C/R/PP/G` = Composer load checks, `PF-V` = Composer verifier (type checking), `PF-X` = extra checks.
   A clean lint means Composer will load and verify the file without complaint.
+
+## 11. Native fields, ontology coding and source quotes
+
+Composer's properties panel has native fields for most of what a guideline needs. Fill those
+before reaching for free `key=value` metaprops: Composer shows them as fields, and the report gives
+them their own rows.
+
+| Content | Where it goes |
+|---|---|
+| Short label | `caption` (tasks, data items, candidates, arguments) |
+| Longer guideline text, rationale | `description` |
+| What an action does (the instruction to carry out) | `procedure` (actions only) |
+| Entry, waiting and exit conditions | `precondition`, `wait_condition`, `postcondition` |
+| Fixed repetition of a component | `number_of_cycles`, `cycle_repeat`, `cycle_until` on the component |
+| Clinical concept the element stands for | ontology coding, `ontology.coding=SNOMED:<code>` |
+| Verbatim passage the element was modelled from | `source.N` + `quote.N` metaprops |
+
+**Ontology coding.** Composer stores its "Ontology coding" property as the metaprop
+`ontology.coding`, written `SCHEME:code` (Composer's own files use `SNOMED:372733002`). Its
+metaprops editor hides the key and shows the term as a field. It applies to tasks, data items,
+candidates and arguments. Add `ontology.label` with the term's preferred name, so readers don't
+have to look the code up. The report shows the coding as its own row and links SNOMED CT codes to
+the SNOMED browser.
+
+```bash
+proforma set --file $F --selector Monitor_Pancreatitis --attribute metaprops --value "'goal.verb=order
+ontology.coding=SNOMED:197456007
+ontology.label=Acute pancreatitis (disorder)
+...'"
+proforma set --file $F --selector "treatment/candidate:ace_inhibitor" --attribute metaprops --value "'ontology.coding=SNOMED:372733002'"
+```
+
+Code what the element is about: the disorder or finding a monitor watches, the procedure or
+substance an action delivers, the observable a data item records. Leave structural elements
+(plans, an eligibility candidate such as `Eligible`) uncoded rather than forcing a poor match.
+
+**Source quotes.** Record why each element exists as a citation plus the verbatim passage it came
+from. Pair them by number: `source.1` is the citation (document and section), and `quote.1` is the
+excerpt, prefixed with its page or section, e.g. `quote.1=p.21: "follow-up ... at least monthly
+during the first 3 months"`. Use the bare `source` / `quote` when there is only one. Keep each quote
+short, at most about 25 words, copied exactly from the source, with `...` marking any omission.
+That is enough to find the passage again without reproducing the document. The report shows each
+quote under its citation, on tasks, data items, candidates and arguments alike.
+
+Composer can also link elements to highlighted regions of a source PDF. Those citations live in
+Composer's separate project evidence model, not in the `.pf` file, so a `.pf` built with the CLI
+carries its provenance in these metaprops instead.
+
+`set --attribute metaprops` replaces the whole map. To change one key, read the current map
+(`get` or `export`), change it, and write the whole map back. Keys are sorted, and `=` and `:` in
+values are escaped on save; the tools read the escapes back, so write plain values.
