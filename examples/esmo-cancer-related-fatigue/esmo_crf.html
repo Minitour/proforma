@@ -1155,9 +1155,13 @@ plan crf_care_cycle</title></g></g></g><defs class="icons"><linearGradient id="g
         showProps();
         return;
       }
-      // show the plan that contains this task
+      // show the plan that contains this task (openPlan selects the plan it opens, so
+      // select the task again afterwards)
       const parent = t.used_by && t.used_by[0];
-      if (parent && parent !== state.plan) openPlan(parent, trailTo(parent));
+      if (parent && parent !== state.plan) {
+        openPlan(parent, trailTo(parent));
+        state.sel = { type: "task", name };
+      }
     }
     if (!opts || !opts.silent) {
       for (const n of vp.querySelectorAll(".node")) n.classList.toggle("sel", n.dataset.task === name);
