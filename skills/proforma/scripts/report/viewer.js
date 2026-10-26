@@ -19,6 +19,37 @@
     return e;
   };
 
+  // ------------------------------------------------------------ touch / narrow screens
+  // Below 900px the task tree is a drawer and the properties pane a bottom sheet (viewer.css).
+  const narrow = () => window.matchMedia("(max-width: 900px)").matches;
+  function closeDrawer() {
+    if (narrow()) $("aside.left").classList.remove("show");
+  }
+  // A second tap on the same element within 350 ms acts as a double-click: mobile browsers
+  // do not reliably fire dblclick for a double tap. Taps that move (pans) do not count.
+  let lastTap = null;
+  function onDoubleTap(el, fn) {
+    let down = null;
+    el.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "touch") down = { x: e.clientX, y: e.clientY };
+    });
+    el.addEventListener("pointerup", (e) => {
+      if (e.pointerType !== "touch" || !down) return;
+      // nested nodes (a task inside an expanded plan frame): only the innermost one counts
+      if (e.pfDoubleTapSeen) return;
+      e.pfDoubleTapSeen = true;
+      const moved = Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) > 10;
+      down = null;
+      if (moved) return;
+      const now = Date.now();
+      if (lastTap && lastTap.el === el && now - lastTap.t < 350) {
+        lastTap = null;
+        e.preventDefault();
+        fn(e);
+      } else lastTap = { el, t: now };
+    });
+  }
+
   // evidence grades such as [I, A] or [IV-V, B]
   const LEVEL = "(?:I{1,3}|IV|V)";
   const GRADE_RE = new RegExp("\\[(" + LEVEL + "(?:\\s*[-–]\\s*" + LEVEL + ")?),\\s*([A-E])\\]", "g");
@@ -61,7 +92,11 @@
     b.onclick = () => showTab(b.dataset.tab);
   }
   function showTab(id) {
-    for (const b of document.querySelectorAll("nav.tabs button")) b.classList.toggle("on", b.dataset.tab === id);
+    for (const b of document.querySelectorAll("nav.tabs button")) {
+      b.classList.toggle("on", b.dataset.tab === id);
+      // on a phone the tab strip scrolls: keep the chosen tab in view
+      if (b.dataset.tab === id && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
     for (const v of document.querySelectorAll(".view")) v.classList.toggle("on", v.id === id);
     if (id === "workspace") requestAnimationFrame(() => fit(false));
   }
@@ -94,8 +129,12 @@
           e.target.textContent = sub.hidden ? "▸" : "▾";
         };
       }
-      row.onclick = () => selectTask(taskName, { open: true });
+      row.onclick = () => {
+        selectTask(taskName, { open: true });
+        closeDrawer();
+      };
       row.ondblclick = () => t && t.kind === "plan" && openPlan(taskName);
+      onDoubleTap(row, () => t && t.kind === "plan" && openPlan(taskName));
     };
     if (G.root) add(ul, G.root, null, [], 0);
     const orphans = G.tasks.filter((t) => !t.reachable);
@@ -113,7 +152,10 @@
       const li = document.createElement("li");
       li.innerHTML =
         '<div class="row" data-data="' + esc(d.name) + '"><span class="twist"></span>' + iconSvg("data") + '<span class="nm">' + esc(d.name) + "</span></div>";
-      li.firstChild.onclick = () => selectData(d.name);
+      li.firstChild.onclick = () => {
+        selectData(d.name);
+        closeDrawer();
+      };
       dl.appendChild(li);
     }
   }
@@ -153,6 +195,12 @@
       const depths = comps.map((c) => depthOf(c, [c.name]));
       if (new Set(depths).size < depths.length) usable = false;
     }
+    // phones: a stored layout much wider than tall would fit only at an unreadable zoom
+    if (usable && narrow() && comps.length > 3) {
+      const xs = stored.map((p) => p.x), ys = stored.map((p) => p.y);
+      const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys);
+      if (w > 2.5 * Math.max(h, 80)) usable = false;
+    }
     state.autoUsed = !(state.layout === "stored" && usable);
     if (state.layout === "stored" && usable) {
       // Composer stores icon positions; spread them a little so labels fit
@@ -176,14 +224,17 @@
       if (!rows.has(l)) rows.set(l, []);
       rows.get(l).push(i);
     });
-    // wide layers wrap into a grid so many parallel tasks stay readable
-    const PER_ROW = 5;
+    // wide layers wrap into a grid so many parallel tasks stay readable; on a phone every
+    // layer wraps at three, so a plan reads top to bottom instead of shrinking to a strip
+    const phone = narrow();
+    const PER_ROW = phone ? 3 : 5;
+    const perOf = (idx) => (!phone && idx.some((i) => comps[i].after.length) ? idx.length : PER_ROW);
     const pos = [];
-    const width = Math.max(...[...rows.values()].map((r) => (r.some((i) => comps[i].after.length) ? r.length : Math.min(PER_ROW, r.length))));
+    const width = Math.max(...[...rows.values()].map((r) => Math.min(perOf(r), r.length)));
     let y = 40;
     for (const l of [...rows.keys()].sort((a, b) => a - b)) {
       const idx = rows.get(l);
-      const per = idx.some((i) => comps[i].after.length) ? idx.length : PER_ROW;
+      const per = perOf(idx);
       for (let start = 0; start < idx.length; start += per) {
         const chunk = idx.slice(start, start + per);
         chunk.forEach((i, j) => {
@@ -321,6 +372,10 @@
       // a frame can sit several levels below the current plan: open it with its full path
       if (t.kind === "plan") openPlan(c.task, trailTo(c.task));
     });
+    onDoubleTap(g, (e) => {
+      e.stopPropagation();
+      if (t.kind === "plan") openPlan(c.task, trailTo(c.task));
+    });
     if (state.sel && state.sel.type === "task" && state.sel.name === c.task) g.classList.add("sel");
   }
 
@@ -339,7 +394,8 @@
     let bottom = top + lines.length * 17;
     if (t.kind === "plan") {
       svgEl("text", { class: "plan-drill", x: cx, y: bottom + 12 }, g).textContent =
-        "▸ " + (t.components ? t.components.length : 0) + " tasks · double-click to open";
+        "▸ " + (t.components ? t.components.length : 0) + " tasks · " +
+        (window.matchMedia("(pointer: coarse)").matches ? "double-tap" : "double-click") + " to open";
       bottom += 16;
     }
     const half = Math.max((icon.x2 - icon.x1) / 2, (Math.max(...lines.map((l) => l.length)) * 7.4) / 2) + 6;
@@ -588,6 +644,8 @@
       state.trail = at >= 0 ? state.trail.slice(0, at + 1) : state.trail.concat(name);
     }
     state.plan = name;
+    // phones: an opened plan gets the whole screen; the properties sheet folds away
+    if (narrow()) $("aside.right").classList.add("collapsed");
     selectTask(name, { open: false, silent: true });
     render();
     fit(false);
@@ -620,10 +678,12 @@
     const W = svg.clientWidth;
     const H = svg.clientHeight;
     if (!box.width || !W || !H) return;
-    const k = Math.min(1.4, Math.max(0.15, Math.min((W - 60) / box.width, (H - 60) / box.height)));
+    // narrow screens: the toolbar runs along the bottom of the canvas, so fit above it
+    const below = narrow() ? 76 : 0;
+    const k = Math.min(1.4, Math.max(0.15, Math.min((W - 60) / box.width, (H - below - 60) / box.height)));
     view.k = k;
     view.x = (W - box.width * k) / 2 - box.x * k;
-    view.y = (H - box.height * k) / 2 - box.y * k;
+    view.y = (H - below - box.height * k) / 2 - box.y * k;
     applyView();
   }
   function zoomAt(f, px, py) {
@@ -648,12 +708,14 @@
   // Panning starts anywhere, including on tasks and plan frames: a press that
   // moves more than a few pixels pans (and its click is swallowed); a press that
   // does not move stays a click / double-click on whatever is under it.
+  // (a finger wobbles more than a mouse: touch presses get a larger allowance)
   const PAN_SLOP = 4;
+  const TOUCH_PAN_SLOP = 10;
   let suppressClick = false;
   svg.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.size === 1) drag = { id: e.pointerId, x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
+    if (pointers.size === 1) drag = { id: e.pointerId, x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false, touch: e.pointerType === "touch" };
   });
   svg.addEventListener("pointermove", (e) => {
     if (!pointers.has(e.pointerId)) return;
@@ -673,7 +735,7 @@
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
     if (!drag.moved) {
-      if (Math.abs(dx) + Math.abs(dy) <= PAN_SLOP) return;
+      if (Math.abs(dx) + Math.abs(dy) <= (drag.touch ? TOUCH_PAN_SLOP : PAN_SLOP)) return;
       drag.moved = true;
       svg.classList.add("panning");
       // capture only once it is a pan, so plain clicks still reach the node
@@ -697,6 +759,11 @@
       }
       svg.classList.remove("panning");
       drag = null;
+    } else if (pointers.size === 1) {
+      // a pinch ended with one finger still down: pan from where that finger is now,
+      // instead of jumping back to where the first finger started
+      const [id, p] = [...pointers.entries()][0];
+      drag = { id, x: p.x, y: p.y, vx: view.x, vy: view.y, moved: true, touch: true };
     }
   };
   svg.addEventListener(
@@ -739,7 +806,15 @@
     e.currentTarget.classList.toggle("on", state.label === "caption");
     render();
   };
-  window.addEventListener("resize", () => fit(false));
+  // the phone layout (wrapped rows, toolbar along the bottom) depends on the width:
+  // redraw when a rotation crosses the breakpoint, otherwise just refit
+  let wasNarrow = narrow();
+  window.addEventListener("resize", () => {
+    if (narrow() !== wasNarrow) {
+      wasNarrow = narrow();
+      render();
+    } else fit(false);
+  });
   document.addEventListener("keydown", (e) => {
     if (!$("#workspace").classList.contains("on") || e.target.closest("input,textarea")) return;
     if (e.key === "+" || e.key === "=") $("#zin").click();
@@ -759,9 +834,13 @@
         showProps();
         return;
       }
-      // show the plan that contains this task
+      // show the plan that contains this task (openPlan selects the plan it opens, so
+      // select the task again afterwards)
       const parent = t.used_by && t.used_by[0];
-      if (parent && parent !== state.plan) openPlan(parent, trailTo(parent));
+      if (parent && parent !== state.plan) {
+        openPlan(parent, trailTo(parent));
+        state.sel = { type: "task", name };
+      }
     }
     if (!opts || !opts.silent) {
       for (const n of vp.querySelectorAll(".node")) n.classList.toggle("sel", n.dataset.task === name);
@@ -836,8 +915,15 @@
   function showProps() {
     const el = $("#props");
     markTree();
+    // narrow screens: the properties sheet opens when something is selected (but not for
+    // the plan that was just opened, which should get the screen)
+    if (state.sel && narrow() && !(state.sel.type === "task" && state.sel.name === state.plan)) {
+      $("aside.right").classList.remove("collapsed");
+    }
     if (!state.sel) {
-      el.innerHTML = '<div class="empty">Select a task on the canvas or in the tree. Double-click a plan to open it.</div>';
+      el.innerHTML = window.matchMedia("(pointer: coarse)").matches
+        ? '<div class="empty">Tap a task on the canvas or in the task tree (☰). Double-tap a plan to open it.</div>'
+        : '<div class="empty">Select a task on the canvas or in the tree. Double-click a plan to open it.</div>';
       return;
     }
     if (state.sel.type === "data") {
@@ -1033,6 +1119,24 @@
     r.dataset.theme = dark ? "light" : "dark";
   };
   $("#treeToggle").onclick = () => $("aside.left").classList.toggle("show");
+  // narrow screens: a tap outside the open task-tree drawer closes it
+  document.addEventListener("pointerdown", (e) => {
+    const drawer = $("aside.left");
+    if (!drawer.classList.contains("show") || !narrow()) return;
+    if (drawer.contains(e.target) || $("#treeToggle").contains(e.target)) return;
+    drawer.classList.remove("show");
+  });
+  // narrow screens: the properties title bar opens and closes the bottom sheet, which
+  // starts closed so the plan gets the whole screen
+  // (build_report's static prerender runs this code against a stub DOM without these nodes)
+  const sheet = $("aside.right");
+  const sheetTitle = sheet && $(".pane-title", sheet);
+  if (sheetTitle) sheetTitle.onclick = () => narrow() && sheet.classList.toggle("collapsed");
+  if (sheet && narrow() && !state.sel) sheet.classList.add("collapsed");
+  if (window.matchMedia("(pointer: coarse)").matches) {
+    const hint = $(".hint");
+    if (hint) hint.textContent = "Drag to pan · pinch to zoom · double-tap a plan to open it · ⧉ shows all levels";
+  }
 
   // ---------------------------------------------------------------- start
   buildTree();

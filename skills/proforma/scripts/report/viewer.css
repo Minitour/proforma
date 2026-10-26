@@ -37,6 +37,9 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* phones: follow the visible viewport as the browser's address bar shows and hides */
+@supports (height: 100dvh) { body { height: 100dvh; } }
 body {
   background: var(--bg); color: var(--ink);
   font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -76,6 +79,8 @@ main { flex: 1; min-height: 0; display: flex; }
 
 /* workspace: tree | canvas | properties */
 #workspace { display: grid; grid-template-columns: var(--left-w, 250px) minmax(0, 1fr) var(--right-w, 340px); position: relative; }
+/* the id rule above outranks .view { display: none }: hide the workspace on the other tabs */
+#workspace:not(.on) { display: none; }
 /* drag handle on the left pane's edge */
 .resizer { position: absolute; top: 0; bottom: 0; left: calc(var(--left-w, 250px) - 3px); width: 6px; cursor: col-resize; z-index: 3; touch-action: none; }
 .resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: 2px; width: 2px; background: transparent; transition: background .15s; }
@@ -185,20 +190,56 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
 .notes h1, .notes h2, .notes h3 { font-size: 15px; }
 .muted { color: var(--muted); }
 
-/* narrow screens: stack the panes */
+/* narrow screens (phones, small tablets): the canvas fills the screen, the task tree is a
+   drawer over it, and the properties pane is a sheet along the bottom that opens when a
+   task is selected and collapses to its title bar */
 @media (max-width: 900px) {
-  #workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; overflow: auto; }
+  #workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(160px, 1fr) auto; overflow: hidden; }
   aside.left { display: none; }
   .resizer { display: none; }
-  aside.left.show { display: block; position: absolute; z-index: 5; top: 92px; left: 0; bottom: 0; width: min(280px, 85vw); box-shadow: 0 0 24px rgba(0,0,0,.25); }
-  aside.right { border-left: 0; border-top: 1px solid var(--line); max-height: 45vh; }
-  .canvas-wrap { min-height: 55vh; }
+  aside.left.show { display: block; position: absolute; z-index: 6; top: 0; left: 0; bottom: 0; width: min(300px, 85vw); box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .3), 0 0 24px rgba(0, 0, 0, .3); }
+  aside.right { border-left: 0; border-top: 1px solid var(--line); max-height: 48vh; max-height: 48dvh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 -4px 14px rgba(0, 0, 0, .12); }
+  aside.right > .pane-title { flex: none; position: static; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; user-select: none; }
+  aside.right > .pane-title::after { content: "▾"; font-size: 14px; }
+  aside.right .props { flex: 1 1 auto; min-height: 0; overflow: auto; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  aside.right.collapsed > .pane-title::after { content: "▴"; }
+  aside.right.collapsed .props { display: none; }
+  .canvas-wrap { min-height: 0; }
+  .toolbar { top: auto; bottom: 34px; right: 8px; flex-direction: row; flex-wrap: wrap-reverse; justify-content: flex-end; max-width: calc(100% - 16px); }
+  .toolbar .sep { display: none; }
+  .toolbar button { width: 36px; height: 36px; }
+  .zoomlabel { right: 8px; bottom: 8px; }
   .hint { display: none; }
-  header.top { flex-wrap: wrap; padding: 8px 16px; }
-  .chips { justify-content: flex-start; }
-  .doc { padding: 14px 16px 30px; }
+  .crumbs .plan-cap { max-width: 50vw; }
+  /* compact header: title row, then one scrollable row of chips */
+  header.top { flex-wrap: wrap; gap: 6px 10px; padding: 6px 12px; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .titles { flex: 1 1 0; }
+  .titles h1 { font-size: 14px; }
+  .chips { flex: 1 0 100%; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; padding-bottom: 2px; }
+  .chips::-webkit-scrollbar, nav.tabs::-webkit-scrollbar { display: none; }
+  .chip { font-size: 11px; padding: 1px 8px; }
+  nav.tabs { scrollbar-width: none; padding: 0 4px; }
+  .doc { padding: 14px 12px 30px; }
+  .card { padding: 10px 12px; }
+  table.grid { font-size: 12px; }
+  pre.src { font-size: 11px; }
 }
 @media (min-width: 901px) { #treeToggle { display: none; } }
+/* touch screens: finger-sized targets */
+@media (pointer: coarse) {
+  ul.tree li > .row { padding: 8px 10px; min-height: 40px; }
+  ul.tree .twist { width: 22px; font-size: 14px; }
+  .toolbar button { width: 40px; height: 40px; }
+  .toolbar { gap: 6px; }
+  nav.tabs button { padding: 11px 14px; }
+  button.icon { min-width: 40px; min-height: 36px; }
+  .crumbs a { display: inline-block; padding: 6px 2px; }
+  aside.right > .pane-title { padding: 11px 14px; }
+}
+/* phones: the eight canvas buttons fit on one row along the bottom */
+@media (max-width: 900px) and (pointer: coarse) {
+  .toolbar button { width: 36px; height: 36px; }
+}
 @media print {
   body { overflow: visible; height: auto; display: block; }
   nav.tabs, .toolbar, .hint, .zoomlabel, #treeToggle, #themeToggle { display: none !important; }

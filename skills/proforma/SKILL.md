@@ -124,6 +124,12 @@ self-contained HTML viewer laid out like a guideline editor:
   §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
+The same page works on a phone. Below 900px the canvas fills the screen. The task tree opens as a
+drawer (☰), and the properties pane is a bottom sheet that opens when a task is tapped and folds
+away when a plan is opened. The canvas buttons run along the bottom, and automatic layouts wrap at
+three tasks per row. On touch screens, double-tap opens a plan, pinch zooms, and the tap targets
+are finger-sized.
+
 The first screen (task tree, root plan diagram, breadcrumb, properties) is also written into the page as
 static markup, rendered at build time by the same viewer code (`scripts/report/prerender.mjs`), so
 link previews, thumbnails and renderers that do not run scripts show the guideline instead of empty panes.
