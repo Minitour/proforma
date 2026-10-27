@@ -120,8 +120,8 @@ self-contained HTML viewer laid out like a guideline editor:
 - a properties panel for the selected task: caption, description, Composer's ontology coding (a
   SNOMED CT code links to the SNOMED browser), linked expressions, procedure, scheduling, cycles,
   candidates and arguments with evidence grades, ontology codings and source quotes, and metaprops
-  grouped into goal, order, sources with their quotes, and provenance (see `references/modelling.md`
-  §11 for the conventions);
+  grouped into goal, one group per block of keys sharing a prefix (e.g. `ServiceRequest.*`), sources
+  with their quotes, and provenance (see `references/modelling.md` §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
 The same page works on a phone. Below 900px the canvas fills the screen. The task tree opens as a
