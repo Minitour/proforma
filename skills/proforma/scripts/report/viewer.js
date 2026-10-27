@@ -888,9 +888,21 @@
   function metapropsHtml(mp) {
     const keys = Object.keys(mp || {}).filter((k) => !HIDDEN_META(k));
     if (!keys.length) return "";
+    // keys sharing a dotted prefix form their own group (e.g. ServiceRequest.code and
+    // ServiceRequest.occurrenceTiming under "ServiceRequest"), so a block of structured keys
+    // stays together whatever vocabulary a guideline uses for it
+    const prefixOf = (k) => (k.includes(".") ? k.slice(0, k.indexOf(".")) : null);
+    const counts = {};
+    for (const k of keys) {
+      const p = prefixOf(k);
+      if (p && p !== "goal" && !SRC_KEY.test(k)) counts[p] = (counts[p] || 0) + 1;
+    }
+    const prefixGroups = Object.keys(counts)
+      .filter((p) => counts[p] > 1)
+      .map((p) => [p, (k) => prefixOf(k) === p]);
     const groups = [
       ["Goal", (k) => k.startsWith("goal.")],
-      ["Order", (k) => k.startsWith("order.")],
+      ...prefixGroups,
       ["Sources and quotes", (k) => SRC_KEY.test(k), () => sourcesHtml(mp)],
       ["Provenance and operationalization", () => true],
     ];
