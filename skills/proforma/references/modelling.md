@@ -165,22 +165,30 @@ them their own rows.
 | What an action does (the instruction to carry out) | `procedure` (actions only) |
 | Entry, waiting and exit conditions | `precondition`, `wait_condition`, `postcondition` |
 | Fixed repetition of a component | `number_of_cycles`, `cycle_repeat`, `cycle_until` on the component |
-| Clinical concept the element stands for | ontology coding, `ontology.coding=SNOMED:<code>` |
+| Clinical concept the element stands for | ontology coding, `ontology.coding=SCT:<code> [<term>]` |
 | Verbatim passage the element was modelled from | `source.N` + `quote.N` metaprops |
 
 **Ontology coding.** Composer stores its "Ontology coding" property as the metaprop
-`ontology.coding`, written `SCHEME:code` (Composer's own files use `SNOMED:372733002`). Its
-metaprops editor hides the key and shows the term as a field. It applies to tasks, data items,
-candidates and arguments. Add `ontology.label` with the term's preferred name, so readers don't
-have to look the code up. The report shows the coding as its own row and links SNOMED CT codes to
-the SNOMED browser.
+`ontology.coding`, written `<prefix>:<code> [<term>]` with a three-letter prefix: `SCT` (SNOMED
+CT), `LNC` (LOINC), `IC0` (ICD-10-CM) or `IC9` (ICD-9-CM), e.g.
+`SCT:271807003 [Eruption of skin (disorder)]` or `LNC:718-7 [Hemoglobin [Mass/volume] in Blood]`
+(the term is everything after the first ` [`, so it may hold brackets of its own). Its metaprops
+editor hides the key and shows the term as a field. For a **task**, Composer keeps the coding on
+the **component** that runs the task in its parent plan (`plan/component:<name>`), not on the task
+definition; data items, candidates and arguments carry it in their own metaprops. A drug can also
+be identified with a plain `rxnorm.coding=RXNORM:<rxcui>` (plus `rxnorm.label`) on the task
+definition, which Composer keeps as an ordinary metaprop.
+
+The report shows the codings as their own row: SNOMED CT codes link to the SNOMED CT browser,
+LOINC codes to loinc.org and RxNorm codes to RxNav. It still reads the older form
+(`SNOMED:<id>` / `LOINC:<code>` with the term in `ontology.label`), and falls back to a task
+definition's coding when its component has none.
 
 ```bash
-proforma set --file $F --selector Monitor_Pancreatitis --attribute metaprops --value "'goal.verb=order
-ontology.coding=SNOMED:197456007
-ontology.label=Acute pancreatitis (disorder)
-...'"
-proforma set --file $F --selector "treatment/candidate:ace_inhibitor" --attribute metaprops --value "'ontology.coding=SNOMED:372733002'"
+proforma set --file $F --selector "Monitor_Undesired_State/component:Monitor_Pancreatitis" --attribute metaprops \
+  --value "'ontology.coding=SCT:197456007 [Acute pancreatitis (disorder)]'"
+proforma set --file $F --selector "treatment/candidate:ace_inhibitor" --attribute metaprops \
+  --value "'ontology.coding=SCT:372733002 [Angiotensin-converting enzyme inhibitor (substance)]'"
 ```
 
 Code what the element is about: the disorder or finding a monitor watches, the procedure or

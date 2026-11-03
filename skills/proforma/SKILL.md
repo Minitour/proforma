@@ -84,8 +84,8 @@ Things that commonly go wrong:
   `--description` on tasks, data items and candidates; argument captions for rationale and grades;
   `set-metadata --desc` for the guideline as a whole; and `modelling-notes.md` for assumptions.
 - Prefer Composer's native fields over free metaprops: `procedure` for what an action does, the
-  **ontology coding** (`ontology.coding=SNOMED:<code>`) for the clinical concept a task, data item,
-  candidate or argument stands for, and a `source.N` / `quote.N` pair recording the verbatim passage
+  **ontology coding** (`ontology.coding=SCT:<code> [<term>]`, on a task's component in its parent
+  plan) for the clinical concept a task, data item, candidate or argument stands for, and a `source.N` / `quote.N` pair recording the verbatim passage
   each element was modelled from. See `references/modelling.md` §11.
 - Time intervals: `date_diff_hours(from, to)` returns *to − from*, so "48 h after treatment" is
   `date_diff_hours(completed_time(treat), now()) >= 48`.
@@ -117,12 +117,20 @@ self-contained HTML viewer laid out like a guideline editor:
   pan, wheel or pinch to zoom, double-click a plan to open it (breadcrumbs lead back). When stored
   positions stack parallel tasks in one column, it switches to an automatic grid layout;
   the ⧉ button (or E) shows all levels at once, with every sub-plan drawn inline as a nested frame;
-- a properties panel for the selected task: caption, description, Composer's ontology coding (a
-  SNOMED CT code links to the SNOMED browser), linked expressions, procedure, scheduling, cycles,
+- a properties panel for the selected task: caption, description, Composer's ontology coding (read
+  from the task's component in its parent plan; SNOMED CT codes link to the SNOMED CT browser, LOINC
+  codes to loinc.org) and an RxNorm coding (`rxnorm.coding`, linked to RxNav), linked expressions, procedure, scheduling, cycles,
   candidates and arguments with evidence grades, ontology codings and source quotes, and metaprops
   grouped into goal, order, sources with their quotes, and provenance (see `references/modelling.md`
   §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
+
+Captions and descriptions are rendered with the Markdown subset Composer supports: headers (`#` to
+`####`), `*emphasis*` / `_emphasis_`, `**strong**` / `__strong__`, bulleted (`* item`) and numbered
+(`1. item`) lists nested with tabs, paragraphs (a blank line), line breaks (two trailing spaces), a
+horizontal rule (`___`) and preformatted text (four leading spaces). The properties panel, decision
+tables and data table show the formatted text; canvas labels, tree rows and breadcrumbs show the
+caption's first line as plain text.
 
 The same page works on a phone. Below 900px the canvas fills the screen. The task tree opens as a
 drawer (☰), and the properties pane is a bottom sheet that opens when a task is tapped and folds
@@ -133,6 +141,28 @@ are finger-sized.
 The first screen (task tree, root plan diagram, breadcrumb, properties) is also written into the page as
 static markup, rendered at build time by the same viewer code (`scripts/report/prerender.mjs`), so
 link previews, thumbnails and renderers that do not run scripts show the guideline instead of empty panes.
+
+**Attaching a Composer project.** `--attach-dir <folder>` embeds every file under a folder in the
+page (recursively, binary-safe, still one self-contained file), and the header gets a download
+button that zips them in the browser. The intended folder is a Deontics Composer project
+(`project.metadata`, `proforma/<Name>.pf`, `proforma/<Name>.deo`), so a reader can download it and
+open it in Composer with File > Open Project:
+
+```bash
+node <this-skill>/scripts/build_report.mjs $F --out guideline.html \
+     --attach-dir My_Project --attach-name My_Project.zip --attach-label "Download Composer project"
+```
+
+- `--attach-name`: the zip's file name (default `<guideline>-composer-project.zip`).
+- `--attach-label`: the button text (default "Download Composer project"); on a phone the button
+  shows its icon only.
+- The zip holds the files under one top-level folder named after the zip (`My_Project/project.metadata`,
+  `My_Project/proforma/...`), so the extracted folder is the project: open that folder in Composer.
+  (Windows' "Extract All" adds a folder of its own, giving `My_Project\My_Project`; open the inner
+  one.) `--attach-root <name>` names the folder differently, and `--attach-root .` puts the files at
+  the zip root.
+- The zip is built when the button is clicked (STORE method, UTF-8 names), so attachments make the
+  page larger by about a third of their size; keep them to project files.
 
 It reads the guideline through `proforma export` and `proforma lint`, so it needs proforma-mcp 0.2.0 or
 later. It finds the CLI on its own: `--bin` / `$PROFORMA_BIN`, a global `npm install -g proforma-mcp`,

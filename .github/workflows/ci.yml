@@ -45,6 +45,14 @@ jobs:
       - name: Run tests
         run: cargo test --all
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Report viewer tests
+        run: node --test "tests/viewer/*.test.mjs"
+
       - name: Lint example guidelines
         shell: bash
         run: |
