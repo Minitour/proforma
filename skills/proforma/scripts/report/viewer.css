@@ -164,6 +164,19 @@ table.mp td.k { color: var(--muted); width: 40%; font-family: ui-monospace, Cons
 .cand .src, .args .src { border-top: 0; padding: 2px 0; }
 .src .cite { color: var(--ink); }
 blockquote.quote { margin: 4px 0 2px; padding: 3px 8px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-style: italic; }
+/* Composer's Markdown subset in captions and descriptions (viewer-lib.js md) */
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p { margin: 0 0 6px; }
+.md ul, .md ol { margin: 2px 0 6px; padding-left: 22px; }
+.md ul { list-style: disc; } .md ol { list-style: decimal; }
+.md ul ul { list-style: circle; } .md ul ul ul { list-style: square; }
+.md li, .args .md li { margin: 1px 0; }
+.md li > ul, .md li > ol { margin: 1px 0; }
+.md .mdh { font-weight: 600; margin: 8px 0 4px; line-height: 1.3; color: var(--ink); }
+.md .mdh1 { font-size: 1.25em; } .md .mdh2 { font-size: 1.15em; } .md .mdh3 { font-size: 1.05em; } .md .mdh4 { font-size: 1em; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+.md pre { background: var(--code-bg); padding: 4px 8px; border-radius: 4px; overflow-x: auto; margin: 4px 0 6px; white-space: pre; }
 a.ext { text-decoration: none; }
 a.ext:hover code { text-decoration: underline; }
 a.ref { color: var(--sel); cursor: pointer; text-decoration: none; }

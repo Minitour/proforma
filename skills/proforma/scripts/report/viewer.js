@@ -9,8 +9,10 @@
   const tasks = new Map(G.tasks.map((t) => [t.name, t]));
   const dataItems = new Map(G.data.map((d) => [d.name, d]));
   const $ = (s, el) => (el || document).querySelector(s);
-  const esc = (s) =>
-    String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  // pure helpers (Composer Markdown, ontology codings, ZIP writer) live in viewer-lib.js,
+  // which build_report inlines before this file
+  const L = PFLib;
+  const esc = L.esc;
   const NS = "http://www.w3.org/2000/svg";
   const svgEl = (name, attrs, parent) => {
     const e = document.createElementNS(NS, name);
@@ -50,10 +52,19 @@
     });
   }
 
-  // evidence grades such as [I, A] or [IV-V, B]
-  const LEVEL = "(?:I{1,3}|IV|V)";
-  const GRADE_RE = new RegExp("\\[(" + LEVEL + "(?:\\s*[-–]\\s*" + LEVEL + ")?),\\s*([A-E])\\]", "g");
-  const rich = (s) => esc(s).replace(GRADE_RE, (m, l, g) => '<span class="grade g' + g + '">' + l + ", " + g + "</span>");
+  // plain text with evidence grades such as [I, A] or [IV-V, B] as badges (metaprops, quotes)
+  const rich = (s) => L.grades(esc(s));
+  // captions and descriptions: Composer's Markdown subset, with grade badges. A one-paragraph
+  // text comes back inline; md(s, tag, cls) wraps it in <tag class=cls>, or in a <div> when
+  // the text has blocks (headers, lists, paragraphs), so it never lands inside a <span>.
+  const md = (s, tag, cls) => {
+    const h = L.md(s);
+    if (!h || !tag) return h;
+    const t = h.startsWith('<div class="md">') ? "div" : tag;
+    return "<" + t + (cls ? ' class="' + cls + '"' : "") + ">" + h + "</" + t + ">";
+  };
+  // tooltips: the text without Markdown markers, one line per line
+  const tip = (s) => L.plainLines(s).join("\n");
 
   // names in an expression become links to the task / data item they refer to
   const linkExpr = (expr) =>
@@ -112,7 +123,7 @@
       const row = document.createElement("div");
       row.className = "row";
       row.dataset.task = taskName;
-      row.title = t && t.caption ? t.caption : taskName;
+      row.title = t && t.caption ? tip(t.caption) : taskName;
       row.innerHTML =
         '<span class="twist">' + (kids.length ? (depth < 2 ? "▾" : "▸") : "") + "</span>" + iconSvg(t ? t.kind : "task") +
         '<span class="nm">' + esc(compName || taskName) + "</span>";
@@ -346,7 +357,8 @@
     return { x: cx + dx * t, y: cy + dy * t };
   }
 
-  const labelOf = (c, t) => (state.label === "caption" && t.caption ? t.caption : c.name);
+  // canvas labels stay plain: the caption's first line without Markdown markers
+  const labelOf = (c, t) => (state.label === "caption" && L.plain(t.caption) ? L.plain(t.caption) : c.name);
   const labelLines = (c, t) => wrapLabel(labelOf(c, t), state.label === "caption" ? 26 : 22);
 
   function badges(g, c, t, ifX, ifY, cycX, cycY) {
@@ -362,7 +374,7 @@
 
   function wireNode(g, c, t) {
     const title = svgEl("title", {}, g);
-    title.textContent = (t.caption ? t.caption + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
+    title.textContent = (t.caption ? tip(t.caption) + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
     g.addEventListener("click", (e) => {
       e.stopPropagation();
       selectTask(c.task, { open: false });
@@ -623,7 +635,7 @@
       .map((p, i) =>
         i === state.trail.length - 1 ? '<span class="here">' + esc(p) + "</span>" : '<a data-i="' + i + '">' + esc(p) + '</a><span class="sep">›</span>'
       )
-      .join("") + (plan && plan.caption ? '<span class="plan-cap" title="' + esc(plan.caption) + '">' + esc(plan.caption) + "</span>" : "");
+      .join("") + (plan && plan.caption ? '<span class="plan-cap" title="' + esc(tip(plan.caption)) + '">' + esc(L.plain(plan.caption)) + "</span>" : "");
     for (const a of el.querySelectorAll("a")) {
       a.onclick = () => {
         const i = Number(a.dataset.i);
@@ -931,8 +943,8 @@
       el.innerHTML =
         "<h2>" + iconSvg("data") + esc(d.name) + '</h2><div class="kindline">data item · ' + esc(d.type || "untyped") + "</div>" +
         kv([
-          ["Caption", d.caption && rich(d.caption)],
-          ["Description", d.description && rich(d.description)],
+          ["Caption", md(d.caption)],
+          ["Description", md(d.description)],
           ["Ontology coding", ontologyHtml(d.metaprops)],
           ["Type", d.type && "<code>" + esc(d.type) + "</code>"],
           ["Unit", d.unit && esc(d.unit)],
@@ -951,8 +963,8 @@
     let html =
       "<h2>" + iconSvg(t.kind) + esc(t.name) + '</h2><div class="kindline">' + esc(t.kind) + (comp ? " · in plan " + esc(comp.plan) : t.name === G.root ? " · root plan" : "") + "</div>" +
       kv([
-        ["Caption", t.caption && rich(t.caption)],
-        ["Description", t.description && rich(t.description)],
+        ["Caption", md(t.caption)],
+        ["Description", md(t.description)],
         ["Ontology coding", ontologyHtml(t.metaprops)],
         ["Precondition", t.precondition && "<code>" + linkExpr(t.precondition) + "</code>"],
         ["Wait condition", t.wait_condition && "<code>" + linkExpr(t.wait_condition) + "</code>"],
@@ -974,19 +986,19 @@
     if (t.sources.length) {
       html += "<h3>Asks for (sources)</h3><table class=\"mp\">" + t.sources.map((s) => {
         const d = dataItems.get(s.data);
-        return '<tr><td class="k"><a class="ref" data-data="' + esc(s.data) + '">' + esc(s.data) + "</a></td><td>" + (d ? esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") + (d.description ? " — " + rich(d.description) : "") : "") + "</td></tr>";
+        return '<tr><td class="k"><a class="ref" data-data="' + esc(s.data) + '">' + esc(s.data) + "</a></td><td>" + (d ? esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") + (d.description ? " — " + md(d.description, "span") : "") : "") + "</td></tr>";
       }).join("") + "</table>";
     }
     if (t.candidates.length) {
       html += "<h3>Candidates</h3>" + t.candidates.map((c) =>
-        '<div class="cand"><div class="cn">' + esc(c.name) + (c.caption ? ' <span class="tag">' + rich(c.caption) + "</span>" : "") + "</div>" +
-        (c.description ? '<div class="muted">' + rich(c.description) + "</div>" : "") +
+        '<div class="cand"><div class="cn">' + esc(c.name) + (c.caption ? " " + md(c.caption, "span", "tag") : "") + "</div>" +
+        md(c.description, "div", "muted") +
         (ontologyHtml(c.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(c.metaprops) + "</div>" : "") +
         sourcesHtml(c.metaprops) +
         '<ul class="args">' + (c.arguments.length ? c.arguments.map((a) =>
           '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" +
-          (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") +
-          (a.description ? '<div class="muted">' + rich(a.description) + "</div>" : "") +
+          md(a.caption, "div", "muted") +
+          md(a.description, "div", "muted") +
           (ontologyHtml(a.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(a.metaprops) + "</div>" : "") +
           sourcesHtml(a.metaprops) + "</li>").join("") : '<li class="muted">no arguments</li>') + "</ul>" +
         '<div class="muted">recommended when <code>' + linkExpr(c.recommendation || "netsupport() > 0") + "</code></div></div>").join("");
@@ -1032,7 +1044,7 @@
   function buildDataView() {
     const rows = G.data.map((d) =>
       "<tr><td><a class=\"ref\" data-data=\"" + esc(d.name) + "\"><code>" + esc(d.name) + "</code></a></td><td>" + esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") +
-      "</td><td>" + rich(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
+      "</td><td>" + md(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
       "</td><td>" + d.asked_by.map((a) => '<a class="ref" data-task="' + esc(a) + '">' + esc(a) + "</a>").join(", ") + "</td></tr>").join("");
     $("#dataview").innerHTML = '<div class="inner"><h2>Data definitions</h2><div class="card tablewrap"><table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Values</th><th>Asked by</th></tr></thead><tbody>' +
       (rows || '<tr><td colspan="5" class="muted">No data items.</td></tr>') + "</tbody></table></div></div>";
@@ -1040,12 +1052,22 @@
   }
   function buildDecisionView() {
     const ds = G.tasks.filter((t) => t.kind === "decision");
+    // a card title is one line: a caption with blocks (header, list) heads the card in plain
+    // text and is shown in full underneath
+    const title = (d) => {
+      const h = L.md(d.caption);
+      return h.startsWith('<div class="md">') ? esc(L.plain(d.caption)) : h || esc(d.name);
+    };
+    const capBlock = (d) => {
+      const h = L.md(d.caption);
+      return h.startsWith('<div class="md">') ? h : "";
+    };
     $("#decisionview").innerHTML = '<div class="inner"><h2>Decisions</h2>' + (ds.length ? ds.map((d) =>
-      '<section class="card"><h3>' + rich(d.caption || d.name) + ' <span class="tag">' + esc(d.name) + " · " + esc(d.choice_mode || "single") + " choice</span></h3>" +
-      (d.description ? "<p>" + rich(d.description) + "</p>" : "") +
+      '<section class="card"><h3>' + title(d) + ' <span class="tag">' + esc(d.name) + " · " + esc(d.choice_mode || "single") + " choice</span></h3>" + capBlock(d) +
+      md(d.description, "p") +
       '<div class="tablewrap"><table class="grid"><thead><tr><th>Candidate</th><th>Arguments</th><th>Recommended when</th></tr></thead><tbody>' +
-      d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + (c.caption ? '<div class="muted">' + rich(c.caption) + "</div>" : "") + (c.description ? '<div class="muted">' + rich(c.description) + "</div>" : "") +
-        '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") + "</li>").join("") : '<li class="muted">no arguments</li>') +
+      d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + md(c.caption, "div", "muted") + md(c.description, "div", "muted") +
+        '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + md(a.caption, "div", "muted") + "</li>").join("") : '<li class="muted">no arguments</li>') +
         "</ul></td><td><code>" + linkExpr(c.recommendation || "netsupport() > 0") + "</code></td></tr>").join("") + "</tbody></table></div></section>").join("") : '<p class="muted">No decisions.</p>') + "</div>";
     wireRefs($("#decisionview"));
   }

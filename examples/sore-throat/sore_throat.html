@@ -170,6 +170,19 @@ table.mp td.k { color: var(--muted); width: 40%; font-family: ui-monospace, Cons
 .cand .src, .args .src { border-top: 0; padding: 2px 0; }
 .src .cite { color: var(--ink); }
 blockquote.quote { margin: 4px 0 2px; padding: 3px 8px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-style: italic; }
+/* Composer's Markdown subset in captions and descriptions (viewer-lib.js md) */
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p { margin: 0 0 6px; }
+.md ul, .md ol { margin: 2px 0 6px; padding-left: 22px; }
+.md ul { list-style: disc; } .md ol { list-style: decimal; }
+.md ul ul { list-style: circle; } .md ul ul ul { list-style: square; }
+.md li, .args .md li { margin: 1px 0; }
+.md li > ul, .md li > ol { margin: 1px 0; }
+.md .mdh { font-weight: 600; margin: 8px 0 4px; line-height: 1.3; color: var(--ink); }
+.md .mdh1 { font-size: 1.25em; } .md .mdh2 { font-size: 1.15em; } .md .mdh3 { font-size: 1.05em; } .md .mdh4 { font-size: 1em; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+.md pre { background: var(--code-bg); padding: 4px 8px; border-radius: 4px; overflow-x: auto; margin: 4px 0 6px; white-space: pre; }
 a.ext { text-decoration: none; }
 a.ext:hover code { text-decoration: underline; }
 a.ref { color: var(--sel); cursor: pointer; text-decoration: none; }
@@ -324,7 +337,173 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
   <section class="view doc" id="sourceview"></section>
 </main>
 <script type="application/json" id="pf-data">{"model":{"format":"proforma-export/1","engine_version":"1.9","metadata":{"author":"proforma example","name":"sore_throat","title":"Sore throat assessment","version":"1.0"},"metaprops":{},"root":"sore_throat","tasks":[{"name":"sore_throat","kind":"plan","caption":"Sore throat assessment","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[{"name":"assess","task":"assess","caption":null,"description":null,"metaprops":{},"after":[],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,40,0,0]},{"name":"manage","task":"manage","caption":null,"description":null,"metaprops":{},"after":["assess"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,140,0,0]},{"name":"prescribe","task":"prescribe","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,240,0,0]},{"name":"advise","task":"advise","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,340,0,0]}],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":[],"paths":["sore_throat"],"reachable":true},{"name":"assess","kind":"enquiry","caption":"Assess patient","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[{"data":"centor_score","mandatory":null},{"data":"penicillin_allergy","mandatory":null},{"data":"temperature","mandatory":null}],"used_by":["sore_throat"],"paths":["sore_throat/assess"],"reachable":true},{"name":"manage","kind":"decision","caption":"Choose management","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[{"name":"antibiotics","caption":"Prescribe antibiotics","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":"high_centor","support":"for","condition":"centor_score >= 3","caption":"Centor score of 3 or more","description":null,"metaprops":{}},{"name":null,"support":"for","condition":"temperature > 38.5","caption":null,"description":null,"metaprops":{}}]},{"name":"self_care","caption":"Self-care advice","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":null,"support":"for","condition":"centor_score \u003c= 1","caption":null,"description":null,"metaprops":{}}]}],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/manage"],"reachable":true},{"name":"prescribe","kind":"action","caption":"Prescribe phenoxymethylpenicillin","description":null,"metaprops":{},"precondition":"result_of(manage) = antibiotics and penicillin_allergy = \"no\"","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":"Phenoxymethylpenicillin 500 mg four times daily for 5 days","abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/prescribe"],"reachable":true},{"name":"advise","kind":"action","caption":"Give self-care advice","description":null,"metaprops":{},"precondition":"result_of(manage) = self_care","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/advise"],"reachable":true}],"data":[{"name":"temperature","type":"real","caption":"Body temperature","description":null,"metaprops":{},"unit":"C","range":[],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"centor_score","type":"integer","caption":"Centor score (0-4)","description":null,"metaprops":{},"unit":null,"range":["0","1","2","3","4"],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"penicillin_allergy","type":"text","caption":"Penicillin allergy?","description":null,"metaprops":{},"unit":null,"range":["\"yes\"","\"no\""],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]}],"functions":[]},"lint":[],"source":"/** PROforma version 1.9 (plain text) **/\n\n/** IMPORTANT: Keep all your comments below the engine_version line **/\nengine_version :: '1.9' ;\n\nmetadata  :: 'sore_throat' ;\n     title :: 'Sore throat assessment' ;\n     version :: '1.0' ;\n     author :: 'proforma example' ;\nend metadata.\n\nmetaprops :: '' ;\n\nplan  :: 'sore_throat' ;\n     caption :: 'Sore throat assessment' ;\n     component :: 'assess' ;\n          task_definition :: 'assess' ;\n          ltwh :: 40,40,0,0;\n     component :: 'manage' ;\n          task_definition :: 'manage' ;\n          schedule_constraint :: completed('assess') ;\n          ltwh :: 40,140,0,0;\n     component :: 'prescribe' ;\n          task_definition :: 'prescribe' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,240,0,0;\n     component :: 'advise' ;\n          task_definition :: 'advise' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,340,0,0;\nend plan.\n\nenquiry  :: 'assess' ;\n     caption :: 'Assess patient' ;\n     source :: 'centor_score' ;\n          data_definition :: 'centor_score' ;\n     source :: 'penicillin_allergy' ;\n          data_definition :: 'penicillin_allergy' ;\n     source :: 'temperature' ;\n          data_definition :: 'temperature' ;\nend enquiry.\n\ndecision  :: 'manage' ;\n     caption :: 'Choose management' ;\n     candidate :: 'antibiotics' ;\n          caption :: 'Prescribe antibiotics' ;\n          argument :: for,centor_score >= 3 attributes\n               argument_name :: 'high_centor' ;\n               caption :: 'Centor score of 3 or more' ;\n          end attributes\n          ;\n          argument :: for,temperature > 38.5;\n          recommendation ::netsupport() > 0;\n     candidate :: 'self_care' ;\n          caption :: 'Self-care advice' ;\n          argument :: for,centor_score \u003c= 1;\n          recommendation ::netsupport() > 0;\nend decision.\n\naction  :: 'prescribe' ;\n     caption :: 'Prescribe phenoxymethylpenicillin' ;\n     precondition ::result_of(manage) = antibiotics and penicillin_allergy = \"no\";\n     procedure :: 'Phenoxymethylpenicillin 500 mg four times daily for 5 days' ;\nend action.\n\naction  :: 'advise' ;\n     caption :: 'Give self-care advice' ;\n     precondition ::result_of(manage) = self_care;\nend action.\n\n\ndata  :: 'temperature' ;\n     type :: real ;\n     caption :: 'Body temperature' ;\n     unit :: 'C' ;\nend data.\n\ndata  :: 'centor_score' ;\n     type :: integer ;\n     caption :: 'Centor score (0-4)' ;\n     range ::0,1,2,3,4;\nend data.\n\ndata  :: 'penicillin_allergy' ;\n     type :: text ;\n     caption :: 'Penicillin allergy?' ;\n     range ::\"yes\",\"no\";\nend data.\n","file":"sore_throat.pf"}</script>
-<script>/* PROforma guideline viewer (client side). Reads the embedded `proforma export` model
+<script>/* Pure helpers for the PROforma guideline viewer, shared by the page (inlined before
+   viewer.js), build_report.mjs and the tests (loaded with node:vm). No DOM access, no
+   dependencies: Composer's Markdown subset in captions and descriptions. */
+var PFLib = (function () {
+  "use strict";
+
+  const esc = (s) =>
+    String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+  // evidence grades such as [I, A] or [IV-V, B]
+  const LEVEL = "(?:I{1,3}|IV|V)";
+  const GRADE_RE = new RegExp("\\[(" + LEVEL + "(?:\\s*[-–]\\s*" + LEVEL + ")?),\\s*([A-E])\\]", "g");
+  const grades = (html) => html.replace(GRADE_RE, (m, l, g) => '<span class="grade g' + g + '">' + l + ", " + g + "</span>");
+
+  // ---------------------------------------------------------------- Composer Markdown
+  // Composer renders a Markdown subset in captions and descriptions: headers (# to ####),
+  // *emphasis* / _emphasis_, **strong** / __strong__, bulleted (* item) and numbered (1. item)
+  // lists nested with tabs, paragraphs (blank line), line breaks (two trailing spaces), a
+  // horizontal rule (three underscores) and preformatted text (four leading spaces).
+  // Escape first, then add the markup, so nothing in the text can inject HTML.
+
+  // emphasis delimiters: never inside a word for "_" (identifiers such as on_insulin_x), and
+  // never next to a space on the inside for either (so "5 * 3 * 2" stays as it is)
+  const STRONG_STAR_RE = /\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/g;
+  const STRONG_UND_RE = /(^|[^A-Za-z0-9_])__(?=\S)([\s\S]*?\S)__(?![A-Za-z0-9_])/g;
+  const EM_STAR_RE = /\*(?=[^\s*])([^*]*?[^\s*])\*/g;
+  const EM_UND_RE = /(^|[^A-Za-z0-9_])_(?=[^\s_])([^_]*?[^\s_])_(?![A-Za-z0-9_])/g;
+  function inline(s) {
+    let h = esc(s).replace(/\\([*_#\\])/g, (m, c) => "&#" + c.charCodeAt(0) + ";");
+    h = h.replace(STRONG_STAR_RE, "<strong>$1</strong>").replace(STRONG_UND_RE, "$1<strong>$2</strong>");
+    h = h.replace(EM_STAR_RE, "<em>$1</em>");
+    h = h.replace(EM_UND_RE, "$1<em>$2</em>");
+    return grades(h);
+  }
+
+  const HEADER_RE = /^ {0,3}(#{1,4})[ \t]+(.*?)[ \t]*#*[ \t]*$/;
+  const HR_RE = /^ {0,3}(?:_[ \t]*){3,}$|^ {0,3}(?:-[ \t]*){3,}$|^ {0,3}(?:\*[ \t]*){3,}$/;
+  const ITEM_RE = /^(\t*) {0,3}(?:([*+-])|(\d{1,9})[.)])[ \t]+(.*)$/;
+  const PRE_RE = /^ {4}(.*)$/;
+  const hardBreak = (line) => / {2,}$/.test(line);
+
+  /** Composer Markdown to HTML. One plain paragraph comes back as inline HTML (no <p>), so a
+   *  one-line caption fits where it always did; anything else is a block in <div class="md">. */
+  function md(src) {
+    const text = String(src == null ? "" : src).replace(/\r\n?/g, "\n");
+    if (!text.trim()) return "";
+    const lines = text.split("\n");
+    const out = [];
+    let para = null; // lines of the open paragraph
+    const lists = []; // open lists: {tag}
+    let pre = null;
+    let blank = false;
+    let blocks = 0;
+    const lineHtml = (ls) => ls.map((l, i) => inline(l.trim()) + (i < ls.length - 1 ? (hardBreak(l) ? "<br>" : " ") : "")).join("");
+    const closePara = () => {
+      if (para) out.push({ p: lineHtml(para) });
+      para = null;
+    };
+    const closePre = () => {
+      if (pre) {
+        while (pre.length && !pre[pre.length - 1].trim()) pre.pop();
+        out.push("<pre>" + esc(pre.join("\n")) + "</pre>");
+        blocks++;
+      }
+      pre = null;
+    };
+    const closeLists = (depth) => {
+      while (lists.length > depth) out.push("</li></" + lists.pop().tag + ">");
+    };
+    let item = null; // lines of the open list item
+    const flushItem = () => {
+      if (item) out.push(lineHtml(item));
+      item = null;
+    };
+    for (const raw of lines) {
+      const line = raw.replace(/\s+$/, (m) => (/ {2,}$/.test(m) ? "  " : ""));
+      if (!line.trim()) {
+        closePara();
+        if (pre) pre.push("");
+        blank = true;
+        continue;
+      }
+      let li = ITEM_RE.exec(line);
+      // as in CommonMark, only a list starting at 1 may interrupt a paragraph ("2023. Next")
+      if (li && para && li[3] && Number(li[3]) !== 1) li = null;
+      if (pre && PRE_RE.test(line) && !li) {
+        pre.push(PRE_RE.exec(line)[1]);
+        continue;
+      }
+      closePre();
+      if (li) {
+        closePara();
+        flushItem();
+        const tag = li[2] ? "ul" : "ol";
+        const depth = Math.min(li[1].length, lists.length);
+        closeLists(depth + 1);
+        if (lists.length === depth + 1 && lists[depth].tag !== tag) closeLists(depth);
+        if (lists.length === depth + 1) out.push("</li><li>");
+        else {
+          if (!lists.length) blocks++;
+          const start = li[3] && Number(li[3]) !== 1 ? ' start="' + Number(li[3]) + '"' : "";
+          out.push("<" + tag + start + "><li>");
+          lists.push({ tag });
+        }
+        item = [li[4]];
+        blank = false;
+        continue;
+      }
+      // a paragraph line after a list item continues the item unless a blank line came first
+      if (lists.length && !blank && item) {
+        item.push(line.replace(/^[\t ]+/, ""));
+        continue;
+      }
+      flushItem();
+      closeLists(0);
+      const h = HEADER_RE.exec(line);
+      if (h) {
+        closePara();
+        out.push('<div class="mdh mdh' + h[1].length + '" role="heading" aria-level="' + h[1].length + '">' + inline(h[2]) + "</div>");
+        blocks++;
+      } else if (HR_RE.test(line) && !(para && /^ {0,3}-/.test(line))) {
+        closePara();
+        out.push("<hr>");
+        blocks++;
+      } else if (!para && PRE_RE.test(line)) {
+        pre = [PRE_RE.exec(line)[1]];
+      } else {
+        if (!para) para = [];
+        para.push(line);
+      }
+      blank = false;
+    }
+    closePara();
+    closePre();
+    flushItem();
+    closeLists(0);
+    const paras = out.filter((x) => typeof x === "object");
+    if (paras.length === 1 && blocks === 0) return paras[0].p;
+    return '<div class="md">' + out.map((x) => (typeof x === "object" ? "<p>" + x.p + "</p>" : x)).join("") + "</div>";
+  }
+
+  /** A caption or description as plain text: Markdown markers stripped, one line per line. */
+  function plainLines(src) {
+    return String(src == null ? "" : src)
+      .replace(/\r\n?/g, "\n")
+      .split("\n")
+      .filter((l) => l.trim() && !HR_RE.test(l))
+      .map((l) =>
+        l
+          .replace(HEADER_RE, "$2")
+          .replace(ITEM_RE, (m, tabs, b, n, rest) => (n ? n + ". " : "") + rest)
+          .replace(/^ {4}/, "")
+          .replace(STRONG_STAR_RE, "$1")
+          .replace(STRONG_UND_RE, "$1$2")
+          .replace(EM_STAR_RE, "$1")
+          .replace(EM_UND_RE, "$1$2")
+          .replace(/\\([*_#\\])/g, "$1")
+          .trim()
+      );
+  }
+  /** The first line of a caption, plain (canvas labels, tree rows, breadcrumbs). */
+  const plain = (src) => plainLines(src)[0] || "";
+
+  return { esc, grades, inline, md, plain, plainLines };
+})();
+
+/* PROforma guideline viewer (client side). Reads the embedded `proforma export` model
    (#pf-data) and renders a Composer-style workspace: task tree, plan canvas with
    pan / zoom / drill-down, and a properties panel; plus data, decision, lint and
    source views. No external dependencies. */
@@ -335,8 +514,10 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
   const tasks = new Map(G.tasks.map((t) => [t.name, t]));
   const dataItems = new Map(G.data.map((d) => [d.name, d]));
   const $ = (s, el) => (el || document).querySelector(s);
-  const esc = (s) =>
-    String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  // pure helpers (Composer Markdown, ontology codings, ZIP writer) live in viewer-lib.js,
+  // which build_report inlines before this file
+  const L = PFLib;
+  const esc = L.esc;
   const NS = "http://www.w3.org/2000/svg";
   const svgEl = (name, attrs, parent) => {
     const e = document.createElementNS(NS, name);
@@ -376,10 +557,19 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
     });
   }
 
-  // evidence grades such as [I, A] or [IV-V, B]
-  const LEVEL = "(?:I{1,3}|IV|V)";
-  const GRADE_RE = new RegExp("\\[(" + LEVEL + "(?:\\s*[-–]\\s*" + LEVEL + ")?),\\s*([A-E])\\]", "g");
-  const rich = (s) => esc(s).replace(GRADE_RE, (m, l, g) => '<span class="grade g' + g + '">' + l + ", " + g + "</span>");
+  // plain text with evidence grades such as [I, A] or [IV-V, B] as badges (metaprops, quotes)
+  const rich = (s) => L.grades(esc(s));
+  // captions and descriptions: Composer's Markdown subset, with grade badges. A one-paragraph
+  // text comes back inline; md(s, tag, cls) wraps it in <tag class=cls>, or in a <div> when
+  // the text has blocks (headers, lists, paragraphs), so it never lands inside a <span>.
+  const md = (s, tag, cls) => {
+    const h = L.md(s);
+    if (!h || !tag) return h;
+    const t = h.startsWith('<div class="md">') ? "div" : tag;
+    return "<" + t + (cls ? ' class="' + cls + '"' : "") + ">" + h + "</" + t + ">";
+  };
+  // tooltips: the text without Markdown markers, one line per line
+  const tip = (s) => L.plainLines(s).join("\n");
 
   // names in an expression become links to the task / data item they refer to
   const linkExpr = (expr) =>
@@ -438,7 +628,7 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
       const row = document.createElement("div");
       row.className = "row";
       row.dataset.task = taskName;
-      row.title = t && t.caption ? t.caption : taskName;
+      row.title = t && t.caption ? tip(t.caption) : taskName;
       row.innerHTML =
         '<span class="twist">' + (kids.length ? (depth < 2 ? "▾" : "▸") : "") + "</span>" + iconSvg(t ? t.kind : "task") +
         '<span class="nm">' + esc(compName || taskName) + "</span>";
@@ -672,7 +862,8 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
     return { x: cx + dx * t, y: cy + dy * t };
   }
 
-  const labelOf = (c, t) => (state.label === "caption" && t.caption ? t.caption : c.name);
+  // canvas labels stay plain: the caption's first line without Markdown markers
+  const labelOf = (c, t) => (state.label === "caption" && L.plain(t.caption) ? L.plain(t.caption) : c.name);
   const labelLines = (c, t) => wrapLabel(labelOf(c, t), state.label === "caption" ? 26 : 22);
 
   function badges(g, c, t, ifX, ifY, cycX, cycY) {
@@ -688,7 +879,7 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
 
   function wireNode(g, c, t) {
     const title = svgEl("title", {}, g);
-    title.textContent = (t.caption ? t.caption + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
+    title.textContent = (t.caption ? tip(t.caption) + "\n" : "") + t.kind + " " + c.task + (t.precondition ? "\nprecondition: " + t.precondition : "");
     g.addEventListener("click", (e) => {
       e.stopPropagation();
       selectTask(c.task, { open: false });
@@ -949,7 +1140,7 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
       .map((p, i) =>
         i === state.trail.length - 1 ? '<span class="here">' + esc(p) + "</span>" : '<a data-i="' + i + '">' + esc(p) + '</a><span class="sep">›</span>'
       )
-      .join("") + (plan && plan.caption ? '<span class="plan-cap" title="' + esc(plan.caption) + '">' + esc(plan.caption) + "</span>" : "");
+      .join("") + (plan && plan.caption ? '<span class="plan-cap" title="' + esc(tip(plan.caption)) + '">' + esc(L.plain(plan.caption)) + "</span>" : "");
     for (const a of el.querySelectorAll("a")) {
       a.onclick = () => {
         const i = Number(a.dataset.i);
@@ -1257,8 +1448,8 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
       el.innerHTML =
         "<h2>" + iconSvg("data") + esc(d.name) + '</h2><div class="kindline">data item · ' + esc(d.type || "untyped") + "</div>" +
         kv([
-          ["Caption", d.caption && rich(d.caption)],
-          ["Description", d.description && rich(d.description)],
+          ["Caption", md(d.caption)],
+          ["Description", md(d.description)],
           ["Ontology coding", ontologyHtml(d.metaprops)],
           ["Type", d.type && "<code>" + esc(d.type) + "</code>"],
           ["Unit", d.unit && esc(d.unit)],
@@ -1277,8 +1468,8 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
     let html =
       "<h2>" + iconSvg(t.kind) + esc(t.name) + '</h2><div class="kindline">' + esc(t.kind) + (comp ? " · in plan " + esc(comp.plan) : t.name === G.root ? " · root plan" : "") + "</div>" +
       kv([
-        ["Caption", t.caption && rich(t.caption)],
-        ["Description", t.description && rich(t.description)],
+        ["Caption", md(t.caption)],
+        ["Description", md(t.description)],
         ["Ontology coding", ontologyHtml(t.metaprops)],
         ["Precondition", t.precondition && "<code>" + linkExpr(t.precondition) + "</code>"],
         ["Wait condition", t.wait_condition && "<code>" + linkExpr(t.wait_condition) + "</code>"],
@@ -1300,19 +1491,19 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
     if (t.sources.length) {
       html += "<h3>Asks for (sources)</h3><table class=\"mp\">" + t.sources.map((s) => {
         const d = dataItems.get(s.data);
-        return '<tr><td class="k"><a class="ref" data-data="' + esc(s.data) + '">' + esc(s.data) + "</a></td><td>" + (d ? esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") + (d.description ? " — " + rich(d.description) : "") : "") + "</td></tr>";
+        return '<tr><td class="k"><a class="ref" data-data="' + esc(s.data) + '">' + esc(s.data) + "</a></td><td>" + (d ? esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") + (d.description ? " — " + md(d.description, "span") : "") : "") + "</td></tr>";
       }).join("") + "</table>";
     }
     if (t.candidates.length) {
       html += "<h3>Candidates</h3>" + t.candidates.map((c) =>
-        '<div class="cand"><div class="cn">' + esc(c.name) + (c.caption ? ' <span class="tag">' + rich(c.caption) + "</span>" : "") + "</div>" +
-        (c.description ? '<div class="muted">' + rich(c.description) + "</div>" : "") +
+        '<div class="cand"><div class="cn">' + esc(c.name) + (c.caption ? " " + md(c.caption, "span", "tag") : "") + "</div>" +
+        md(c.description, "div", "muted") +
         (ontologyHtml(c.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(c.metaprops) + "</div>" : "") +
         sourcesHtml(c.metaprops) +
         '<ul class="args">' + (c.arguments.length ? c.arguments.map((a) =>
           '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" +
-          (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") +
-          (a.description ? '<div class="muted">' + rich(a.description) + "</div>" : "") +
+          md(a.caption, "div", "muted") +
+          md(a.description, "div", "muted") +
           (ontologyHtml(a.metaprops) ? '<div class="muted">Ontology coding: ' + ontologyHtml(a.metaprops) + "</div>" : "") +
           sourcesHtml(a.metaprops) + "</li>").join("") : '<li class="muted">no arguments</li>') + "</ul>" +
         '<div class="muted">recommended when <code>' + linkExpr(c.recommendation || "netsupport() > 0") + "</code></div></div>").join("");
@@ -1358,7 +1549,7 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
   function buildDataView() {
     const rows = G.data.map((d) =>
       "<tr><td><a class=\"ref\" data-data=\"" + esc(d.name) + "\"><code>" + esc(d.name) + "</code></a></td><td>" + esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") +
-      "</td><td>" + rich(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
+      "</td><td>" + md(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
       "</td><td>" + d.asked_by.map((a) => '<a class="ref" data-task="' + esc(a) + '">' + esc(a) + "</a>").join(", ") + "</td></tr>").join("");
     $("#dataview").innerHTML = '<div class="inner"><h2>Data definitions</h2><div class="card tablewrap"><table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Values</th><th>Asked by</th></tr></thead><tbody>' +
       (rows || '<tr><td colspan="5" class="muted">No data items.</td></tr>') + "</tbody></table></div></div>";
@@ -1366,12 +1557,22 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
   }
   function buildDecisionView() {
     const ds = G.tasks.filter((t) => t.kind === "decision");
+    // a card title is one line: a caption with blocks (header, list) heads the card in plain
+    // text and is shown in full underneath
+    const title = (d) => {
+      const h = L.md(d.caption);
+      return h.startsWith('<div class="md">') ? esc(L.plain(d.caption)) : h || esc(d.name);
+    };
+    const capBlock = (d) => {
+      const h = L.md(d.caption);
+      return h.startsWith('<div class="md">') ? h : "";
+    };
     $("#decisionview").innerHTML = '<div class="inner"><h2>Decisions</h2>' + (ds.length ? ds.map((d) =>
-      '<section class="card"><h3>' + rich(d.caption || d.name) + ' <span class="tag">' + esc(d.name) + " · " + esc(d.choice_mode || "single") + " choice</span></h3>" +
-      (d.description ? "<p>" + rich(d.description) + "</p>" : "") +
+      '<section class="card"><h3>' + title(d) + ' <span class="tag">' + esc(d.name) + " · " + esc(d.choice_mode || "single") + " choice</span></h3>" + capBlock(d) +
+      md(d.description, "p") +
       '<div class="tablewrap"><table class="grid"><thead><tr><th>Candidate</th><th>Arguments</th><th>Recommended when</th></tr></thead><tbody>' +
-      d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + (c.caption ? '<div class="muted">' + rich(c.caption) + "</div>" : "") + (c.description ? '<div class="muted">' + rich(c.description) + "</div>" : "") +
-        '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + (a.caption ? '<div class="muted">' + rich(a.caption) + "</div>" : "") + "</li>").join("") : '<li class="muted">no arguments</li>') +
+      d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + md(c.caption, "div", "muted") + md(c.description, "div", "muted") +
+        '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + md(a.caption, "div", "muted") + "</li>").join("") : '<li class="muted">no arguments</li>') +
         "</ul></td><td><code>" + linkExpr(c.recommendation || "netsupport() > 0") + "</code></td></tr>").join("") + "</tbody></table></div></section>").join("") : '<p class="muted">No decisions.</p>') + "</div>";
     wireRefs($("#decisionview"));
   }

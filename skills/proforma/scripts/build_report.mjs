@@ -8,12 +8,14 @@
 //   node <skill>/scripts/build_report.mjs <guideline.pf> [--out <file.html>] [--source "<text>"] [--notes <file.md>]
 //                         [--badge "<text>"]... [--bin <proforma binary or bin/proforma.js>]
 //
-// The page is self-contained: the template (report/viewer.css, report/viewer.js), the guideline
-// data and the source are inlined, and nothing is fetched, so it can be opened locally or
-// uploaded as is. The script refuses to write a page with an external reference.
+// The page is self-contained: the template (report/viewer.css, report/viewer-lib.js,
+// report/viewer.js), the guideline data and the source are inlined, and nothing is
+// fetched, so it can be opened locally or uploaded as is. The script refuses to write a page
+// with an external reference.
 
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { prerender } from "./report/prerender.mjs";
 import { exportGuideline, lintGuideline } from "./lib/proforma.mjs";
@@ -102,10 +104,14 @@ try {
 const source = fs.readFileSync(opts.file, "latin1").replace(/\r\n/g, "\n");
 const notesHtml = opts.notes && fs.existsSync(opts.notes) ? markdown(fs.readFileSync(opts.notes, "utf8")) : "";
 const css = fs.readFileSync(path.join(HERE, "report", "viewer.css"), "utf8");
-const js = fs.readFileSync(path.join(HERE, "report", "viewer.js"), "utf8");
+// the page script: the pure helpers (viewer-lib.js, also used here) and then the viewer
+const lib = fs.readFileSync(path.join(HERE, "report", "viewer-lib.js"), "utf8");
+const PFLib = vm.runInNewContext(lib + "\n;PFLib", {}, { filename: "viewer-lib.js" });
+const js = lib + "\n" + fs.readFileSync(path.join(HERE, "report", "viewer.js"), "utf8");
 
 const m = model.metadata || {};
-const title = m.title || model.tasks.find((t) => t.name === model.root)?.caption || model.root || path.basename(opts.file);
+// a caption may hold Composer Markdown: the page title is its first line, plain
+const title = m.title || PFLib.plain(model.tasks.find((t) => t.name === model.root)?.caption) || model.root || path.basename(opts.file);
 const count = (k) => model.tasks.filter((t) => t.kind === k).length;
 const errors = lint.filter((d) => d.severity === "error").length;
 const warnings = lint.filter((d) => d.severity === "warning").length;

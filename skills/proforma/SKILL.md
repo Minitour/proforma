@@ -124,6 +124,13 @@ self-contained HTML viewer laid out like a guideline editor:
   §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
+Captions and descriptions are rendered with the Markdown subset Composer supports: headers (`#` to
+`####`), `*emphasis*` / `_emphasis_`, `**strong**` / `__strong__`, bulleted (`* item`) and numbered
+(`1. item`) lists nested with tabs, paragraphs (a blank line), line breaks (two trailing spaces), a
+horizontal rule (`___`) and preformatted text (four leading spaces). The properties panel, decision
+tables and data table show the formatted text; canvas labels, tree rows and breadcrumbs show the
+caption's first line as plain text.
+
 The same page works on a phone. Below 900px the canvas fills the screen. The task tree opens as a
 drawer (☰), and the properties pane is a bottom sheet that opens when a task is tapped and folds
 away when a plan is opened. The canvas buttons run along the bottom, and automatic layouts wrap at

@@ -168,6 +168,7 @@ flowchart TD
 cargo test
 cargo clippy --all-targets -- -D warnings
 cargo run -- lint --file examples/sore-throat/sore_throat.pf
+node --test "tests/viewer/*.test.mjs"    # report viewer helpers (Node 22+)
 ```
 
 Releases: push a `vX.Y.Z` tag. The release workflow builds Linux/macOS/Windows (x64 + arm64)
