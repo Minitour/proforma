@@ -142,6 +142,28 @@ The first screen (task tree, root plan diagram, breadcrumb, properties) is also 
 static markup, rendered at build time by the same viewer code (`scripts/report/prerender.mjs`), so
 link previews, thumbnails and renderers that do not run scripts show the guideline instead of empty panes.
 
+**Attaching a Composer project.** `--attach-dir <folder>` embeds every file under a folder in the
+page (recursively, binary-safe, still one self-contained file), and the header gets a download
+button that zips them in the browser. The intended folder is a Deontics Composer project
+(`project.metadata`, `proforma/<Name>.pf`, `proforma/<Name>.deo`), so a reader can download it and
+open it in Composer with File > Open Project:
+
+```bash
+node <this-skill>/scripts/build_report.mjs $F --out guideline.html \
+     --attach-dir My_Project --attach-name My_Project.zip --attach-label "Download Composer project"
+```
+
+- `--attach-name`: the zip's file name (default `<guideline>-composer-project.zip`).
+- `--attach-label`: the button text (default "Download Composer project"); on a phone the button
+  shows its icon only.
+- The zip holds the files under one top-level folder named after the zip (`My_Project/project.metadata`,
+  `My_Project/proforma/...`), so the extracted folder is the project: open that folder in Composer.
+  (Windows' "Extract All" adds a folder of its own, giving `My_Project\My_Project`; open the inner
+  one.) `--attach-root <name>` names the folder differently, and `--attach-root .` puts the files at
+  the zip root.
+- The zip is built when the button is clicked (STORE method, UTF-8 names), so attachments make the
+  page larger by about a third of their size; keep them to project files.
+
 It reads the guideline through `proforma export` and `proforma lint`, so it needs proforma-mcp 0.2.0 or
 later. It finds the CLI on its own: `--bin` / `$PROFORMA_BIN`, a global `npm install -g proforma-mcp`,
 `proforma` on PATH, or a private install of the pinned version in `~/.cache/proforma-mcp`.

@@ -1156,7 +1156,43 @@
     if (hint) hint.textContent = "Drag to pan · pinch to zoom · double-tap a plan to open it · ⧉ shows all levels";
   }
 
+  // ---------------------------------------------------------------- attached files
+  // build_report --attach-dir embeds a folder (e.g. a Composer project) as #pf-attachments
+  // ({name, label, root, files: [{path, mtime, base64}]}); the header's Download button zips it
+  // in the browser and saves it. (The static prerender has no attachments: the button stays hidden.)
+  function setupDownload() {
+    const btn = document.getElementById("downloadBtn");
+    const node = document.getElementById("pf-attachments");
+    let att = null;
+    try {
+      const text = node && node.textContent;
+      att = text && text.trim() ? JSON.parse(text) : null;
+    } catch (e) {
+      att = null;
+    }
+    if (!btn || !att || !Array.isArray(att.files) || !att.files.length) return;
+    btn.hidden = false;
+    btn.onclick = () => {
+      let url;
+      try {
+        url = URL.createObjectURL(new Blob([L.attachmentsZip(att)], { type: "application/zip" }));
+      } catch (e) {
+        alert("Could not build " + att.name + ": " + e.message);
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = att.name;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    };
+  }
+
   // ---------------------------------------------------------------- start
+  setupDownload();
   buildTree();
   buildDataView();
   buildDecisionView();

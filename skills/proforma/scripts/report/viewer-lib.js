@@ -1,6 +1,7 @@
 /* Pure helpers for the PROforma guideline viewer, shared by the page (inlined before
    viewer.js), build_report.mjs and the tests (loaded with node:vm). No DOM access, no
-   dependencies: Composer's Markdown subset in captions and descriptions, and ontology codings. */
+   dependencies: Composer's Markdown subset in captions and descriptions, ontology codings,
+   and a ZIP writer for the files attached to the page. */
 var PFLib = (function () {
   "use strict";
 
@@ -255,5 +256,134 @@ var PFLib = (function () {
     return [ontology, rxnorm].filter(Boolean).map(codingHtml).join("<br>");
   }
 
-  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml };
+  // ---------------------------------------------------------------- ZIP writer
+  // A minimal ZIP (PKWARE APPNOTE 6.3) writer: STORE method, CRC-32, local file headers,
+  // central directory and end record, UTF-8 names (flag bit 11). Folders are implicit in
+  // the paths. No ZIP64, so at most 65535 entries and 4 GiB.
+  let CRC_TABLE = null;
+  function crc32(bytes) {
+    if (!CRC_TABLE) {
+      CRC_TABLE = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        CRC_TABLE[n] = c >>> 0;
+      }
+    }
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  function utf8(s) {
+    if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(s);
+    const b = unescape(encodeURIComponent(s));
+    const out = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) out[i] = b.charCodeAt(i);
+    return out;
+  }
+
+  function fromBase64(b64) {
+    const bin = atob(String(b64 || ""));
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // MS-DOS date and time (local time, 2-second resolution, 1980 to 2107)
+  function dosDateTime(ms) {
+    const d = new Date(ms == null || !isFinite(ms) ? Date.now() : ms);
+    const y = Math.min(Math.max(d.getFullYear(), 1980), 2107);
+    return {
+      time: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1),
+      date: ((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(),
+    };
+  }
+
+  /** Build a ZIP archive. files: [{path, data: Uint8Array, mtime?: ms}]. Returns a Uint8Array. */
+  function zip(files) {
+    if (files.length > 0xffff) throw new Error("too many files for a ZIP without ZIP64");
+    const FLAGS = 0x0800; // names are UTF-8
+    const entries = files.map((f) => {
+      const name = utf8(String(f.path).replace(/\\/g, "/").replace(/^\/+/, ""));
+      const data = ArrayBuffer.isView(f.data)
+        ? new Uint8Array(f.data.buffer, f.data.byteOffset, f.data.byteLength)
+        : utf8(String(f.data == null ? "" : f.data));
+      return { name, data, crc: crc32(data), dt: dosDateTime(f.mtime) };
+    });
+    let size = 22;
+    for (const e of entries) size += 30 + e.name.length + e.data.length + 46 + e.name.length;
+    if (size > 0xffffffff) throw new Error("archive too large for a ZIP without ZIP64");
+    const buf = new Uint8Array(size);
+    const dv = new DataView(buf.buffer);
+    let p = 0;
+    const u16 = (v) => {
+      dv.setUint16(p, v, true);
+      p += 2;
+    };
+    const u32 = (v) => {
+      dv.setUint32(p, v >>> 0, true);
+      p += 4;
+    };
+    const bytes = (b) => {
+      buf.set(b, p);
+      p += b.length;
+    };
+    for (const e of entries) {
+      e.offset = p;
+      u32(0x04034b50); // local file header
+      u16(20); // version needed to extract (2.0)
+      u16(FLAGS);
+      u16(0); // method: stored
+      u16(e.dt.time);
+      u16(e.dt.date);
+      u32(e.crc);
+      u32(e.data.length); // compressed size
+      u32(e.data.length); // uncompressed size
+      u16(e.name.length);
+      u16(0); // extra field length
+      bytes(e.name);
+      bytes(e.data);
+    }
+    const cd = p;
+    for (const e of entries) {
+      u32(0x02014b50); // central directory header
+      u16(20); // version made by (MS-DOS, 2.0)
+      u16(20); // version needed to extract
+      u16(FLAGS);
+      u16(0);
+      u16(e.dt.time);
+      u16(e.dt.date);
+      u32(e.crc);
+      u32(e.data.length);
+      u32(e.data.length);
+      u16(e.name.length);
+      u16(0); // extra
+      u16(0); // comment
+      u16(0); // disk number start
+      u16(0); // internal attributes
+      u32(0); // external attributes
+      u32(e.offset);
+      bytes(e.name);
+    }
+    const cdSize = p - cd;
+    u32(0x06054b50); // end of central directory
+    u16(0);
+    u16(0);
+    u16(entries.length);
+    u16(entries.length);
+    u32(cdSize);
+    u32(cd);
+    u16(0); // comment length
+    return buf;
+  }
+
+  /** The attachments block build_report writes ({name, root, files: [{path, mtime, base64}]})
+   *  as a ZIP, every file under the root folder (none when root is empty). */
+  function attachmentsZip(att) {
+    const root = String(att.root || "").replace(/^\/+|\/+$/g, "");
+    return zip(att.files.map((f) => ({ path: (root ? root + "/" : "") + f.path, data: fromBase64(f.base64), mtime: f.mtime })));
+  }
+
+  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml, crc32, zip, fromBase64, attachmentsZip };
 })();

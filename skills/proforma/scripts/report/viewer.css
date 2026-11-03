@@ -64,6 +64,11 @@ header.top {
 .chip.warn { color: var(--warn); }
 button.icon { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }
 button.icon:hover { border-color: var(--muted); }
+/* download of the files attached with build_report --attach-dir */
+button.dl { display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+button.dl:hover { border-color: var(--accent); }
+button.dl[hidden] { display: none; }
+button.dl svg { width: 15px; height: 15px; flex: none; }
 
 /* tabs */
 nav.tabs { display: flex; gap: 2px; padding: 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); flex: none; overflow-x: auto; }
@@ -238,6 +243,11 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
   table.grid { font-size: 12px; }
   pre.src { font-size: 11px; }
 }
+/* phones: the download button keeps its icon and gives the title the room */
+@media (max-width: 560px) {
+  button.dl { justify-content: center; }
+  button.dl .dl-label { display: none; }
+}
 @media (min-width: 901px) { #treeToggle { display: none; } }
 /* touch screens: finger-sized targets */
 @media (pointer: coarse) {
@@ -256,7 +266,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
 }
 @media print {
   body { overflow: visible; height: auto; display: block; }
-  nav.tabs, .toolbar, .hint, .zoomlabel, #treeToggle, #themeToggle { display: none !important; }
+  nav.tabs, .toolbar, .hint, .zoomlabel, #treeToggle, #themeToggle, #downloadBtn { display: none !important; }
   main, .view, .view.on, #workspace { display: block !important; }
   aside { display: none !important; }
   .doc { overflow: visible; }

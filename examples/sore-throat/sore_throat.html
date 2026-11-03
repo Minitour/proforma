@@ -70,6 +70,11 @@ header.top {
 .chip.warn { color: var(--warn); }
 button.icon { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }
 button.icon:hover { border-color: var(--muted); }
+/* download of the files attached with build_report --attach-dir */
+button.dl { display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+button.dl:hover { border-color: var(--accent); }
+button.dl[hidden] { display: none; }
+button.dl svg { width: 15px; height: 15px; flex: none; }
 
 /* tabs */
 nav.tabs { display: flex; gap: 2px; padding: 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); flex: none; overflow-x: auto; }
@@ -244,6 +249,11 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
   table.grid { font-size: 12px; }
   pre.src { font-size: 11px; }
 }
+/* phones: the download button keeps its icon and gives the title the room */
+@media (max-width: 560px) {
+  button.dl { justify-content: center; }
+  button.dl .dl-label { display: none; }
+}
 @media (min-width: 901px) { #treeToggle { display: none; } }
 /* touch screens: finger-sized targets */
 @media (pointer: coarse) {
@@ -262,7 +272,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
 }
 @media print {
   body { overflow: visible; height: auto; display: block; }
-  nav.tabs, .toolbar, .hint, .zoomlabel, #treeToggle, #themeToggle { display: none !important; }
+  nav.tabs, .toolbar, .hint, .zoomlabel, #treeToggle, #themeToggle, #downloadBtn { display: none !important; }
   main, .view, .view.on, #workspace { display: block !important; }
   aside { display: none !important; }
   .doc { overflow: visible; }
@@ -274,6 +284,7 @@ pre.src .cmt { color: var(--muted); font-style: italic; }
   <button class="icon" id="treeToggle" title="Task tree">☰</button>
   <svg class="brand" viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#8a1538"/><g stroke-linejoin="round" stroke-linecap="round"><g stroke="#FFDCD9" stroke-width="5" fill="none"><path d="M46 46 L54 54"/><path d="M74 74 L82 82"/></g><path d="M32 16 L48 32 L32 48 L16 32 Z" fill="#E6FFE6" stroke="#009700" stroke-width="4"/><circle cx="64" cy="64" r="15" fill="#FFFFFF" stroke="#B40F78" stroke-width="4"/><circle cx="64" cy="64" r="5" fill="#B40F78"/><rect x="80" y="80" width="32" height="32" rx="8" fill="#E4FAFA" stroke="#008585" stroke-width="4"/></g></svg>
   <div class="titles"><h1 title="Sore throat assessment">Sore throat assessment</h1><div class="sub">version 1.0 · proforma example · Tutorial guideline built step by step with the proforma CLI</div></div>
+  
   <div class="chips">
     
     <span class="chip">1 plans</span>
@@ -340,7 +351,8 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
 <script type="application/json" id="pf-data">{"model":{"format":"proforma-export/1","engine_version":"1.9","metadata":{"author":"proforma example","name":"sore_throat","title":"Sore throat assessment","version":"1.0"},"metaprops":{},"root":"sore_throat","tasks":[{"name":"sore_throat","kind":"plan","caption":"Sore throat assessment","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[{"name":"assess","task":"assess","caption":null,"description":null,"metaprops":{},"after":[],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,40,0,0]},{"name":"manage","task":"manage","caption":null,"description":null,"metaprops":{},"after":["assess"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,140,0,0]},{"name":"prescribe","task":"prescribe","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,240,0,0]},{"name":"advise","task":"advise","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,340,0,0]}],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":[],"paths":["sore_throat"],"reachable":true},{"name":"assess","kind":"enquiry","caption":"Assess patient","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[{"data":"centor_score","mandatory":null},{"data":"penicillin_allergy","mandatory":null},{"data":"temperature","mandatory":null}],"used_by":["sore_throat"],"paths":["sore_throat/assess"],"reachable":true},{"name":"manage","kind":"decision","caption":"Choose management","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[{"name":"antibiotics","caption":"Prescribe antibiotics","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":"high_centor","support":"for","condition":"centor_score >= 3","caption":"Centor score of 3 or more","description":null,"metaprops":{}},{"name":null,"support":"for","condition":"temperature > 38.5","caption":null,"description":null,"metaprops":{}}]},{"name":"self_care","caption":"Self-care advice","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":null,"support":"for","condition":"centor_score \u003c= 1","caption":null,"description":null,"metaprops":{}}]}],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/manage"],"reachable":true},{"name":"prescribe","kind":"action","caption":"Prescribe phenoxymethylpenicillin","description":null,"metaprops":{},"precondition":"result_of(manage) = antibiotics and penicillin_allergy = \"no\"","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":"Phenoxymethylpenicillin 500 mg four times daily for 5 days","abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/prescribe"],"reachable":true},{"name":"advise","kind":"action","caption":"Give self-care advice","description":null,"metaprops":{},"precondition":"result_of(manage) = self_care","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/advise"],"reachable":true}],"data":[{"name":"temperature","type":"real","caption":"Body temperature","description":null,"metaprops":{},"unit":"C","range":[],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"centor_score","type":"integer","caption":"Centor score (0-4)","description":null,"metaprops":{},"unit":null,"range":["0","1","2","3","4"],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"penicillin_allergy","type":"text","caption":"Penicillin allergy?","description":null,"metaprops":{},"unit":null,"range":["\"yes\"","\"no\""],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]}],"functions":[]},"lint":[],"source":"/** PROforma version 1.9 (plain text) **/\n\n/** IMPORTANT: Keep all your comments below the engine_version line **/\nengine_version :: '1.9' ;\n\nmetadata  :: 'sore_throat' ;\n     title :: 'Sore throat assessment' ;\n     version :: '1.0' ;\n     author :: 'proforma example' ;\nend metadata.\n\nmetaprops :: '' ;\n\nplan  :: 'sore_throat' ;\n     caption :: 'Sore throat assessment' ;\n     component :: 'assess' ;\n          task_definition :: 'assess' ;\n          ltwh :: 40,40,0,0;\n     component :: 'manage' ;\n          task_definition :: 'manage' ;\n          schedule_constraint :: completed('assess') ;\n          ltwh :: 40,140,0,0;\n     component :: 'prescribe' ;\n          task_definition :: 'prescribe' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,240,0,0;\n     component :: 'advise' ;\n          task_definition :: 'advise' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,340,0,0;\nend plan.\n\nenquiry  :: 'assess' ;\n     caption :: 'Assess patient' ;\n     source :: 'centor_score' ;\n          data_definition :: 'centor_score' ;\n     source :: 'penicillin_allergy' ;\n          data_definition :: 'penicillin_allergy' ;\n     source :: 'temperature' ;\n          data_definition :: 'temperature' ;\nend enquiry.\n\ndecision  :: 'manage' ;\n     caption :: 'Choose management' ;\n     candidate :: 'antibiotics' ;\n          caption :: 'Prescribe antibiotics' ;\n          argument :: for,centor_score >= 3 attributes\n               argument_name :: 'high_centor' ;\n               caption :: 'Centor score of 3 or more' ;\n          end attributes\n          ;\n          argument :: for,temperature > 38.5;\n          recommendation ::netsupport() > 0;\n     candidate :: 'self_care' ;\n          caption :: 'Self-care advice' ;\n          argument :: for,centor_score \u003c= 1;\n          recommendation ::netsupport() > 0;\nend decision.\n\naction  :: 'prescribe' ;\n     caption :: 'Prescribe phenoxymethylpenicillin' ;\n     precondition ::result_of(manage) = antibiotics and penicillin_allergy = \"no\";\n     procedure :: 'Phenoxymethylpenicillin 500 mg four times daily for 5 days' ;\nend action.\n\naction  :: 'advise' ;\n     caption :: 'Give self-care advice' ;\n     precondition ::result_of(manage) = self_care;\nend action.\n\n\ndata  :: 'temperature' ;\n     type :: real ;\n     caption :: 'Body temperature' ;\n     unit :: 'C' ;\nend data.\n\ndata  :: 'centor_score' ;\n     type :: integer ;\n     caption :: 'Centor score (0-4)' ;\n     range ::0,1,2,3,4;\nend data.\n\ndata  :: 'penicillin_allergy' ;\n     type :: text ;\n     caption :: 'Penicillin allergy?' ;\n     range ::\"yes\",\"no\";\nend data.\n","file":"sore_throat.pf"}</script>
 <script>/* Pure helpers for the PROforma guideline viewer, shared by the page (inlined before
    viewer.js), build_report.mjs and the tests (loaded with node:vm). No DOM access, no
-   dependencies: Composer's Markdown subset in captions and descriptions, and ontology codings. */
+   dependencies: Composer's Markdown subset in captions and descriptions, ontology codings,
+   and a ZIP writer for the files attached to the page. */
 var PFLib = (function () {
   "use strict";
 
@@ -595,7 +607,136 @@ var PFLib = (function () {
     return [ontology, rxnorm].filter(Boolean).map(codingHtml).join("<br>");
   }
 
-  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml };
+  // ---------------------------------------------------------------- ZIP writer
+  // A minimal ZIP (PKWARE APPNOTE 6.3) writer: STORE method, CRC-32, local file headers,
+  // central directory and end record, UTF-8 names (flag bit 11). Folders are implicit in
+  // the paths. No ZIP64, so at most 65535 entries and 4 GiB.
+  let CRC_TABLE = null;
+  function crc32(bytes) {
+    if (!CRC_TABLE) {
+      CRC_TABLE = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        CRC_TABLE[n] = c >>> 0;
+      }
+    }
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  function utf8(s) {
+    if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(s);
+    const b = unescape(encodeURIComponent(s));
+    const out = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) out[i] = b.charCodeAt(i);
+    return out;
+  }
+
+  function fromBase64(b64) {
+    const bin = atob(String(b64 || ""));
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // MS-DOS date and time (local time, 2-second resolution, 1980 to 2107)
+  function dosDateTime(ms) {
+    const d = new Date(ms == null || !isFinite(ms) ? Date.now() : ms);
+    const y = Math.min(Math.max(d.getFullYear(), 1980), 2107);
+    return {
+      time: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1),
+      date: ((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(),
+    };
+  }
+
+  /** Build a ZIP archive. files: [{path, data: Uint8Array, mtime?: ms}]. Returns a Uint8Array. */
+  function zip(files) {
+    if (files.length > 0xffff) throw new Error("too many files for a ZIP without ZIP64");
+    const FLAGS = 0x0800; // names are UTF-8
+    const entries = files.map((f) => {
+      const name = utf8(String(f.path).replace(/\\/g, "/").replace(/^\/+/, ""));
+      const data = ArrayBuffer.isView(f.data)
+        ? new Uint8Array(f.data.buffer, f.data.byteOffset, f.data.byteLength)
+        : utf8(String(f.data == null ? "" : f.data));
+      return { name, data, crc: crc32(data), dt: dosDateTime(f.mtime) };
+    });
+    let size = 22;
+    for (const e of entries) size += 30 + e.name.length + e.data.length + 46 + e.name.length;
+    if (size > 0xffffffff) throw new Error("archive too large for a ZIP without ZIP64");
+    const buf = new Uint8Array(size);
+    const dv = new DataView(buf.buffer);
+    let p = 0;
+    const u16 = (v) => {
+      dv.setUint16(p, v, true);
+      p += 2;
+    };
+    const u32 = (v) => {
+      dv.setUint32(p, v >>> 0, true);
+      p += 4;
+    };
+    const bytes = (b) => {
+      buf.set(b, p);
+      p += b.length;
+    };
+    for (const e of entries) {
+      e.offset = p;
+      u32(0x04034b50); // local file header
+      u16(20); // version needed to extract (2.0)
+      u16(FLAGS);
+      u16(0); // method: stored
+      u16(e.dt.time);
+      u16(e.dt.date);
+      u32(e.crc);
+      u32(e.data.length); // compressed size
+      u32(e.data.length); // uncompressed size
+      u16(e.name.length);
+      u16(0); // extra field length
+      bytes(e.name);
+      bytes(e.data);
+    }
+    const cd = p;
+    for (const e of entries) {
+      u32(0x02014b50); // central directory header
+      u16(20); // version made by (MS-DOS, 2.0)
+      u16(20); // version needed to extract
+      u16(FLAGS);
+      u16(0);
+      u16(e.dt.time);
+      u16(e.dt.date);
+      u32(e.crc);
+      u32(e.data.length);
+      u32(e.data.length);
+      u16(e.name.length);
+      u16(0); // extra
+      u16(0); // comment
+      u16(0); // disk number start
+      u16(0); // internal attributes
+      u32(0); // external attributes
+      u32(e.offset);
+      bytes(e.name);
+    }
+    const cdSize = p - cd;
+    u32(0x06054b50); // end of central directory
+    u16(0);
+    u16(0);
+    u16(entries.length);
+    u16(entries.length);
+    u32(cdSize);
+    u32(cd);
+    u16(0); // comment length
+    return buf;
+  }
+
+  /** The attachments block build_report writes ({name, root, files: [{path, mtime, base64}]})
+   *  as a ZIP, every file under the root folder (none when root is empty). */
+  function attachmentsZip(att) {
+    const root = String(att.root || "").replace(/^\/+|\/+$/g, "");
+    return zip(att.files.map((f) => ({ path: (root ? root + "/" : "") + f.path, data: fromBase64(f.base64), mtime: f.mtime })));
+  }
+
+  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml, crc32, zip, fromBase64, attachmentsZip };
 })();
 
 /* PROforma guideline viewer (client side). Reads the embedded `proforma export` model
@@ -1756,7 +1897,43 @@ var PFLib = (function () {
     if (hint) hint.textContent = "Drag to pan · pinch to zoom · double-tap a plan to open it · ⧉ shows all levels";
   }
 
+  // ---------------------------------------------------------------- attached files
+  // build_report --attach-dir embeds a folder (e.g. a Composer project) as #pf-attachments
+  // ({name, label, root, files: [{path, mtime, base64}]}); the header's Download button zips it
+  // in the browser and saves it. (The static prerender has no attachments: the button stays hidden.)
+  function setupDownload() {
+    const btn = document.getElementById("downloadBtn");
+    const node = document.getElementById("pf-attachments");
+    let att = null;
+    try {
+      const text = node && node.textContent;
+      att = text && text.trim() ? JSON.parse(text) : null;
+    } catch (e) {
+      att = null;
+    }
+    if (!btn || !att || !Array.isArray(att.files) || !att.files.length) return;
+    btn.hidden = false;
+    btn.onclick = () => {
+      let url;
+      try {
+        url = URL.createObjectURL(new Blob([L.attachmentsZip(att)], { type: "application/zip" }));
+      } catch (e) {
+        alert("Could not build " + att.name + ": " + e.message);
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = att.name;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    };
+  }
+
   // ---------------------------------------------------------------- start
+  setupDownload();
   buildTree();
   buildDataView();
   buildDecisionView();

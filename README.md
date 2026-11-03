@@ -119,6 +119,15 @@ guideline-to-PROforma workflow:
 The report is a self-contained viewer laid out like a guideline editor: task tree, plan canvas with pan, zoom and drill-down into sub-plans, a properties panel, decision tables with evidence grades, the data model and the
 source. The skill ships its test cases under `evals/`.
 
+`--attach-dir <folder>` embeds a folder in the report, typically a Deontics Composer project
+(`project.metadata`, `proforma/<Name>.pf`, `proforma/<Name>.deo`), behind a download button that
+zips it in the browser, so readers can open the guideline in Composer (File > Open Project):
+
+```bash
+node skills/proforma/scripts/build_report.mjs guideline.pf --out guideline.html \
+     --attach-dir My_Project --attach-name My_Project.zip   # unzips to My_Project/project.metadata, ...
+```
+
 ## Examples
 
 Each example has its own folder with the `.pf` file, an HTML viewer and a Mermaid diagram.
