@@ -9,7 +9,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-export const PROFORMA_MCP_VERSION = "0.2.0";
+export const PROFORMA_MCP_VERSION = "0.3.0";
 
 function resolveCli() {
   const asCmd = (file) => (file.endsWith(".js") ? { cmd: process.execPath, pre: [file] } : { cmd: file, pre: [] });
