@@ -1,6 +1,6 @@
 /* Pure helpers for the PROforma guideline viewer, shared by the page (inlined before
    viewer.js), build_report.mjs and the tests (loaded with node:vm). No DOM access, no
-   dependencies: Composer's Markdown subset in captions and descriptions. */
+   dependencies: Composer's Markdown subset in captions and descriptions, and ontology codings. */
 var PFLib = (function () {
   "use strict";
 
@@ -161,5 +161,99 @@ var PFLib = (function () {
   /** The first line of a caption, plain (canvas labels, tree rows, breadcrumbs). */
   const plain = (src) => plainLines(src)[0] || "";
 
-  return { esc, grades, inline, md, plain, plainLines };
+  // ---------------------------------------------------------------- ontology coding
+  // Composer writes ontology.coding as "<prefix>:<code> [<caption>]" with a 3-letter
+  // prefix; the caption is everything after the first " [" with the outer brackets
+  // stripped (it may hold brackets of its own, as LOINC names do). Older files use a
+  // scheme name (SNOMED:<id>, LOINC:<code>) and put the term in ontology.label.
+  const SCHEMES = {
+    SCT: { name: "SNOMED CT", url: (c) => "https://browser.ihtsdotools.org/?perspective=full&conceptId1=" + encodeURIComponent(c) },
+    LNC: { name: "LOINC", url: (c) => "https://loinc.org/" + encodeURIComponent(c) + "/" },
+    IC0: { name: "ICD-10-CM" },
+    IC9: { name: "ICD-9-CM" },
+  };
+  const ALIASES = {
+    SNOMED: "SCT", SNOMEDCT: "SCT", "SNOMED-CT": "SCT", "SNOMED CT": "SCT",
+    LOINC: "LNC",
+    ICD10: "IC0", ICD10CM: "IC0", "ICD-10": "IC0", "ICD-10-CM": "IC0",
+    ICD9: "IC9", ICD9CM: "IC9", "ICD-9": "IC9", "ICD-9-CM": "IC9",
+  };
+
+  /** Parse an ontology.coding value (plus the older ontology.label) into
+   *  {prefix, scheme, system, code, caption, url}; null when there is no coding. */
+  function parseCoding(value, label) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return null;
+    const cut = v.indexOf(" [");
+    const head = (cut < 0 ? v : v.slice(0, cut)).trim();
+    let caption = cut < 0 ? "" : v.slice(cut + 2).trim();
+    if (caption.endsWith("]")) caption = caption.slice(0, -1).trim();
+    const colon = head.indexOf(":");
+    const prefix = colon < 0 ? "" : head.slice(0, colon).trim();
+    const code = colon < 0 ? head : head.slice(colon + 1).trim();
+    const up = prefix.toUpperCase();
+    const scheme = SCHEMES[up] ? up : ALIASES[up] || null;
+    const s = scheme && SCHEMES[scheme];
+    return {
+      prefix,
+      scheme,
+      system: s ? s.name : prefix,
+      code,
+      caption: caption || String(label == null ? "" : label).trim(),
+      url: s && s.url && code ? s.url(code) : null,
+    };
+  }
+
+  /** Parse rxnorm.coding (RXNORM:<rxcui>) plus rxnorm.label; null when absent. */
+  function parseRxnorm(value, label) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return null;
+    const m = /^(?:RXNORM|RXCUI)\s*:\s*(\S+)(?:\s+\[(.*)\])?$/i.exec(v);
+    const code = m ? m[1] : v;
+    return {
+      prefix: "RXNORM",
+      scheme: "RXNORM",
+      system: "RxNorm",
+      code,
+      caption: ((m && m[2]) || String(label == null ? "" : label)).trim(),
+      url: /^\d+$/.test(code) ? "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=" + encodeURIComponent(code) : null,
+    };
+  }
+
+  /** Metaprop keys the properties panel shows elsewhere or not at all. */
+  const hiddenMeta = (k) => k.startsWith("ontology.") || k.startsWith("rxnorm.") || k.startsWith("ae.private.");
+
+  /** A task's codings as Composer reads them: ontology.coding from the component that runs the
+   *  task in its parent plan (the first coded one), falling back to the task definition;
+   *  rxnorm.coding from the task definition, falling back to the component. */
+  function taskCodings(model, taskName) {
+    const comps = [];
+    for (const p of model.tasks || []) for (const c of p.components || []) if (c.task === taskName) comps.push(c);
+    const t = (model.tasks || []).find((x) => x.name === taskName) || {};
+    const tm = t.metaprops || {};
+    const coded = comps.find((c) => c.metaprops && String(c.metaprops["ontology.coding"] || "").trim());
+    const om = coded ? coded.metaprops : tm;
+    const rxComp = comps.find((c) => c.metaprops && String(c.metaprops["rxnorm.coding"] || "").trim());
+    const rm = String(tm["rxnorm.coding"] || "").trim() ? tm : rxComp ? rxComp.metaprops : {};
+    return {
+      ontology: parseCoding(om["ontology.coding"], om["ontology.label"]),
+      ontologyFrom: coded ? "component" : om["ontology.coding"] ? "definition" : null,
+      rxnorm: parseRxnorm(rm["rxnorm.coding"], rm["rxnorm.label"]),
+    };
+  }
+
+  /** One coding as HTML: the prefix:code chip (linked when the scheme has a browser) and its caption. */
+  function codingHtml(c) {
+    if (!c) return "";
+    const chip = '<code title="' + esc(c.system) + '">' + esc(c.prefix ? c.prefix + ":" + c.code : c.code) + "</code>";
+    return '<span class="coding">' + (c.url ? '<a class="ext" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + chip + "</a>" : chip) +
+      (c.caption ? ' <span class="coding-cap">' + esc(c.caption) + "</span>" : "") + "</span>";
+  }
+
+  /** The ontology row: the ontology coding and the RxNorm coding, one per line. */
+  function codingsHtml(ontology, rxnorm) {
+    return [ontology, rxnorm].filter(Boolean).map(codingHtml).join("<br>");
+  }
+
+  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml };
 })();

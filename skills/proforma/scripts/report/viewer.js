@@ -864,25 +864,20 @@
     showProps();
   }
 
-  // Composer's native "Ontology coding" property is stored as the metaprop ontology.coding
-  // (SCHEME:code, e.g. SNOMED:197456007); its metaprops editor hides that key and shows the
-  // term as a field of its own. ontology.label (optional) carries the term's preferred name.
-  // ae.private.* keys are Composer's internal component ids.
-  const HIDDEN_META = (k) => k === "ontology.coding" || k === "ontology.label" || k.startsWith("ae.private.");
-  const ONTOLOGY_BROWSERS = {
-    SNOMED: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
-    SNOMEDCT: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
+  // Composer's "Ontology coding" property is the metaprop ontology.coding, written
+  // "<prefix>:<code> [<caption>]" with prefix SCT (SNOMED CT), LNC (LOINC), IC0 (ICD-10-CM) or
+  // IC9 (ICD-9-CM); older files write SNOMED:<id> with the term in ontology.label. For a task
+  // Composer keeps it on the component that runs the task in its parent plan; data items,
+  // candidates and arguments carry it in their own metaprops. A therapy action may also carry
+  // rxnorm.coding=RXNORM:<rxcui> (+ rxnorm.label). The metaprops list hides ontology.* and
+  // rxnorm.* (shown in the ontology row) and ae.private.* (Composer's internal component ids).
+  const HIDDEN_META = L.hiddenMeta;
+  const ontologyHtml = (mp) =>
+    mp ? L.codingsHtml(L.parseCoding(mp["ontology.coding"], mp["ontology.label"]), L.parseRxnorm(mp["rxnorm.coding"], mp["rxnorm.label"])) : "";
+  const taskOntologyHtml = (name) => {
+    const c = L.taskCodings(G, name);
+    return L.codingsHtml(c.ontology, c.rxnorm);
   };
-  function ontologyHtml(mp) {
-    const v = mp && mp["ontology.coding"];
-    if (!v) return "";
-    const m = /^\s*([A-Za-z][A-Za-z0-9_-]*)\s*:\s*(\S+)\s*$/.exec(v);
-    const browse = m && ONTOLOGY_BROWSERS[m[1].toUpperCase()];
-    const chip = "<code>" + esc(v.trim()) + "</code>";
-    const label = mp["ontology.label"];
-    return (browse ? '<a class="ext" href="' + esc(browse(m[2])) + '" target="_blank" rel="noopener">' + chip + "</a>" : chip) +
-      (label ? ' <span class="muted">' + esc(label) + "</span>" : "");
-  }
 
   // source / source.N citations, each with the verbatim excerpt quote / quote.N that justifies it
   const SRC_KEY = /^(source|quote)(?:\.(\d+))?$/;
@@ -965,7 +960,7 @@
       kv([
         ["Caption", md(t.caption)],
         ["Description", md(t.description)],
-        ["Ontology coding", ontologyHtml(t.metaprops)],
+        ["Ontology coding", taskOntologyHtml(t.name)],
         ["Precondition", t.precondition && "<code>" + linkExpr(t.precondition) + "</code>"],
         ["Wait condition", t.wait_condition && "<code>" + linkExpr(t.wait_condition) + "</code>"],
         ["Postcondition", t.postcondition && "<code>" + linkExpr(t.postcondition) + "</code>"],
@@ -1044,7 +1039,7 @@
   function buildDataView() {
     const rows = G.data.map((d) =>
       "<tr><td><a class=\"ref\" data-data=\"" + esc(d.name) + "\"><code>" + esc(d.name) + "</code></a></td><td>" + esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") +
-      "</td><td>" + md(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
+      "</td><td>" + md(d.caption || d.description || "") + (ontologyHtml(d.metaprops) ? '<div class="muted">' + ontologyHtml(d.metaprops) + "</div>" : "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
       "</td><td>" + d.asked_by.map((a) => '<a class="ref" data-task="' + esc(a) + '">' + esc(a) + "</a>").join(", ") + "</td></tr>").join("");
     $("#dataview").innerHTML = '<div class="inner"><h2>Data definitions</h2><div class="card tablewrap"><table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Values</th><th>Asked by</th></tr></thead><tbody>' +
       (rows || '<tr><td colspan="5" class="muted">No data items.</td></tr>') + "</tbody></table></div></div>";
@@ -1067,6 +1062,7 @@
       md(d.description, "p") +
       '<div class="tablewrap"><table class="grid"><thead><tr><th>Candidate</th><th>Arguments</th><th>Recommended when</th></tr></thead><tbody>' +
       d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + md(c.caption, "div", "muted") + md(c.description, "div", "muted") +
+        (ontologyHtml(c.metaprops) ? '<div class="muted">' + ontologyHtml(c.metaprops) + "</div>" : "") +
         '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + md(a.caption, "div", "muted") + "</li>").join("") : '<li class="muted">no arguments</li>') +
         "</ul></td><td><code>" + linkExpr(c.recommendation || "netsupport() > 0") + "</code></td></tr>").join("") + "</tbody></table></div></section>").join("") : '<p class="muted">No decisions.</p>') + "</div>";
     wireRefs($("#decisionview"));

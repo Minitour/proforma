@@ -177,6 +177,7 @@ blockquote.quote { margin: 4px 0 2px; padding: 3px 8px; border-left: 3px solid v
 .md .mdh1 { font-size: 1.25em; } .md .mdh2 { font-size: 1.15em; } .md .mdh3 { font-size: 1.05em; } .md .mdh4 { font-size: 1em; }
 .md hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
 .md pre { background: var(--code-bg); padding: 4px 8px; border-radius: 4px; overflow-x: auto; margin: 4px 0 6px; white-space: pre; }
+.coding-cap { color: var(--muted); }
 a.ext { text-decoration: none; }
 a.ext:hover code { text-decoration: underline; }
 a.ref { color: var(--sel); cursor: pointer; text-decoration: none; }

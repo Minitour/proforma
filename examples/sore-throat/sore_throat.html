@@ -183,6 +183,7 @@ blockquote.quote { margin: 4px 0 2px; padding: 3px 8px; border-left: 3px solid v
 .md .mdh1 { font-size: 1.25em; } .md .mdh2 { font-size: 1.15em; } .md .mdh3 { font-size: 1.05em; } .md .mdh4 { font-size: 1em; }
 .md hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
 .md pre { background: var(--code-bg); padding: 4px 8px; border-radius: 4px; overflow-x: auto; margin: 4px 0 6px; white-space: pre; }
+.coding-cap { color: var(--muted); }
 a.ext { text-decoration: none; }
 a.ext:hover code { text-decoration: underline; }
 a.ref { color: var(--sel); cursor: pointer; text-decoration: none; }
@@ -339,7 +340,7 @@ precondition: result_of(manage) = self_care</title></g></g></g><defs class="icon
 <script type="application/json" id="pf-data">{"model":{"format":"proforma-export/1","engine_version":"1.9","metadata":{"author":"proforma example","name":"sore_throat","title":"Sore throat assessment","version":"1.0"},"metaprops":{},"root":"sore_throat","tasks":[{"name":"sore_throat","kind":"plan","caption":"Sore throat assessment","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[{"name":"assess","task":"assess","caption":null,"description":null,"metaprops":{},"after":[],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,40,0,0]},{"name":"manage","task":"manage","caption":null,"description":null,"metaprops":{},"after":["assess"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,140,0,0]},{"name":"prescribe","task":"prescribe","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,240,0,0]},{"name":"advise","task":"advise","caption":null,"description":null,"metaprops":{},"after":["manage"],"optional":false,"autonomous":false,"terminal":false,"number_of_cycles":null,"cycle_until":null,"cycle_repeat":null,"param_values":[],"ltwh":[40,340,0,0]}],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":[],"paths":["sore_throat"],"reachable":true},{"name":"assess","kind":"enquiry","caption":"Assess patient","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[{"data":"centor_score","mandatory":null},{"data":"penicillin_allergy","mandatory":null},{"data":"temperature","mandatory":null}],"used_by":["sore_throat"],"paths":["sore_throat/assess"],"reachable":true},{"name":"manage","kind":"decision","caption":"Choose management","description":null,"metaprops":{},"precondition":null,"wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[{"name":"antibiotics","caption":"Prescribe antibiotics","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":"high_centor","support":"for","condition":"centor_score >= 3","caption":"Centor score of 3 or more","description":null,"metaprops":{}},{"name":null,"support":"for","condition":"temperature > 38.5","caption":null,"description":null,"metaprops":{}}]},{"name":"self_care","caption":"Self-care advice","description":null,"metaprops":{},"recommendation":"netsupport() > 0","priority":null,"arguments":[{"name":null,"support":"for","condition":"centor_score \u003c= 1","caption":null,"description":null,"metaprops":{}}]}],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/manage"],"reachable":true},{"name":"prescribe","kind":"action","caption":"Prescribe phenoxymethylpenicillin","description":null,"metaprops":{},"precondition":"result_of(manage) = antibiotics and penicillin_allergy = \"no\"","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":"Phenoxymethylpenicillin 500 mg four times daily for 5 days","abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/prescribe"],"reachable":true},{"name":"advise","kind":"action","caption":"Give self-care advice","description":null,"metaprops":{},"precondition":"result_of(manage) = self_care","wait_condition":null,"postcondition":null,"goal":null,"trigger":null,"context":null,"procedure":null,"abort":null,"terminate":null,"components":[],"choice_mode":null,"support_mode":null,"candidates":[],"sources":[],"used_by":["sore_throat"],"paths":["sore_throat/advise"],"reachable":true}],"data":[{"name":"temperature","type":"real","caption":"Body temperature","description":null,"metaprops":{},"unit":"C","range":[],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"centor_score","type":"integer","caption":"Centor score (0-4)","description":null,"metaprops":{},"unit":null,"range":["0","1","2","3","4"],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]},{"name":"penicillin_allergy","type":"text","caption":"Penicillin allergy?","description":null,"metaprops":{},"unit":null,"range":["\"yes\"","\"no\""],"default_value":null,"derivation":null,"dynamic":false,"mandatory_validation":null,"warnings":[],"asked_by":["assess"]}],"functions":[]},"lint":[],"source":"/** PROforma version 1.9 (plain text) **/\n\n/** IMPORTANT: Keep all your comments below the engine_version line **/\nengine_version :: '1.9' ;\n\nmetadata  :: 'sore_throat' ;\n     title :: 'Sore throat assessment' ;\n     version :: '1.0' ;\n     author :: 'proforma example' ;\nend metadata.\n\nmetaprops :: '' ;\n\nplan  :: 'sore_throat' ;\n     caption :: 'Sore throat assessment' ;\n     component :: 'assess' ;\n          task_definition :: 'assess' ;\n          ltwh :: 40,40,0,0;\n     component :: 'manage' ;\n          task_definition :: 'manage' ;\n          schedule_constraint :: completed('assess') ;\n          ltwh :: 40,140,0,0;\n     component :: 'prescribe' ;\n          task_definition :: 'prescribe' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,240,0,0;\n     component :: 'advise' ;\n          task_definition :: 'advise' ;\n          schedule_constraint :: completed('manage') ;\n          ltwh :: 40,340,0,0;\nend plan.\n\nenquiry  :: 'assess' ;\n     caption :: 'Assess patient' ;\n     source :: 'centor_score' ;\n          data_definition :: 'centor_score' ;\n     source :: 'penicillin_allergy' ;\n          data_definition :: 'penicillin_allergy' ;\n     source :: 'temperature' ;\n          data_definition :: 'temperature' ;\nend enquiry.\n\ndecision  :: 'manage' ;\n     caption :: 'Choose management' ;\n     candidate :: 'antibiotics' ;\n          caption :: 'Prescribe antibiotics' ;\n          argument :: for,centor_score >= 3 attributes\n               argument_name :: 'high_centor' ;\n               caption :: 'Centor score of 3 or more' ;\n          end attributes\n          ;\n          argument :: for,temperature > 38.5;\n          recommendation ::netsupport() > 0;\n     candidate :: 'self_care' ;\n          caption :: 'Self-care advice' ;\n          argument :: for,centor_score \u003c= 1;\n          recommendation ::netsupport() > 0;\nend decision.\n\naction  :: 'prescribe' ;\n     caption :: 'Prescribe phenoxymethylpenicillin' ;\n     precondition ::result_of(manage) = antibiotics and penicillin_allergy = \"no\";\n     procedure :: 'Phenoxymethylpenicillin 500 mg four times daily for 5 days' ;\nend action.\n\naction  :: 'advise' ;\n     caption :: 'Give self-care advice' ;\n     precondition ::result_of(manage) = self_care;\nend action.\n\n\ndata  :: 'temperature' ;\n     type :: real ;\n     caption :: 'Body temperature' ;\n     unit :: 'C' ;\nend data.\n\ndata  :: 'centor_score' ;\n     type :: integer ;\n     caption :: 'Centor score (0-4)' ;\n     range ::0,1,2,3,4;\nend data.\n\ndata  :: 'penicillin_allergy' ;\n     type :: text ;\n     caption :: 'Penicillin allergy?' ;\n     range ::\"yes\",\"no\";\nend data.\n","file":"sore_throat.pf"}</script>
 <script>/* Pure helpers for the PROforma guideline viewer, shared by the page (inlined before
    viewer.js), build_report.mjs and the tests (loaded with node:vm). No DOM access, no
-   dependencies: Composer's Markdown subset in captions and descriptions. */
+   dependencies: Composer's Markdown subset in captions and descriptions, and ontology codings. */
 var PFLib = (function () {
   "use strict";
 
@@ -500,7 +501,101 @@ var PFLib = (function () {
   /** The first line of a caption, plain (canvas labels, tree rows, breadcrumbs). */
   const plain = (src) => plainLines(src)[0] || "";
 
-  return { esc, grades, inline, md, plain, plainLines };
+  // ---------------------------------------------------------------- ontology coding
+  // Composer writes ontology.coding as "<prefix>:<code> [<caption>]" with a 3-letter
+  // prefix; the caption is everything after the first " [" with the outer brackets
+  // stripped (it may hold brackets of its own, as LOINC names do). Older files use a
+  // scheme name (SNOMED:<id>, LOINC:<code>) and put the term in ontology.label.
+  const SCHEMES = {
+    SCT: { name: "SNOMED CT", url: (c) => "https://browser.ihtsdotools.org/?perspective=full&conceptId1=" + encodeURIComponent(c) },
+    LNC: { name: "LOINC", url: (c) => "https://loinc.org/" + encodeURIComponent(c) + "/" },
+    IC0: { name: "ICD-10-CM" },
+    IC9: { name: "ICD-9-CM" },
+  };
+  const ALIASES = {
+    SNOMED: "SCT", SNOMEDCT: "SCT", "SNOMED-CT": "SCT", "SNOMED CT": "SCT",
+    LOINC: "LNC",
+    ICD10: "IC0", ICD10CM: "IC0", "ICD-10": "IC0", "ICD-10-CM": "IC0",
+    ICD9: "IC9", ICD9CM: "IC9", "ICD-9": "IC9", "ICD-9-CM": "IC9",
+  };
+
+  /** Parse an ontology.coding value (plus the older ontology.label) into
+   *  {prefix, scheme, system, code, caption, url}; null when there is no coding. */
+  function parseCoding(value, label) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return null;
+    const cut = v.indexOf(" [");
+    const head = (cut < 0 ? v : v.slice(0, cut)).trim();
+    let caption = cut < 0 ? "" : v.slice(cut + 2).trim();
+    if (caption.endsWith("]")) caption = caption.slice(0, -1).trim();
+    const colon = head.indexOf(":");
+    const prefix = colon < 0 ? "" : head.slice(0, colon).trim();
+    const code = colon < 0 ? head : head.slice(colon + 1).trim();
+    const up = prefix.toUpperCase();
+    const scheme = SCHEMES[up] ? up : ALIASES[up] || null;
+    const s = scheme && SCHEMES[scheme];
+    return {
+      prefix,
+      scheme,
+      system: s ? s.name : prefix,
+      code,
+      caption: caption || String(label == null ? "" : label).trim(),
+      url: s && s.url && code ? s.url(code) : null,
+    };
+  }
+
+  /** Parse rxnorm.coding (RXNORM:<rxcui>) plus rxnorm.label; null when absent. */
+  function parseRxnorm(value, label) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return null;
+    const m = /^(?:RXNORM|RXCUI)\s*:\s*(\S+)(?:\s+\[(.*)\])?$/i.exec(v);
+    const code = m ? m[1] : v;
+    return {
+      prefix: "RXNORM",
+      scheme: "RXNORM",
+      system: "RxNorm",
+      code,
+      caption: ((m && m[2]) || String(label == null ? "" : label)).trim(),
+      url: /^\d+$/.test(code) ? "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=" + encodeURIComponent(code) : null,
+    };
+  }
+
+  /** Metaprop keys the properties panel shows elsewhere or not at all. */
+  const hiddenMeta = (k) => k.startsWith("ontology.") || k.startsWith("rxnorm.") || k.startsWith("ae.private.");
+
+  /** A task's codings as Composer reads them: ontology.coding from the component that runs the
+   *  task in its parent plan (the first coded one), falling back to the task definition;
+   *  rxnorm.coding from the task definition, falling back to the component. */
+  function taskCodings(model, taskName) {
+    const comps = [];
+    for (const p of model.tasks || []) for (const c of p.components || []) if (c.task === taskName) comps.push(c);
+    const t = (model.tasks || []).find((x) => x.name === taskName) || {};
+    const tm = t.metaprops || {};
+    const coded = comps.find((c) => c.metaprops && String(c.metaprops["ontology.coding"] || "").trim());
+    const om = coded ? coded.metaprops : tm;
+    const rxComp = comps.find((c) => c.metaprops && String(c.metaprops["rxnorm.coding"] || "").trim());
+    const rm = String(tm["rxnorm.coding"] || "").trim() ? tm : rxComp ? rxComp.metaprops : {};
+    return {
+      ontology: parseCoding(om["ontology.coding"], om["ontology.label"]),
+      ontologyFrom: coded ? "component" : om["ontology.coding"] ? "definition" : null,
+      rxnorm: parseRxnorm(rm["rxnorm.coding"], rm["rxnorm.label"]),
+    };
+  }
+
+  /** One coding as HTML: the prefix:code chip (linked when the scheme has a browser) and its caption. */
+  function codingHtml(c) {
+    if (!c) return "";
+    const chip = '<code title="' + esc(c.system) + '">' + esc(c.prefix ? c.prefix + ":" + c.code : c.code) + "</code>";
+    return '<span class="coding">' + (c.url ? '<a class="ext" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + chip + "</a>" : chip) +
+      (c.caption ? ' <span class="coding-cap">' + esc(c.caption) + "</span>" : "") + "</span>";
+  }
+
+  /** The ontology row: the ontology coding and the RxNorm coding, one per line. */
+  function codingsHtml(ontology, rxnorm) {
+    return [ontology, rxnorm].filter(Boolean).map(codingHtml).join("<br>");
+  }
+
+  return { esc, grades, inline, md, plain, plainLines, parseCoding, parseRxnorm, hiddenMeta, taskCodings, codingHtml, codingsHtml };
 })();
 
 /* PROforma guideline viewer (client side). Reads the embedded `proforma export` model
@@ -1369,25 +1464,20 @@ var PFLib = (function () {
     showProps();
   }
 
-  // Composer's native "Ontology coding" property is stored as the metaprop ontology.coding
-  // (SCHEME:code, e.g. SNOMED:197456007); its metaprops editor hides that key and shows the
-  // term as a field of its own. ontology.label (optional) carries the term's preferred name.
-  // ae.private.* keys are Composer's internal component ids.
-  const HIDDEN_META = (k) => k === "ontology.coding" || k === "ontology.label" || k.startsWith("ae.private.");
-  const ONTOLOGY_BROWSERS = {
-    SNOMED: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
-    SNOMEDCT: (code) => "https://browser.ihtsdotools.org/?perspective=full&edition=MAIN&conceptId1=" + encodeURIComponent(code),
+  // Composer's "Ontology coding" property is the metaprop ontology.coding, written
+  // "<prefix>:<code> [<caption>]" with prefix SCT (SNOMED CT), LNC (LOINC), IC0 (ICD-10-CM) or
+  // IC9 (ICD-9-CM); older files write SNOMED:<id> with the term in ontology.label. For a task
+  // Composer keeps it on the component that runs the task in its parent plan; data items,
+  // candidates and arguments carry it in their own metaprops. A therapy action may also carry
+  // rxnorm.coding=RXNORM:<rxcui> (+ rxnorm.label). The metaprops list hides ontology.* and
+  // rxnorm.* (shown in the ontology row) and ae.private.* (Composer's internal component ids).
+  const HIDDEN_META = L.hiddenMeta;
+  const ontologyHtml = (mp) =>
+    mp ? L.codingsHtml(L.parseCoding(mp["ontology.coding"], mp["ontology.label"]), L.parseRxnorm(mp["rxnorm.coding"], mp["rxnorm.label"])) : "";
+  const taskOntologyHtml = (name) => {
+    const c = L.taskCodings(G, name);
+    return L.codingsHtml(c.ontology, c.rxnorm);
   };
-  function ontologyHtml(mp) {
-    const v = mp && mp["ontology.coding"];
-    if (!v) return "";
-    const m = /^\s*([A-Za-z][A-Za-z0-9_-]*)\s*:\s*(\S+)\s*$/.exec(v);
-    const browse = m && ONTOLOGY_BROWSERS[m[1].toUpperCase()];
-    const chip = "<code>" + esc(v.trim()) + "</code>";
-    const label = mp["ontology.label"];
-    return (browse ? '<a class="ext" href="' + esc(browse(m[2])) + '" target="_blank" rel="noopener">' + chip + "</a>" : chip) +
-      (label ? ' <span class="muted">' + esc(label) + "</span>" : "");
-  }
 
   // source / source.N citations, each with the verbatim excerpt quote / quote.N that justifies it
   const SRC_KEY = /^(source|quote)(?:\.(\d+))?$/;
@@ -1470,7 +1560,7 @@ var PFLib = (function () {
       kv([
         ["Caption", md(t.caption)],
         ["Description", md(t.description)],
-        ["Ontology coding", ontologyHtml(t.metaprops)],
+        ["Ontology coding", taskOntologyHtml(t.name)],
         ["Precondition", t.precondition && "<code>" + linkExpr(t.precondition) + "</code>"],
         ["Wait condition", t.wait_condition && "<code>" + linkExpr(t.wait_condition) + "</code>"],
         ["Postcondition", t.postcondition && "<code>" + linkExpr(t.postcondition) + "</code>"],
@@ -1549,7 +1639,7 @@ var PFLib = (function () {
   function buildDataView() {
     const rows = G.data.map((d) =>
       "<tr><td><a class=\"ref\" data-data=\"" + esc(d.name) + "\"><code>" + esc(d.name) + "</code></a></td><td>" + esc(d.type || "") + (d.unit ? " (" + esc(d.unit) + ")" : "") +
-      "</td><td>" + md(d.caption || d.description || "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
+      "</td><td>" + md(d.caption || d.description || "") + (ontologyHtml(d.metaprops) ? '<div class="muted">' + ontologyHtml(d.metaprops) + "</div>" : "") + "</td><td>" + (d.range.length ? d.range.map((r) => "<code>" + esc(r) + "</code>").join(" ") : d.derivation ? "derived: <code>" + esc(d.derivation) + "</code>" : '<span class="muted">—</span>') +
       "</td><td>" + d.asked_by.map((a) => '<a class="ref" data-task="' + esc(a) + '">' + esc(a) + "</a>").join(", ") + "</td></tr>").join("");
     $("#dataview").innerHTML = '<div class="inner"><h2>Data definitions</h2><div class="card tablewrap"><table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Values</th><th>Asked by</th></tr></thead><tbody>' +
       (rows || '<tr><td colspan="5" class="muted">No data items.</td></tr>') + "</tbody></table></div></div>";
@@ -1572,6 +1662,7 @@ var PFLib = (function () {
       md(d.description, "p") +
       '<div class="tablewrap"><table class="grid"><thead><tr><th>Candidate</th><th>Arguments</th><th>Recommended when</th></tr></thead><tbody>' +
       d.candidates.map((c) => "<tr><td><b>" + esc(c.name) + "</b>" + md(c.caption, "div", "muted") + md(c.description, "div", "muted") +
+        (ontologyHtml(c.metaprops) ? '<div class="muted">' + ontologyHtml(c.metaprops) + "</div>" : "") +
         '</td><td><ul class="args">' + (c.arguments.length ? c.arguments.map((a) => '<li><span class="sup ' + esc(a.support) + '">' + esc(a.support) + "</span><code>" + linkExpr(a.condition) + "</code>" + md(a.caption, "div", "muted") + "</li>").join("") : '<li class="muted">no arguments</li>') +
         "</ul></td><td><code>" + linkExpr(c.recommendation || "netsupport() > 0") + "</code></td></tr>").join("") + "</tbody></table></div></section>").join("") : '<p class="muted">No decisions.</p>') + "</div>";
     wireRefs($("#decisionview"));
