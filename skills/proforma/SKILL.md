@@ -121,8 +121,8 @@ self-contained HTML viewer laid out like a guideline editor:
   from the task's component in its parent plan; SNOMED CT codes link to the SNOMED CT browser, LOINC
   codes to loinc.org) and an RxNorm coding (`rxnorm.coding`, linked to RxNav), linked expressions, procedure, scheduling, cycles,
   candidates and arguments with evidence grades, ontology codings and source quotes, and metaprops
-  grouped into goal, order, sources with their quotes, and provenance (see `references/modelling.md`
-  §11 for the conventions);
+  grouped into goal, one group per block of keys sharing a prefix (e.g. `ServiceRequest.*`), sources
+  with their quotes, and provenance (see `references/modelling.md` §11 for the conventions);
 - data definitions, decision tables, modelling notes, lint findings and the `.pf` source as tabs.
 
 Captions and descriptions are rendered with the Markdown subset Composer supports: headers (`#` to
